@@ -1420,11 +1420,11 @@ and the code chunk references.
 
 @table @asis
 
-@item @mybibitem{JWT}
+@mybibitem{JWT}
 @url{https://blog.bitsrc.io/understanding-json-web-token-authentication-a1febf0e15,
 @cite{Understanding JSON Web Token Authentication}}, by Rajat S
 
-@item @mybibitem{JWT-INTRO}
+@mybibitem{JWT-INTRO}
 @url{https://jwt.io/introduction/, Introduction to JSON Web Tokens}
 by Auth0
 
