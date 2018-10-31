@@ -9,8 +9,8 @@
 @c %**end of header (This is for running Texinfo on a region.)
 @c *****************************************************************************
 
-@c VERSION 0.0.3
-@c DATE    2018-10-31T08:00
+@c VERSION 0.0.4
+@c DATE    2018-10-31T13:25
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -524,30 +524,40 @@ Tokens}.  @mybibcite{JWT-INTRO}
 
 @c -----------------------------------------------------------------------------
 
-@node JWT AUTHENTICATION
-@section JWT Authentication
+@node Understanding JSON Web Token Authentication
+@section Understanding JSON Web Token Authentication
+
+@heading About
+@cindex @cite{Understanding JSON Web Token Authentication}
+@cindex Rajat S, author
+
+This information is derived from
+@cite{Understanding  JSON Web Token Authentication}.  @mybibcite{JWT}
+
+This article first  describes what a JSON  Web Token is (@pxref{What  Is A JSON
+Web Token}), and then creates a web server  that works with a JSON Web Token to
+log a user in (and keep unauthorized users out).
 
 
 @c .....................................
 
-@node Understanding Article
-@subsection Understanding Article
+@node What Is A JSON Web Token
+@subsection What Is A JSON Web Token?
 @cindex JSON web token, definition
+@cindex JWT
 
-@heading Source
-
-This information is from @cite{Understanding JSON Web Token Authentication} by
-Rajat S @mybibcite{JWT}.
-
-@heading About
+@heading JSON Web Token
 
 A @dfn{JSON  Web Token  (JWT}) is  a safe, compact,  and self-contained  way of
 transmitting information between multiple parties in the form of a JSON object.
 
-@subheading Scenario
+What is a JSON Web Token used for?
 
-Say you want to log in to an  app, like say Tinder.  Tinder allows users to log
-in using their Facebook profile.  So when the user selects the option to log in
+@subheading Scenario
+@cindex JSON web token scenario
+
+Say you want to  log in to an app, Tinder for example.   Tinder allows users to
+log in using their  Facebook profile.  So when you select the  option to log in
 using  Facebook, the  app contacts  Facebook’s Authentication  server with  the
 user’s credentials (username and password).
 
@@ -555,13 +565,17 @@ Once the Authentication server verifies  the user’s credentials, it will creat
 a JWT and send it  to the user.  The app now gets this  JWT and allows the user
 access to its data.
 
-@c _____________________________________
+
+@c .....................................
 
 @node JWT Structure
-@subsubsection JWT Structure
+@subsection JWT Structure
 @cindex JWT structure
 
-A JSON Web Token consists of three parts that are separated by a “.”.
+@heading Structure of a JSON Web Token
+
+A JSON  Web Token consists  of three parts that  are separated by  a @emph{dot}
+(@kbd{.}).
 
 @enumerate
 @cindex header
@@ -573,10 +587,10 @@ The @dfn{header} typically  consists of two parts:
 @enumerate
 @cindex token type
 @item
-the token’s  type, and
+the token’s  @emph{type}, and
 @cindex hashing algorithm
 @item
-the hashing algorithm that is being used.
+the @emph{hashing algorithm} that is being used.
 @example
 @{
   "alg": "HS256",
@@ -615,96 +629,258 @@ reaching its destination.  This is usually done by using private keys.
 
 @cindex Base64-URI
 These three parts are usually  encoded into three @dfn{Base64-URI} strings that
-are separated by a @kbd{.} in between them.
+are separated by a dot (@kbd{.}).
 
 To easily  decode, verify, generate, or  just play around with  JWTs, check out
 the @file{JWT.IO Debugger} by Auth0.
+@cindex @file{JWT.IO Debugger}
+@cindex jwt.io
+@cindex Auth0
 
 @itemize
 @item
 @url{https://jwt.io/, JWT.IO} by Auth0
 @end itemize
 
+
+@c .....................................
+
+@node Create a Basic Express Server
+@subsection Create a Basic Express Server
+@cindex server, express
+@cindex express server, create
+@cindex create express server
+
+@heading An Express Server
+
+Now that we have  a basic understanding of what a JSON Web  Token is, lets look
+at how to build a simple authentication server that will issue a JSON Web Token
+(JWT), which  we will then use  to access an API.   We will do this  in phases,
+first creating a  simple server, then looping back to  add login functionality,
+and then again to create authentication functionality.
+
+@heading The Process
+
+@subheading Install Express and Dependencies
+
+We  will first  implement a  simple server  using the  Node Express  framework.
+Therefore,  we  will need  to  install  the  @file{express} library,  and  some
+dependencies that @file{express} will need  to do its server and authentication
+work.  We will  use @command{yarn} to do the installations,  but you could just
+as well use @command{npm}.
+
+@subheading Implement a Basic Server
+
+Then we will create a server  application in a file called @file{index.js} that
+lives  inside  a  folder  called @file{jwt-auth-server}.   The  server's  basic
+functionality (its API) will  be to return the current date  and time using the
+route  @code{/time}.  The  current  date and  time will  be  obtained from  the
+JavaScript @file{Date}  class.  Therefore, our server  application will contain
+some routes and associated route  handlers, including a ``catch-all'' route and
+handler.
+
+@itemize @result
+@item
+@code{/time}
+@item
+@code{*}
+@end itemize
+
+@heading Makefile Target @file{jwt-auth-demo}
+
+You  can install  the Express  server and  dependencies by  typing the  command
+@command{make jwt-auth-demo} from the command-line  at your project root.  This
+command will create  the necessary directory structure in  your current working
+directory and  install the  @file{express} framework  and all  dependencies, as
+described below.  The project will be installed into @file{JWT-Auth-Demo}.  The
+server application  directory, @file{jwt-auth-server},  is also  created inside
+@file{JWT-Auth-Demo} at this time.
+
+Again,  make  sure  you  are  in an  appropriate  working  directory,  as  this
+@command{make} command will install the project in @file{JWT-Auth_Demo} in your
+current  directory.   Node's  @file{package.json}  file will  be  added  inside
+@file{JWT-Auth-Demo}, and  the @file{express} library and  dependencies will go
+into @file{node_modules}.
+
+@subheading Makefile JWT Express Server Skeleton
+
+The @file{Makefile}  target is created here,  and will be fully  implemented in
+the next sections.
+
+@<Makefile---Applications@>=
+# JWT EXPRESS SERVER
+# ##################
+
+@<Makefile---Applications--JWT-Auth-Demo@>
+
+@
+
 @c _____________________________________
 
-@node JWT Authentication Server
-@subsubsection JWT Authentication Server
-@cindex server, JWT authentication
+@node Express and Dependencies
+@subsubsection Express and Dependencies
 
-Now that we have  a basic understanding of what a JSON is,  lets take a look at
-how to build a simple authentication server  that will issue JWT, which we will
-then use to access an API.  The API will have a single route that displays the
-current date and time, and will have a handler for 404 pages.
+@heading Express and Dependencies
 
-@subheading Install @file{Express}
-@cindex @file{express} installation
+First, we install  @file{express}.  While No dependencies are  necessary to run
+the basic server, I  am going to install all dependencies  that the server will
+eventually  need  at  this  point  to  simplify  the  process.   The  necessary
+dependencies  for  login  and  authentication  work will  be  utilized  in  the
+following iterations.
 
-First, install the @file{express} library onto your system using NPM.
+@enumerate
+@item @file{express}
 
 @example
-$ npm install express
+$ yarn add express
 @end example
 
-@subheading Create Folder @file{jwt-auth}
-@cindex @file{jwt-auth} directory
-
-Next, create  a new folder  named @file{jwt-auth}.   You can name  it something
-else if you want.
+@item
+@file{jsonwebtoken}
 
 @example
-$ mkdir jwt-auth
-$ cd jwt-auth
+$ yarn add jsonwebtoken
 @end example
 
-@subheading Create @file{index.js}
-@cindex @file{index.js}
-
-Inside this folder create a new  file called @file{index.js}.  This is where we
-will write our code  to set up a web server.  Place the following code inside
-@file{index.js}:
-
-@subheading Server Code and Time Route Handler
+@item
+@file{cors}
 
 @example
+$ yarn add cors
+@end example
+
+@item
+@file{express-jwt}
+
+@example
+$ yarn add express-jwt
+@end example
+
+@end enumerate
+
+@heading Implement a Basic Express Server
+
+Next, create  a new  server folder.   The server code  will live  inside.  This
+folder can  be named  anything you like,  but it should  be descriptive  of its
+contents.   I  will use  the  name  @file{jwt-auth-server}  After it  has  been
+created, move into it to prepare to create the file @file{index.js}.
+
+@example
+$ mkdir jwt-auth-server
+$ cd jwt-auth-server
+$ touch index.js
+@end example
+
+@heading Makefile Express Server Rule
+
+This code, inside  the Makefile under the  target @code{jwt-auth-demo}, creates
+the directory structure and installs  @file{express} and its dependencies using
+@command{yarn}.     Note    that     the    server    application    directory,
+@file{jwt-auth-server}, is created via the @command{mkdir -p} command.
+
+@<Makefile---Applications--JWT-Auth-Demo@>=
+
+PWD := $$PWD
+JWT-EXPRESS-SERVER-ROOT := $(PWD)/JWT-Auth-Demo
+JWT-AUTH-SERVER := jwt-auth-server
+JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
+
+DEPS := express jsonwebtoken cors express-jwt
+
+.PHONY : jwt-auth-demo
+jwt-auth-demo : $(JWT-EXPRESS-SERVER)
+$(JWT-EXPRESS-SERVER) :
+	mkdir -p $(JWT-EXPRESS-SERVER); \
+	cd $(JWT-EXPRESS-SERVER-ROOT);  \
+	yarn add $(DEPS)
+	  
+@
+
+@c _____________________________________
+
+@node Express Server Code
+@subsubsection Express Server Code
+
+@heading The Server Sections
+
+The basic server implementation contains three major sections:
+
+@enumerate
+@item
+Dependencies
+
+Import dependency libraries using @code{require}:
+
+@itemize
+@item
+@file{express}
+
+@verbatim
 const express = require("express");
+@end verbatim
+@end itemize
+
+@item
+The Server
+
+The   server   is   created    by   executing   the   @code{express}   function
+(@samp{express()}.  The server needs to connect to a port, so decide upon which
+port you want to  use, and place that into a  variable called @code{PORT}.  The
+server is started by sending it the  @code{listen} message and giving it a port
+assignment:
+
+@verbatim
 const app = express();
 const PORT = 8888;
-app.get('/time', (req, res) => @{
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`); 
+});
+@end verbatim
+
+@item
+Route Handlers
+
+@itemize @result
+@item
+@file{/time}
+
+This  code creates  a  route handler  for @code{/time}  (@samp{app.get('/time',
+@var{cb})}).  The handler  gets the current time as  an object from
+the   JavaScript   @file{Date}   class    (@samp{new   Date()}),   formats   it
+(@samp{.toLocaleTime()}), and  then sends it  to the requesting  client browser
+(@samp{res.status(@var{status}).send(@var{response})}).
+
+@verbatim
+app.get('/time', (req, res) => {
   const time = (new Date()).toLocaleTimeString();
-  res.status(200).send(`The Time is $@{time@}`);
-@});
-@end example
+  res.status(200).send(`The Time is ${time}`);
+});
+@end verbatim
 
-This code imports  the Express library, executes  the @code{express()} function
-to create  an application (called @code{app}),  prepares to use port  8888, and
-creates a route handler for @code{/time}.  The handler gets the current time as
-an object  from the  @file{Date} class, formats  it, and then  sends it  to the
-requesting client browser.
+@item
+@code{*} (``catch-all'')
 
-@subheading 404 Not Found Handler
+Also add a  ``catch-all'' route to handle  any request to any  route other than
+@code{/time}; in  this handler, the server  will send a 404  error message.  To
+implement this handler,  write the following code into our  server; notice that
+the    server    responds    with    a    different    command    this    time:
+@samp{res.sendStatus(@var{status})},  one that  sends only  a status  without a
+response:
 
-Now add a route to handle any  request to any route other than @code{/time}; in
-this handler, the server will send a 404 error message.  This route is called a
-catchall  route.   To  implement  this,  write  the  following  code  into  our
-@file{index.js} file:
-
-@example
-app.get("*", (req, res) => @{
+@verbatim
+app.get("*", (req, res) => {
   res.sendStatus(404);
-@});
-@end example
+});
+@end verbatim
+@end itemize
 
-@subheading Run The App
+@end enumerate
 
-Now start the server on our chosen port:
+@c _____________________________________
 
-@example
-app.listen(PORT, () => @{
-  console.log(`Server is running on port $@{PORT@}.`); 
-@});
-@end example
-
-@subheading Run The Client
+@node Start the Server
+@subsubsection Start the Server
 
 With that  done, we  can start the  server by typing  @command{node .}   in our
 command terminal.  Then, go to @file{localhost:8888}  and you will find that it
@@ -719,10 +895,11 @@ display the local time as shown below:
 In short, we  have built an @file{express}  server that will show  us the local
 time at @code{/time} and a 404 error on any other route.
 
-@c _____________________________________
+
+@c .....................................
 
 @node Implement A Login Route
-@subsubsection Implement A Login Route
+@subsection Implement A Login Route
 @cindex login route, implement
 
 Let’s implement a route called @file{login}.  Unlike the routes in the previous
@@ -742,7 +919,7 @@ But currently our server cannot read the  body of the requests.  To solve this,
 we will install a new middleware library called @file{body-parser}.
 
 @example
-$ npm install body-parser
+$ yarn install body-parser
 @end example
 
 Then  just like  we did  with the  @file{express} library,  import it  into the
@@ -787,7 +964,7 @@ Clicking on send should get you the following response:
 @c _____________________________________
 
 @node Issuing JWT's
-@subsubsection Issuing JWT's
+@subsection Issuing JWT's
 @cindex issue JWT
 
 Now that we have built a simple  server that can handle GET, and POST requests,
@@ -837,7 +1014,7 @@ Before   going   forward,   let’s    install   another   library   called   th
 @file{jsonwebtoken}.
 
 @example
-$ npm install jsonwebtoken
+$ yarn install jsonwebtoken
 @end example
 
 At the top of the @file{index.js}  file, write the @code{require} statement for
@@ -889,7 +1066,7 @@ extra things.
 @c _____________________________________
 
 @node Side Note On CORS
-@subsubsection Side Note On CORS
+@subsection Side Note On CORS
 @cindex CORS
 
 In some  cases where  the API that  your app  tries to access  is running  on a
@@ -900,7 +1077,7 @@ To  prevent  this  from  happening,  we  can  install  another  library  called
 @file{cors}.
 
 @example
-$ npm install cors
+$ yarn install cors
 @end example
 
 Then at the top of the @file{index.js} file, write the @code{require} statement
@@ -920,7 +1097,7 @@ app.use(cors());
 @c _____________________________________
 
 @node Provide User Access To An API using JWT
-@subsubsection Provide User Access To An API using JWT
+@subsection Provide User Access To An API using JWT
 
 Here,  we will  create a  new API  with two  routes.  The  first route  will be
 public, while  the second one will  require the user to  be authenticated using
@@ -974,7 +1151,7 @@ actually  implemented it.  To  do so,  we need  to  install another  middleware
 library called @file{express-jwt}.
 
 @example
-$ npm install express-jwt
+$ yarn install express-jwt
 @end example
 
 Then at the  top of @file{api.js} file, write the  @code{require} statement for
@@ -1020,7 +1197,7 @@ the previous sections.
 @c _____________________________________
 
 @node Conclusion To Article
-@subsubsection Conclusion Article
+@subsection Conclusion Article
 @cindex conclusion
 
 Compared  to  other  web  tokens   like  @file{Simple  Web  Tokens}  (SWTs)  or
@@ -1595,6 +1772,7 @@ Creates a bibliography item in a table or list, as appropriate.
 @<Makefile---TWJR Targets@>
 @<Makefile---Clean Targets@>
 @<Makefile---Bib Macros Example Target@>
+@<Makefile---Applications@>
 
 @
 
@@ -1668,7 +1846,7 @@ document.     @code{info}    runs     @command{makeinfo},    @code{pdf}    runs
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : tangle weave
+twjr : tangle weave worldclean
 
 TANGLE : tangle
 tangle : $(FILE).twjr
@@ -1760,6 +1938,18 @@ distclean : dirclean
 worldclean : distclean
 	rm -rfv *.info* my-bib-macros.texi
 
+@
+
+
+
+
+@c -----------------------------------------------------------------------------
+
+@node Makefile Applications
+@appendixsec Makefile Applications
+@cindex Makefile applications
+
+@<Makefile---Applications@>=
 @
 
 

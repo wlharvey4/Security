@@ -16,7 +16,7 @@ default : INFO PDF HTML
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : tangle weave
+twjr : tangle weave worldclean
 
 TANGLE : tangle
 tangle : $(FILE).twjr
@@ -83,5 +83,24 @@ bibmacros : bibmacros.texi
 bibmacros.texi : twjr
 bibexample : bibmacros.texi
 	makeinfo my-file-with-bib.texi
+
+# JWT EXPRESS SERVER
+# ##################
+
+PWD := $$PWD
+JWT-EXPRESS-SERVER-ROOT := $(PWD)/JWT-Auth-Demo
+JWT-AUTH-SERVER := jwt-auth-server
+JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
+
+DEPS := express jsonwebtoken cors express-jwt
+
+.PHONY : jwt-auth-demo
+jwt-auth-demo : $(JWT-EXPRESS-SERVER)
+$(JWT-EXPRESS-SERVER) :
+	mkdir -p $(JWT-EXPRESS-SERVER); \
+	cd $(JWT-EXPRESS-SERVER-ROOT);  \
+	yarn add $(DEPS)
+	  
+
 
 
