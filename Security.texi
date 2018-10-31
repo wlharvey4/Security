@@ -17,8 +17,8 @@
 @defindex cr   @c chunk reference
 @c *****************************************************************************
 
-@c VERSION 0.0.1
-@c DATE    2018-10-30T06:45
+@c VERSION 0.0.2
+@c DATE    2018-10-30T21:20
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -1958,12 +1958,13 @@ clean :
     rm -f *~ .*~ #*#
 
 # remove  all directories;  leave the  source files  @@file@{TWJR@}, @@@{TEXI@},  and
-# @@file@{Makefile@}
+# @@file@{Makefile@}; resources dir
 dirclean : clean
     for file in *; do          \
       case $$file in           \
         $(FILE)* | Makefile) ;;\
         my-bib-macros*)      ;;\
+            resources*)      ;;\
         *) rm -vfr $$file    ;;\
       esac                     \
     done

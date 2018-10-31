@@ -1487,7 +1487,7 @@ dirclean : clean
 	  case $$file in           \
 	    $(FILE)* | Makefile) ;;\
 	    my-bib-macros*)      ;;\
-            resources)		 ;;\
+            resources*)	 	 ;;\
 	    *) rm -vfr $$file	 ;;\
 	  esac                     \
 	done

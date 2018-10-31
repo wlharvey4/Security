@@ -57,12 +57,13 @@ clean :
 	rm -f *~ .*~ #*#
 
 # remove  all directories;  leave the  source files  @file{TWJR}, @{TEXI},  and
-# @file{Makefile}
+# @file{Makefile}; resources dir
 dirclean : clean
 	for file in *; do          \
 	  case $$file in           \
 	    $(FILE)* | Makefile) ;;\
 	    my-bib-macros*)      ;;\
+            resources*)	 	 ;;\
 	    *) rm -vfr $$file	 ;;\
 	  esac                     \
 	done
