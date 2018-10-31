@@ -9,8 +9,8 @@
 @c %**end of header (This is for running Texinfo on a region.)
 @c *****************************************************************************
 
-@c VERSION 0.0.1
-@c DATE    2018-10-30T06:45
+@c VERSION 0.0.2
+@c DATE    2018-10-30T21:20
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -555,8 +555,7 @@ Once the Authentication server verifies  the user’s credentials, it will creat
 a JWT and send it  to the user.  The app now gets this  JWT and allows the user
 access to its data.
 
-
-@c .....................................
+@c _____________________________________
 
 @node JWT Structure
 @subsubsection JWT Structure
@@ -625,6 +624,168 @@ the @file{JWT.IO Debugger} by Auth0.
 @item
 @url{https://jwt.io/, JWT.IO} by Auth0
 @end itemize
+
+@c _____________________________________
+
+@node JWT Authentication Server
+@subsubsection JWT Authentication Server
+@cindex server, JWT authentication
+
+Now that we have  a basic understanding of what a JSON is,  lets take a look at
+how to build a simple authentication server  that will issue JWT, which we will
+then use to access an API.  The API will have a single route that displays the
+current date and time, and will have a handler for 404 pages.
+
+@subheading Install @file{Express}
+@cindex @file{express} installation
+
+First, install the @file{express} library onto your system using NPM.
+
+@example
+$ npm install express
+@end example
+
+@subheading Create Folder @file{jwt-auth}
+@cindex @file{jwt-auth} directory
+
+Next, create  a new folder  named @file{jwt-auth}.   You can name  it something
+else if you want.
+
+@example
+$ mkdir jwt-auth
+$ cd jwt-auth
+@end example
+
+@subheading Create @file{index.js}
+@cindex @file{index.js}
+
+Inside this folder create a new  file called @file{index.js}.  This is where we
+will write our code  to set up a web server.  Place the following code inside
+@file{index.js}:
+
+@subheading Server Code and Time Route Handler
+
+@example
+const express = require("express");
+const app = express();
+const PORT = 8888;
+app.get('/time', (req, res) => @{
+  const time = (new Date()).toLocaleTimeString();
+  res.status(200).send(`The Time is $@{time@}`);
+@});
+@end example
+
+This code imports  the Express library, executes  the @code{express()} function
+to create  an application (called @code{app}),  prepares to use port  8888, and
+creates a route handler for @code{/time}.  The handler gets the current time as
+an object  from the  @file{Date} class, formats  it, and then  sends it  to the
+requesting client browser.
+
+@subheading 404 Not Found Handler
+
+Now add a route to handle any  request to any route other than @code{/time}; in
+this handler, the server will send a 404 error message.  This route is called a
+catchall  route.   To  implement  this,  write  the  following  code  into  our
+@file{index.js} file:
+
+@example
+app.get("*", (req, res) => @{
+  res.sendStatus(404);
+@});
+@end example
+
+@subheading Run The App
+
+Now start the server on our chosen port:
+
+@example
+app.listen(PORT, () => @{
+  console.log(`Server is running on port $@{PORT@}.`); 
+@});
+@end example
+
+@subheading Run The Client
+
+With that  done, we  can start the  server by typing  @command{node .}   in our
+command terminal.  Then, go to @file{localhost:8888}  and you will find that it
+displays a @samp{Not  Found} message.  Add @file{/time} to the  URL and it will
+display the local time as shown below:
+
+@float Image,img:time
+@image{resources/time,,Time Image}
+@caption{Server Time}
+@end float
+
+In short, we  have built an @file{express}  server that will show  us the local
+time at @code{/time} and a 404 error on any other route.
+
+@c _____________________________________
+
+@node Implement A Login Route
+@subsubsection Implement A Login Route
+@cindex login route, implement
+
+Let’s implement a route called @file{login}.  Unlike the routes in the previous
+sections, which used  @code{get} and @code{listen}, this route  will be created
+using @code{post}.
+
+@subheading Login Route
+
+@example
+app.post("/login", (req, res) => @{
+  const user = req.body.username;
+  res.status(200).send(`User's name is $@{user@}`);
+@})
+@end example
+
+But currently our server cannot read the  body of the requests.  To solve this,
+we will install a new middleware library called @file{body-parser}.
+
+@example
+$ npm install body-parser
+@end example
+
+Then  just like  we did  with the  @file{express} library,  import it  into the
+@file{index.js} file using the @code{require} syntax.
+
+@example
+const bodyParser = require("body-parser");
+@end example
+
+We can now tell @file{express} to use @file{body-parser} to handle all the JSON
+responses as shown below:
+
+@example
+app.use(bodyParser.json());
+@end example
+
+Now start the server by running the @command{node .} command.
+
+In order, to  test this new route,  we will need to use  POSTMAN.  Install this
+into  your system,  if you  don’t already  have it.   Inside POSTMAN,  create a
+@code{post} request to the login route as shown below:
+
+@float Image,img:post
+@image{resources/post,,,Post}
+@caption{Postman Post}
+@end float
+
+Inside the body, create a JSON Object as shown below:
+
+@float Image,img:object
+@image{resources/object,,,Object}
+@caption{Postman Body Object}
+@end float
+
+Clicking on send should get you the following response:
+
+@float Image,img:response
+@image{resources/response,,,Response}
+@caption{Response from Postman Request}
+@end float
+
+
+
 
 
 
@@ -1320,12 +1481,13 @@ clean :
 	rm -f *~ .*~ #*#
 
 # remove  all directories;  leave the  source files  @file{TWJR}, @{TEXI},  and
-# @file{Makefile}
+# @file{Makefile}; resources dir
 dirclean : clean
 	for file in *; do          \
 	  case $$file in           \
 	    $(FILE)* | Makefile) ;;\
 	    my-bib-macros*)      ;;\
+            resources)		 ;;\
 	    *) rm -vfr $$file	 ;;\
 	  esac                     \
 	done
