@@ -17,8 +17,8 @@
 @defindex cr   @c chunk reference
 @c *****************************************************************************
 
-@c VERSION 0.0.2
-@c DATE    2018-10-30T21:20
+@c VERSION 0.0.3
+@c DATE    2018-10-31T08:00
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -428,6 +428,10 @@ Scenario
 * JWT Structure::
 * JWT Authentication Server::
 * Implement A Login Route::
+* Issuing JWT's::
+* Side Note On CORS::
+* Provide User Access To An API using JWT::
+* Conclusion To Article::
 
 Bib Macros Documentation
 
@@ -709,6 +713,10 @@ access to its data.
 * JWT Structure::
 * JWT Authentication Server::
 * Implement A Login Route::
+* Issuing JWT's::
+* Side Note On CORS::
+* Provide User Access To An API using JWT::
+* Conclusion To Article::
 @end menu
 
 @node JWT Structure
@@ -937,6 +945,266 @@ Clicking on send should get you the following response:
 @image{resources/response,,,Response}
 @caption{Response from Postman Request}
 @end float
+
+@c _____________________________________
+
+@node Issuing JWT's
+@subsubsection Issuing JWT's
+@cindex issue JWT
+
+Now that we have built a simple  server that can handle GET, and POST requests,
+let’s build a simple JWT issuer.
+
+Lets start  by creating  a new  array called @code{users}  that will  contain a
+couple of users along with their passwords as shown below:
+
+@example
+const users = [
+  @{id: 1, username: "clarkKent", password: "superman"@},
+  @{id: 2, username: "bruceWayne", password: "batman"@}
+];
+@end example
+
+Lets  rewrite the  @code{/login}  route.   Here, we  will  first  check if  the
+submitted request contains both a @code{username} and @code{password}.  If that
+is not the case, then the server should respond with a 400 status.
+
+@example
+app.post("/login", (req, res) => @{
+  if (!req.body.username || !req.body.password) @{
+    res.status(400).send("Error. Please enter the correct username and password");
+    return;
+  @}
+@end example
+
+Next, if the request is valid, we will need to check if the user in the request
+is  present in  our users  array.  In  the same  @code{/login} route  below the
+@code{if} statement, write:
+
+@example
+  const user = users.find((u) => @{
+    return u.username === req.body.username && u.password === req.body.password;
+  @});
+@end example
+
+But if the  user in the request is  not present in the users array,  we need to
+respond with  a status  code of  401.  Again in  the same  @code{/login} route,
+write:
+
+@example
+
+@end example
+
+Before   going   forward,   let’s    install   another   library   called   the
+@file{jsonwebtoken}.
+
+@example
+$ npm install jsonwebtoken
+@end example
+
+At the top of the @file{index.js}  file, write the @code{require} statement for
+the @file{jsonwebtoken} library as shown below:
+
+@example
+const jwt = require("jsonwebtoken");
+@end example
+
+We will use this  library to create a JSON Web Token for  every valid user.  To
+do  this, we  will  create a  new @code{const}  called  @code{token} using  the
+@code{sign}  method from  the @file{jsonwebtoken}  library.  Note  that we  are
+still writing the code inside the @code{/login} route.
+
+@example
+  const token = jwt.sign(@{
+    sub: user.id,
+    username: user.username
+  @}, "mykey", @{expiresIn: "3 hours"@});
+  res.status(200).send(@{access_token: token@})
+@end example
+
+Now  go to  POSTMAN, and  send a  @code{post} request  with the  following JSON
+object in its body.
+
+@example
+@{
+  "username": "clarkKent",
+  "password": "superman",
+@}
+@end example
+
+The result will be a JSON Web Token as shown below:
+
+@float Image,img:jwt
+@image{resources/jwt,,,jwt}
+@caption{JWT}
+@end float
+
+If you copy the value of access_token into the @file{JWT.IO} Debugger, you will
+see that  it is the  same @code{username} and  @code{password}, but with  a few
+extra things.
+
+@float Image,img:encoded
+@image{resources/encoded,,,encoded}
+@caption{Encoded JWT}
+@end float
+
+@c _____________________________________
+
+@node Side Note On CORS
+@subsubsection Side Note On CORS
+@cindex CORS
+
+In some  cases where  the API that  your app  tries to access  is running  on a
+different server than that of your app’s, will return some kind of @samp{Failed
+To Load error}.
+
+To  prevent  this  from  happening,  we  can  install  another  library  called
+@file{cors}.
+
+@example
+$ npm install cors
+@end example
+
+Then at the top of the @file{index.js} file, write the @code{require} statement
+for this library as shown below:
+
+@example
+const cors = require("cors");
+@end example
+
+Then similar to  what we did with the @file{body-parser}  library, we will tell
+the @file{express} to use @file{cors} as shown below:
+
+@example
+app.use(cors());
+@end example
+
+@c _____________________________________
+
+@node Provide User Access To An API using JWT
+@subsubsection Provide User Access To An API using JWT
+
+Here,  we will  create a  new API  with two  routes.  The  first route  will be
+public, while  the second one will  require the user to  be authenticated using
+JWT in order to access it.
+
+Let’s create a new file in the @file{jwt-auth} folder called @file{api.js}.  In
+this file, write the following startup code:
+
+@example
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+const PORT = process.env.API_PORT || 8888;
+app.use(bodyParser.json());
+app.get("*", (req, res) => @{
+  res.sendStatus(404);
+@});
+app.listen(PORT, () => @{
+  console.log(`Server is running on port $@{PORT@}.`);
+@});
+@end example
+
+Let’s create  a new route  called @file{/asset}.  This  will be a  public route
+that I had mentioned earlier, and will simply return a status code 200.
+
+@example
+app.get("/asset", (req, res) => @{
+  res.status(200).send("Everybody can see this");
+@});
+@end example
+
+The second, secret  route will be @file{/asset/secret}  and it will be  secured with a
+@code{jwtCheck} as shown below:
+
+@example
+app.get("/asset/secret", jwtCheck, (req, res) => @{
+  res.status(200).send("Only logged in people can see me");
+@});
+@end example
+
+Since the  @file{index.js} file is set  to run on the  PORT 8888, we need  to set some
+other PORT  for this file.  To  do that, open  the command terminal and  run the
+command:
+
+@example
+$ export API_PORT=5555
+@end example
+
+Even though  we have said  that the @file{/asset/secret}  route is secure,  we haven’t
+actually  implemented it.  To  do so,  we need  to  install another  middleware
+library called @file{express-jwt}.
+
+@example
+$ npm install express-jwt
+@end example
+
+Then at the  top of @file{api.js} file, write the  @code{require} statement for
+this library.
+
+@example
+const expressjwt = require("express-jwt");
+@end example
+
+
+We  will  use  this  library  to  define  the  @code{jwtCheck}.   We  will  use
+@code{jwtCheck} to check if the signature matches  the one that we got from our
+authentication server.  If you recall, we have named it as @code{mykey}.
+
+@example
+const jwtCheck = expressjwt(@{
+  secret: "mykey"
+@});
+@end example
+
+Run  the @command{node  api.js}  command in  your terminal.   To  check if  the
+authentication works  as it should,  go to POSTMAN and  run the GET  request on
+@file{localhost:5000/asset}.  The  response should  be @samp{Everybody  can see
+this}.
+
+Then  run  the GET  request  on  @file{localhost:5000/asset/secret}.  What  you
+should get is a big error code that looks something like this:
+
+@float Image,img:error
+@image{resources/error,,,error}
+@caption{Error}
+@end float
+
+To solve this, go to the Authentication  tab in POSTMAN, and select the Type as
+Bearer Token.  Then enter the value of Token  as the one that we had received in
+the previous sections.
+
+@float Image,img:resolved
+@image{resources/resolved,,,resolved}
+@caption{Resolved}
+@end float
+
+@c _____________________________________
+
+@node Conclusion To Article
+@subsubsection Conclusion Article
+@cindex conclusion
+
+Compared  to  other  web  tokens   like  @file{Simple  Web  Tokens}  (SWTs)  or
+@file{Security Assertion Markup Language} (SAML), JWT  is much simpler as it is
+based on JSON which is easier to understand than XML.
+
+If we  encode the JSON,  it will  become even more  smaller in size  than SAML,
+making it easier to pass in HTML and HTTP environments.
+
+Security wise, SWTs  use a single key,  whereas both JWT and SAML  use a public
+and private key pair for better authentication.
+
+Talking from  a usage  point of view,  JWTs are used  at Internet  scale.  This
+means that  it is easier  to process  on the user’s  devices, be it  laptops or
+mobile.
+
+Apart  from authentication,  JSON  Web Token  are  a great  and  secure way  of
+transmitting data between multiple parties.  The fact that JWTs have signatures
+makes it easier for everyone to  easily identify the sender of information.  All
+you need is the correct key.
+
+
 
 
 
