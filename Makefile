@@ -95,12 +95,19 @@ JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
 DEPS := express jsonwebtoken cors express-jwt
 
 .PHONY : jwt-auth-demo
-jwt-auth-demo : $(JWT-EXPRESS-SERVER)
+jwt-auth-demo : $(JWT-EXPRESS-SERVER) move-jwt-auth-index.js
 $(JWT-EXPRESS-SERVER) :
 	mkdir -p $(JWT-EXPRESS-SERVER); \
 	cd $(JWT-EXPRESS-SERVER-ROOT);  \
 	yarn add $(DEPS)
 	  
+jwt-auth-index.js : $(FILE).twjr
+	jrtangle $(FILE).twjr
+
+.PHONY : move-jwt-auth-index.js
+move-jwt-auth-index.js : jwt-auth-index.js
+	mv -fv jwt-auth-index.js $(JWT-EXPRESS-SERVER)/index.js
+
 
 
 

@@ -9,14 +9,14 @@
 @c %**end of header (This is for running Texinfo on a region.)
 @c *****************************************************************************
 
-@c VERSION 0.0.4
-@c DATE    2018-10-31T13:25
+@c VERSION 0.0.5
+@c DATE    2018-11-01T13:24
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
 @set SHORTTITLE Security
 @set EDITION 0.1
-@set UPDATE-MONTH OCTOBER, 2018 @c goes in the subtitle
+@set UPDATE-MONTH NOVEMBER, 2018 @c goes in the subtitle
 @set COPYRIGHT-YEAR 2018
 @set AUTHOR WLHarvey4
 @set ADDRESS1 Address Line 1
@@ -788,7 +788,7 @@ JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
 DEPS := express jsonwebtoken cors express-jwt
 
 .PHONY : jwt-auth-demo
-jwt-auth-demo : $(JWT-EXPRESS-SERVER)
+jwt-auth-demo : $(JWT-EXPRESS-SERVER) move-jwt-auth-index.js
 $(JWT-EXPRESS-SERVER) :
 	mkdir -p $(JWT-EXPRESS-SERVER); \
 	cd $(JWT-EXPRESS-SERVER-ROOT);  \
@@ -805,6 +805,10 @@ $(JWT-EXPRESS-SERVER) :
 
 The basic server implementation contains three major sections:
 
+@(jwt-auth-index.js@)=
+@<index.js---Framework@>
+@
+
 @enumerate
 @item
 Dependencies
@@ -819,6 +823,11 @@ Import dependency libraries using @code{require}:
 const express = require("express");
 @end verbatim
 @end itemize
+
+@<index.js---Framework@>=
+const express = require("express");
+
+@
 
 @item
 The Server
@@ -837,6 +846,16 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`); 
 });
 @end verbatim
+
+@<index.js---Framework@>=
+const app = express();
+const PORT = 8888;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+});
+
+@
 
 @item
 Route Handlers
@@ -858,6 +877,16 @@ app.get('/time', (req, res) => {
 });
 @end verbatim
 
+@<index.js---Framework@>=
+# ROUTE HANDLERS
+# /time
+app.get('/time', (req, res) => {
+  const time = new Date()).toLocalTimeString();
+  res.status(200).send(`The Time is ${time}`);
+});
+
+@
+
 @item
 @code{*} (``catch-all'')
 
@@ -875,7 +904,27 @@ app.get("*", (req, res) => {
 @end verbatim
 @end itemize
 
+@<index.js---Framework@>=
+# * catch-all
+app.get("*", (req, res) => {
+  res.sendStatus(404);
+});
+
+@
+
 @end enumerate
+
+@<Makefile---Applications--JWT-Auth-Demo@>=
+
+jwt-auth-index.js : $(FILE).twjr
+	jrtangle $(FILE).twjr
+
+.PHONY : move-jwt-auth-index.js
+move-jwt-auth-index.js : jwt-auth-index.js
+	mv -fv jwt-auth-index.js $(JWT-EXPRESS-SERVER)/index.js
+
+@
+
 
 @c _____________________________________
 
