@@ -17,8 +17,8 @@
 @defindex cr   @c chunk reference
 @c *****************************************************************************
 
-@c VERSION 0.0.5
-@c DATE    2018-11-01T13:24
+@c VERSION 0.0.6
+@c DATE    2018-11-01T21:40
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -370,7 +370,7 @@ URL: @url{http://www.example.com/} @*
 @ifnotxml
 
 @c =============================================================================
-@node Top
+@node Top, Preface, (dir), (dir)
 @top Security
 @c =============================================================================
 
@@ -518,7 +518,7 @@ Code Chunk Summaries
 
 @c *****************************************************************************
 
-@node Preface
+@node Preface, Introduction, Top, Top
 @unnumbered Preface
 
 Text here.
@@ -534,7 +534,7 @@ Text here.
 
 
 @c -----------------------------------------------------------------------------
-@node Audience
+@node Audience, Overview, Preface, Preface
 @unnumberedsec Intended Audience
 
 Audience text here.
@@ -543,7 +543,7 @@ Audience text here.
 
 
 @c -----------------------------------------------------------------------------
-@node Overview
+@node Overview, Conventions, Audience, Preface
 @unnumberedsec What Is Covered
 
 Overview text and chapter by chapter description here.
@@ -552,7 +552,7 @@ Overview text and chapter by chapter description here.
 
 
 @c -----------------------------------------------------------------------------
-@node Conventions
+@node Conventions, Acknowledgements, Overview, Preface
 @unnumberedsec Typographical Conventions
 
 @c Copied mostly verbatim from the gawk manual.
@@ -597,7 +597,7 @@ in this sentence.  Finally, file names are indicated like this:
 
 
 @c -----------------------------------------------------------------------------
-@node Acknowledgements
+@node Acknowledgements,  , Conventions, Preface
 @unnumberedsec Acknowledgements
 
 Acknowledgements go here.
@@ -616,7 +616,7 @@ Acknowledgements go here.
 
 
 @c *****************************************************************************
-@node Introduction
+@node Introduction, JSON Web Tokens, Preface, Top
 @chapter Introduction
 
 
@@ -628,7 +628,7 @@ Acknowledgements go here.
 
 @c *****************************************************************************
 
-@node JSON Web Tokens
+@node JSON Web Tokens, Bib Macros, Introduction, Top
 @chapter JSON Web Tokens
 @cindex JSON web tokens
 
@@ -642,7 +642,7 @@ Acknowledgements go here.
 * Understanding JSON Web Token Authentication::
 @end menu
 
-@node JSON Web Tokens By Auth0
+@node JSON Web Tokens By Auth0, Understanding JSON Web Token Authentication, JSON Web Tokens, JSON Web Tokens
 @section JSON Web Tokens By Auth0
 @cindex Auth0
 
@@ -663,7 +663,7 @@ Acknowledgements go here.
 * Introduction to JSON Web Tokens::
 @end menu
 
-@node Introduction to JSON Web Tokens
+@node Introduction to JSON Web Tokens,  , JSON Web Tokens By Auth0, JSON Web Tokens By Auth0
 @subsection Introduction to JSON Web Tokens
 @cindex JSON web tokens introduction
 
@@ -676,7 +676,7 @@ Tokens}.  @mybibcite{JWT-INTRO}
 
 @c -----------------------------------------------------------------------------
 
-@node Understanding JSON Web Token Authentication
+@node Understanding JSON Web Token Authentication,  , JSON Web Tokens By Auth0, JSON Web Tokens
 @section Understanding JSON Web Token Authentication
 
 @heading About
@@ -704,7 +704,7 @@ log a user in (and keep unauthorized users out).
 * Conclusion To Article::
 @end menu
 
-@node What Is A JSON Web Token
+@node What Is A JSON Web Token, JWT Structure, Understanding JSON Web Token Authentication, Understanding JSON Web Token Authentication
 @subsection What Is A JSON Web Token?
 @cindex JSON web token, definition
 @cindex JWT
@@ -731,7 +731,7 @@ access to its data.
 
 @c .....................................
 
-@node JWT Structure
+@node JWT Structure, Create a Basic Express Server, What Is A JSON Web Token, Understanding JSON Web Token Authentication
 @subsection JWT Structure
 @cindex JWT structure
 
@@ -808,7 +808,7 @@ the @file{JWT.IO Debugger} by Auth0.
 
 @c .....................................
 
-@node Create a Basic Express Server
+@node Create a Basic Express Server, Implement A Login Route, JWT Structure, Understanding JSON Web Token Authentication
 @subsection Create a Basic Express Server
 @cindex server, express
 @cindex express server, create
@@ -909,7 +909,7 @@ The called chunk @r{<@i{Makefile---Applications--JWT-Auth-Demo}>} is first defin
 * Start the Server::
 @end menu
 
-@node Express and Dependencies
+@node Express and Dependencies, Express Server Code, Create a Basic Express Server, Create a Basic Express Server
 @subsubsection Express and Dependencies
 
 @heading Express and Dependencies
@@ -983,12 +983,14 @@ JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
 
 DEPS := express jsonwebtoken cors express-jwt
 
+JWT-EXPRESS-SERVER-TARGETS := jwt-auth-demo
+
 .PHONY : jwt-auth-demo
 jwt-auth-demo : $(JWT-EXPRESS-SERVER) move-jwt-auth-index.js
 $(JWT-EXPRESS-SERVER) :
     mkdir -p $(JWT-EXPRESS-SERVER); \
     cd $(JWT-EXPRESS-SERVER-ROOT);  \
-    yarn add $(DEPS)
+    yarn add $(DEPS);
       
 @end example
 @iftex
@@ -1007,7 +1009,7 @@ This chunk is called by @r{<@i{Makefile---Applications}>}; see its first definit
 
 @c _____________________________________
 
-@node Express Server Code
+@node Express Server Code, Start the Server, Express and Dependencies, Create a Basic Express Server
 @subsubsection Express Server Code
 
 @heading The Server Sections
@@ -1225,9 +1227,12 @@ This chunk is called by @r{@{@file{jwt-auth-index.js}@}}; see its first definiti
 @noindent
 @r{<@i{Makefile---Applications--JWT-Auth-Demo}>} +@equiv{}
 @example
-jwt-auth-index.js : $(FILE).twjr
-    jrtangle $(FILE).twjr
+JWT-AUTH-DEMO-INDEX.JS := jwt-auth-demo-index.js
+JWT-AUTH-DEMO-TARGETS +:= jwt-auth-demo-install-index.js
 
+jwt-auth-index.js : $(TWJR)
+    jrtangle $(FILE).twjr
+    
 .PHONY : move-jwt-auth-index.js
 move-jwt-auth-index.js : jwt-auth-index.js
     mv -fv jwt-auth-index.js $(JWT-EXPRESS-SERVER)/index.js
@@ -1250,7 +1255,7 @@ This chunk is called by @r{<@i{Makefile---Applications}>}; see its first definit
 
 @c _____________________________________
 
-@node Start the Server
+@node Start the Server,  , Express Server Code, Create a Basic Express Server
 @subsubsection Start the Server
 
 With that  done, we  can start the  server by typing  @command{node .}   in our
@@ -1269,7 +1274,7 @@ time at @code{/time} and a 404 error on any other route.
 
 @c .....................................
 
-@node Implement A Login Route
+@node Implement A Login Route, Issuing JWT's, Create a Basic Express Server, Understanding JSON Web Token Authentication
 @subsection Implement A Login Route
 @cindex login route, implement
 
@@ -1334,7 +1339,7 @@ Clicking on send should get you the following response:
 
 @c _____________________________________
 
-@node Issuing JWT's
+@node Issuing JWT's, Side Note On CORS, Implement A Login Route, Understanding JSON Web Token Authentication
 @subsection Issuing JWT's
 @cindex issue JWT
 
@@ -1436,7 +1441,7 @@ extra things.
 
 @c _____________________________________
 
-@node Side Note On CORS
+@node Side Note On CORS, Provide User Access To An API using JWT, Issuing JWT's, Understanding JSON Web Token Authentication
 @subsection Side Note On CORS
 @cindex CORS
 
@@ -1467,7 +1472,7 @@ app.use(cors());
 
 @c _____________________________________
 
-@node Provide User Access To An API using JWT
+@node Provide User Access To An API using JWT, Conclusion To Article, Side Note On CORS, Understanding JSON Web Token Authentication
 @subsection Provide User Access To An API using JWT
 
 Here,  we will  create a  new API  with two  routes.  The  first route  will be
@@ -1567,7 +1572,7 @@ the previous sections.
 
 @c _____________________________________
 
-@node Conclusion To Article
+@node Conclusion To Article,  , Provide User Access To An API using JWT, Understanding JSON Web Token Authentication
 @subsection Conclusion Article
 @cindex conclusion
 
@@ -1611,7 +1616,7 @@ you need is the correct key.
 
 @c *****************************************************************************
 
-@node Bib Macros
+@node Bib Macros, The Makefile, JSON Web Tokens, Top
 @appendix Bib Macros Documentation
 
 This appendix describes @file{my-bib-macros.texi} by Aaron S. Hawley (2004).
@@ -1630,7 +1635,7 @@ This appendix describes @file{my-bib-macros.texi} by Aaron S. Hawley (2004).
 * Bib Macros Example Program::
 @end menu
 
-@node Bib Macros Introduction
+@node Bib Macros Introduction, Bib Macros Usage, Bib Macros, Bib Macros
 @appendixsec Bib Macros Introduction
 @cindex Bib Macros introduction
 
@@ -1647,7 +1652,7 @@ readers.
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Usage
+@node Bib Macros Usage, Bib Macros Example, Bib Macros Introduction, Bib Macros
 @appendixsec Bib Macros Usage
 @cindex Bib Macros usage
 
@@ -1736,7 +1741,7 @@ cited to with with following command, where @var{ref-name} matches one of the
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Example
+@node Bib Macros Example, Bib Macros Notes, Bib Macros Usage, Bib Macros
 @appendixsec Bib Macros Example
 @cindex Bib Macros Example
 
@@ -1794,7 +1799,7 @@ Addison-Wesley, Reading, Massachusetts, 1994.
 * Example PDF Output::
 @end menu
 
-@node Example INFO Output
+@node Example INFO Output, Example PDF Output, Bib Macros Example, Bib Macros Example
 @appendixsubsec Example INFO Output
 
 This example produces (in Info):
@@ -1817,7 +1822,7 @@ Addison-Wesley, Reading, Massachusetts, 1994.
 
 @c .....................................
 
-@node Example PDF Output
+@node Example PDF Output,  , Example INFO Output, Bib Macros Example
 @appendixsubsec PDF Output
 
 @noindent
@@ -1843,7 +1848,7 @@ Addison-Wesley, Reading, Massachusetts, 1994.
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Notes
+@node Bib Macros Notes, Bib Macros Configuration Options, Bib Macros Example, Bib Macros
 @appendixsec Bib Macros Notes
 @cindex Bib Macros Notes
 
@@ -1863,7 +1868,7 @@ An improvement of this system would create cross references (with
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Configuration Options
+@node Bib Macros Configuration Options, Bib Macros Example Program, Bib Macros Notes, Bib Macros
 @appendixsec Bib Macros Configuration Options
 @cindex Bib Macros configuration
 
@@ -1892,7 +1897,7 @@ Cites the cross reference @var{ref}.
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Example Program
+@node Bib Macros Example Program,  , Bib Macros Configuration Options, Bib Macros
 @appendixsec Bib Macros Example Program
 @cindex Bib Macros example program
 
@@ -1939,7 +1944,7 @@ The following table lists called chunk definition points.
 * The Bib Macros::
 @end menu
 
-@node Bib Macros Example Header
+@node Bib Macros Example Header, Bib Macros Example Body, Bib Macros Example Program, Bib Macros Example Program
 @appendixsubsec Bib Macros Example Header
 
 The command @command{@@mybibuselist@{References@}} creates a @code{@@node} of
@@ -1976,7 +1981,7 @@ This chunk is called by @r{@{@file{my-file-with-bib.texi}@}}; see its first defi
 
 @c .....................................
 
-@node Bib Macros Example Body
+@node Bib Macros Example Body, Bib Macros Example Reference, Bib Macros Example Header, Bib Macros Example Program
 @appendixsubsec Bib Macros Example Body
 
 The body of the document has nodes and sectioning as normal, with citations to
@@ -2011,7 +2016,7 @@ This chunk is called by @r{@{@file{my-file-with-bib.texi}@}}; see its first defi
 
 @c .....................................
 
-@node Bib Macros Example Reference
+@node Bib Macros Example Reference, Bib Macros Example End, Bib Macros Example Body, Bib Macros Example Program
 @appendixsubsec Bib Macros Example Reference
 
 Here is the chapter and citation.
@@ -2043,7 +2048,7 @@ This chunk is called by @r{@{@file{my-file-with-bib.texi}@}}; see its first defi
 
 @c .....................................
 
-@node Bib Macros Example End
+@node Bib Macros Example End, The Bib Macros, Bib Macros Example Reference, Bib Macros Example Program
 @appendixsubsec Bib Macros Example End
 
 Here is the Reference section, inside another chapter.  Notice that the node
@@ -2081,7 +2086,7 @@ This chunk is called by @r{@{@file{my-file-with-bib.texi}@}}; see its first defi
 
 @c .....................................
 
-@node The Bib Macros
+@node The Bib Macros,  , Bib Macros Example End, Bib Macros Example Program
 @appendixsubsec The Bib Macros
 
 The macros begin with configuration options, i.e., whether to use a table or
@@ -2143,7 +2148,7 @@ The following table lists called chunk definition points.
 * Bib Item::
 @end menu
 
-@node Set Ref Node
+@node Set Ref Node, Bib Node, The Bib Macros, The Bib Macros
 @appendixsubsubsec Set Ref Node
 
 Defines the name of the node to contain references.
@@ -2171,7 +2176,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Node
+@node Bib Node, Bib Use Table, Set Ref Node, The Bib Macros
 @appendixsubsubsec Bib Node
 
 Macro to be placed at node containing references and calls to @@mybibcite@{@}.
@@ -2199,7 +2204,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Use Table
+@node Bib Use Table, Bib Use List, Bib Node, The Bib Macros
 @appendixsubsubsec Bib Use Table
 
 Whether each @code{@@mybibitem} will be put in a table:
@@ -2231,7 +2236,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Use List
+@node Bib Use List, Bib Cite Ref, Bib Use Table, The Bib Macros
 @appendixsubsubsec Bib Use List
 
 Or whether each @code{@@mybibitem} will be put in a list:
@@ -2263,7 +2268,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Cite Ref
+@node Bib Cite Ref, Bib Make Ref, Bib Use List, The Bib Macros
 @appendixsubsubsec Bib Cite Ref
 
 Cites the cross reference REF.
@@ -2296,7 +2301,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Make Ref
+@node Bib Make Ref, Bib Item, Bib Cite Ref, The Bib Macros
 @appendixsubsubsec Bib Make Ref
 
 Makes a reference using Texinfo's cross-reference tools.
@@ -2324,7 +2329,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c _____________________________________
 
-@node Bib Item
+@node Bib Item,  , Bib Make Ref, The Bib Macros
 @appendixsubsubsec Bib Item
 
 Creates a bibliography item in a table or list, as appropriate.
@@ -2370,7 +2375,7 @@ This chunk is called by @r{@{@file{my-bib-macros.texi}@}}; see its first definit
 
 @c *****************************************************************************
 
-@node The Makefile
+@node The Makefile, Code Chunk Summaries, Bib Macros, Top
 @appendix The Makefile
 @cindex makefile
 
@@ -2431,7 +2436,7 @@ The following table lists called chunk definition points.
 * Bib Macros Example Target::
 @end menu
 
-@node Makefile Variable Definitions
+@node Makefile Variable Definitions, Makefile Default Target, The Makefile, The Makefile
 @appendixsec Makefile Variable Definitions
 
 @need 400
@@ -2443,6 +2448,7 @@ The following table lists called chunk definition points.
 # VARIABLE DEFINITIONS
 ######################
 
+ROOT  := /usr/local/dev/programming/Security
 FILE  := Security
 SHELL := /bin/bash
 
@@ -2462,7 +2468,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 @c -----------------------------------------------------------------------------
 
-@node Makefile Default Target
+@node Makefile Default Target, Makefile TWJR Targets, Makefile Variable Definitions, The Makefile
 @appendixsec Default Target
 @cindex default target
 
@@ -2490,8 +2496,8 @@ links.   You  may then  run  the  @code{default} target,  producing  the
 @example
 # DEFAULT Target
 ################
-.PHONY : TWJR TANGLE WEAVE TEXI INFO PDF HTML
-.PHONY : default twjr tangle weave texi info pdf html
+.PHONY : TWJR JRTANGLE JRWEAVE TEXI INFO PDF HTML
+.PHONY : default twjr jrtangle jrweave weave texi info pdf html
 default : INFO PDF HTML
 
 @end example
@@ -2510,8 +2516,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 @c -----------------------------------------------------------------------------
 
-
-@node Makefile TWJR Targets
+@node Makefile TWJR Targets, Makefile Clean Targets, Makefile Default Target, The Makefile
 @appendixsec TWJR Targets
 @cindex TWJR targets
 
@@ -2529,25 +2534,33 @@ document.     @code{info}    runs     @command{makeinfo},    @code{pdf}    runs
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : tangle weave worldclean
+twjr : jrtangle jrweave worldclean
 
-TANGLE : tangle
-tangle : $(FILE).twjr
+lodestone : $(FILE).twjr
     jrtangle $(FILE).twjr
+    touch $(FILE).twjr
+    touch lodestone;
 
-WEAVE : weave
-weave : TEXI
-TEXI  : texi
-texi  : $(FILE).texi
+JRTANGLE : jrtangle
+jrtangle : tangle
+tangle   : lodestone
+
+JRWEAVE : WEAVE
+WEAVE   : jrweave
+jrweave : weave
+weave   : TEXI
+TEXI    : texi
+texi    : $(FILE).texi
 $(FILE).texi : $(FILE).twjr
     jrweave $(FILE).twjr > $(FILE).texi
+    emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) (texinfo-master-menu 1) (save-buffer 0))'
 
 INFO : info
 info : $(FILE).info
-$(FILE).info : $(FILE).texi
+$(FILE).info : $(FILE).texi $(FILE).twjr
     makeinfo $(FILE).texi
 openinfo : INFO
-    emacs $(FILE).info
+    open -na EmacsMac --args --eval '(info "($(ROOT)/$(FILE).info)top" "$(FILE).texi")'
 
 PDF : pdf
 pdf : $(FILE).pdf
@@ -2579,7 +2592,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 @c -----------------------------------------------------------------------------
 
-@node Makefile Clean Targets
+@node Makefile Clean Targets, Makefile Applications, Makefile TWJR Targets, The Makefile
 @appendixsec Makefile Clean Targets
 @cindex Makefile clean targets
 
@@ -2613,27 +2626,32 @@ The @file{TEXI} file is always left because  it will be accurate so long as the
 
 # remove backup files
 clean :
-    rm -f *~ .*~ #*#
+    @@echo clean
+    @@rm -f *~ .*~ #*#
 
 # remove  all directories;  leave the  source files  @@file@{TWJR@}, @@@{TEXI@},  and
 # @@file@{Makefile@}; resources dir
 dirclean : clean
-    for file in *; do          \
+    @@echo dirclean
+    @@for file in *; do          \
       case $$file in           \
         $(FILE)* | Makefile) ;;\
         my-bib-macros*)      ;;\
             resources*)      ;;\
+        lodestone)       ;;\
         *) rm -vfr $$file    ;;\
       esac                     \
     done
 
 # after dirclean, remove HTML directory and PDF files
 distclean : dirclean
-    rm -vfr $(FILE) $(FILE).pdf
+    @@echo distclean
+    @@rm -vfr $(FILE) $(FILE).pdf
 
 # after distclean, remove INFO and my-bib-macros
 worldclean : distclean
-    rm -rfv *.info* my-bib-macros.texi
+    @@echo worldclean
+    @@rm -vfr *.info* my-bib-macros.texi
 
 @end example
 @iftex
@@ -2651,7 +2669,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 @c -----------------------------------------------------------------------------
 
-@node Makefile Applications
+@node Makefile Applications, Bib Macros Example Target, Makefile Clean Targets, The Makefile
 @appendixsec Makefile Applications
 @cindex Makefile applications
 
@@ -2682,7 +2700,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 @c -----------------------------------------------------------------------------
 
-@node Bib Macros Example Target
+@node Bib Macros Example Target,  , Makefile Applications, The Makefile
 @appendixsec Bib Macros Example Target
 
 @need 400
@@ -2718,7 +2736,7 @@ This chunk is called by @r{@{@file{Makefile}@}}; see its first definition at @re
 
 
 @c *****************************************************************************
-@node Code Chunk Summaries
+@node Code Chunk Summaries, @mybibnode{}, The Makefile, Top
 @appendix Code Chunk Summaries
 
 This @value{APPENDIX} presents alphabetical lists of
@@ -2735,7 +2753,7 @@ and the code chunk references.
 
 
 @c -----------------------------------------------------------------------------
-@node File Definitions
+@node File Definitions, Code Chunk Definitions, Code Chunk Summaries, Code Chunk Summaries
 @appendixsec Source File Definitions
 
 @table @asis
@@ -2757,7 +2775,7 @@ This chunk is defined in
 
 
 @c -----------------------------------------------------------------------------
-@node Code Chunk Definitions
+@node Code Chunk Definitions, Code Chunk References, File Definitions, Code Chunk Summaries
 @appendixsec Code Chunk Definitions
 
 @table @asis
@@ -2835,7 +2853,7 @@ This chunk is defined in
 
 
 @c -----------------------------------------------------------------------------
-@node Code Chunk References
+@node Code Chunk References,  , Code Chunk Definitions, Code Chunk Summaries
 @appendixsec Code Chunk References
 
 @table @asis
@@ -2925,7 +2943,7 @@ This chunk is called by @r{@{@file{my-file-with-bib.texi}@}}; see its first defi
 
 @c *****************************************************************************
 
-@node @mybibnode{}
+@node @mybibnode{}, List of Tables, Code Chunk Summaries, Top
 @unnumbered Bibliography
 
 @table @asis
@@ -2948,7 +2966,7 @@ by Auth0
 
 @c *****************************************************************************
 
-@node List of Tables
+@node List of Tables, Concept Index, @mybibnode{}, Top
 @unnumbered List of Tables
 
 @listoffloats Table
@@ -2961,7 +2979,7 @@ by Auth0
 
 
 @c  *****************************************************************************
-@node Concept Index
+@node Concept Index,  , List of Tables, Top
 @unnumbered Index
 
 @printindex cp

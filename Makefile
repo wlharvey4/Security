@@ -4,37 +4,46 @@
 # VARIABLE DEFINITIONS
 ######################
 
+ROOT  := /usr/local/dev/programming/Security
 FILE  := Security
 SHELL := /bin/bash
 
 # DEFAULT Target
 ################
-.PHONY : TWJR TANGLE WEAVE TEXI INFO PDF HTML
-.PHONY : default twjr tangle weave texi info pdf html
+.PHONY : TWJR JRTANGLE JRWEAVE TEXI INFO PDF HTML
+.PHONY : default twjr jrtangle jrweave weave texi info pdf html
 default : INFO PDF HTML
 
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : tangle weave worldclean
+twjr : jrtangle jrweave worldclean
 
-TANGLE : tangle
-tangle : $(FILE).twjr
+lodestone : $(FILE).twjr
 	jrtangle $(FILE).twjr
+	touch $(FILE).twjr
+	touch lodestone;
 
-WEAVE : weave
-weave : TEXI
-TEXI  : texi
-texi  : $(FILE).texi
+JRTANGLE : jrtangle
+jrtangle : tangle
+tangle   : lodestone
+
+JRWEAVE : WEAVE
+WEAVE   : jrweave
+jrweave : weave
+weave   : TEXI
+TEXI    : texi
+texi    : $(FILE).texi
 $(FILE).texi : $(FILE).twjr
 	jrweave $(FILE).twjr > $(FILE).texi
+	emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) (texinfo-master-menu 1) (save-buffer 0))'
 
 INFO : info
 info : $(FILE).info
-$(FILE).info : $(FILE).texi
+$(FILE).info : $(FILE).texi $(FILE).twjr
 	makeinfo $(FILE).texi
 openinfo : INFO
-	emacs $(FILE).info
+	open -na EmacsMac --args --eval '(info "($(ROOT)/$(FILE).info)top" "$(FILE).texi")'
 
 PDF : pdf
 pdf : $(FILE).pdf
@@ -54,27 +63,32 @@ openhtml : HTML
 
 # remove backup files
 clean :
-	rm -f *~ .*~ #*#
+	@echo clean
+	@rm -f *~ .*~ #*#
 
 # remove  all directories;  leave the  source files  @file{TWJR}, @{TEXI},  and
 # @file{Makefile}; resources dir
 dirclean : clean
-	for file in *; do          \
+	@echo dirclean
+	@for file in *; do          \
 	  case $$file in           \
 	    $(FILE)* | Makefile) ;;\
 	    my-bib-macros*)      ;;\
             resources*)	 	 ;;\
+	    lodestone)		 ;;\
 	    *) rm -vfr $$file	 ;;\
 	  esac                     \
 	done
 
 # after dirclean, remove HTML directory and PDF files
 distclean : dirclean
-	rm -vfr $(FILE) $(FILE).pdf
+	@echo distclean
+	@rm -vfr $(FILE) $(FILE).pdf
 
 # after distclean, remove INFO and my-bib-macros
 worldclean : distclean
-	rm -rfv *.info* my-bib-macros.texi
+	@echo worldclean
+	@rm -vfr *.info* my-bib-macros.texi
 
 # BIB MACROS EXAMPLE TARGET
 # #########################
@@ -94,16 +108,21 @@ JWT-EXPRESS-SERVER := $(JWT-EXPRESS-SERVER-ROOT)/$(JWT-AUTH-SERVER)
 
 DEPS := express jsonwebtoken cors express-jwt
 
+JWT-EXPRESS-SERVER-TARGETS := jwt-auth-demo
+
 .PHONY : jwt-auth-demo
 jwt-auth-demo : $(JWT-EXPRESS-SERVER) move-jwt-auth-index.js
 $(JWT-EXPRESS-SERVER) :
 	mkdir -p $(JWT-EXPRESS-SERVER); \
 	cd $(JWT-EXPRESS-SERVER-ROOT);  \
-	yarn add $(DEPS)
+	yarn add $(DEPS);
 	  
-jwt-auth-index.js : $(FILE).twjr
-	jrtangle $(FILE).twjr
+JWT-AUTH-DEMO-INDEX.JS := jwt-auth-demo-index.js
+JWT-AUTH-DEMO-TARGETS +:= jwt-auth-demo-install-index.js
 
+jwt-auth-index.js : $(TWJR)
+	jrtangle $(FILE).twjr
+	
 .PHONY : move-jwt-auth-index.js
 move-jwt-auth-index.js : jwt-auth-index.js
 	mv -fv jwt-auth-index.js $(JWT-EXPRESS-SERVER)/index.js
