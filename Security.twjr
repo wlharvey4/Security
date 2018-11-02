@@ -1,4 +1,4 @@
-\input texinfo   @c -*- mode: texinfo -*-
+\input texinfo   @c -*- mode: texinfo -*-                          Security.twjr
 
 @c *****************************************************************************
 @c %**start of header (This is for running Texinfo on a region.)
@@ -9,8 +9,8 @@
 @c %**end of header (This is for running Texinfo on a region.)
 @c *****************************************************************************
 
-@c VERSION 0.0.6
-@c DATE    2018-11-01T21:40
+@c VERSION 0.0.7d
+@c DATE    2018-11-02T15:35
 
 @c -----------------------------------------------------------------------------
 @set TITLE      Security Information
@@ -942,7 +942,7 @@ displays a @samp{Not  Found} message.  Add @file{/time} to the  URL and it will
 display the local time as shown below:
 
 @float Image,img:time
-@image{resources/time,,Time Image}
+@image{resources/time,6in,,Time Image}
 @caption{Server Time}
 @end float
 
@@ -997,21 +997,21 @@ into  your system,  if you  don’t already  have it.   Inside POSTMAN,  create 
 @code{post} request to the login route as shown below:
 
 @float Image,img:post
-@image{resources/post,,,Post}
+@image{resources/post,6in,,Post}
 @caption{Postman Post}
 @end float
 
 Inside the body, create a JSON Object as shown below:
 
 @float Image,img:object
-@image{resources/object,,,Object}
+@image{resources/object,6in,,Object}
 @caption{Postman Body Object}
 @end float
 
 Clicking on send should get you the following response:
 
 @float Image,img:response
-@image{resources/response,,,Response}
+@image{resources/response,6in,,Response}
 @caption{Response from Postman Request}
 @end float
 
@@ -1041,7 +1041,9 @@ is not the case, then the server should respond with a 400 status.
 @example
 app.post("/login", (req, res) => @{
   if (!req.body.username || !req.body.password) @{
-    res.status(400).send("Error. Please enter the correct username and password");
+    res.status(400).send(
+      "Error. Please enter the correct username and password
+    ");
     return;
   @}
 @end example
@@ -1052,7 +1054,8 @@ is  present in  our users  array.  In  the same  @code{/login} route  below the
 
 @example
   const user = users.find((u) => @{
-    return u.username === req.body.username && u.password === req.body.password;
+    return u.username === req.body.username &&
+      u.password === req.body.password;
   @});
 @end example
 
@@ -1091,6 +1094,7 @@ still writing the code inside the @code{/login} route.
   res.status(200).send(@{access_token: token@})
 @end example
 
+@need 800
 Now  go to  POSTMAN, and  send a  @code{post} request  with the  following JSON
 object in its body.
 
@@ -1104,7 +1108,7 @@ object in its body.
 The result will be a JSON Web Token as shown below:
 
 @float Image,img:jwt
-@image{resources/jwt,,,jwt}
+@image{resources/jwt,6in,,jwt}
 @caption{JWT}
 @end float
 
@@ -1113,7 +1117,7 @@ see that  it is the  same @code{username} and  @code{password}, but with  a few
 extra things.
 
 @float Image,img:encoded
-@image{resources/encoded,,,encoded}
+@image{resources/encoded,6in,,encoded}
 @caption{Encoded JWT}
 @end float
 
@@ -1235,7 +1239,7 @@ Then  run  the GET  request  on  @file{localhost:5000/asset/secret}.  What  you
 should get is a big error code that looks something like this:
 
 @float Image,img:error
-@image{resources/error,,,error}
+@image{resources/error,6in,,error}
 @caption{Error}
 @end float
 
@@ -1243,10 +1247,12 @@ To solve this, go to the Authentication  tab in POSTMAN, and select the Type as
 Bearer Token.  Then enter the value of Token  as the one that we had received in
 the previous sections.
 
+@ifnottex
 @float Image,img:resolved
 @image{resources/resolved,,,resolved}
 @caption{Resolved}
 @end float
+@end ifnottex
 
 @c _____________________________________
 
@@ -1424,8 +1430,8 @@ where Bib Macros commands are located.
 @@setfilename my-file-with-bib.info
 @@settitle Texinfo with a Bibliography and References
 
-@@include my-bib-macros.texi                                                 <==
-@@mybibuselist@{References@}                                                 <==
+==> @@include my-bib-macros.texi
+==> @@mybibuselist@{References@}
 
 @@comment %**end of header
 
@@ -1442,15 +1448,15 @@ where Bib Macros commands are located.
 @@chapter Introduction
 
 The ability of a documentation format to make cross references to a
-bibliography, a feature of @LaTeX{} @@mybibcite@{LaTeX2e@},                  <==
+bibliography, a feature of @LaTeX{} ==> @@mybibcite@{LaTeX2e@}, <==
 isn't currently supported in Texinfo.
 
-@@node @@mybibnode@{@}                                                       <==
+==> @@node @@mybibnode@{@}
 @@chapter References
 
 @@itemize @@asis
 
-@@mybibitem@{LaTeX2e@}                                                       <==
+==> @@mybibitem@{LaTeX2e@}
 Leslie Lamport, LaTeX User's Guide andReference Manual, 2nd edition,
 Addison-Wesley, Reading, Massachusetts, 1994.
 
@@ -1479,8 +1485,8 @@ bibliography, a feature of LaTeX (See item [LaTeX2e] in
 2 References
 ************
 
-[LaTeX2e] Leslie Lamport, LaTeX User's Guide and Reference Manual, 2nd edition,
-Addison-Wesley, Reading, Massachusetts, 1994.
+[LaTeX2e] Leslie Lamport, LaTeX User's Guide and Reference Manual,
+2nd edition, Addison-Wesley, Reading, Massachusetts, 1994.
 @end verbatim
 
 
@@ -1497,14 +1503,14 @@ and (in printed output):
 **************
 
 The ability of a documentation format to make cross references to a
-bibliography, a feature of LaTeX (See item [LaTeX2e] in Chapter 2 [References],
-page 3.), is not currently supported in Texinfo.
+bibliography, a feature of LaTeX (See item [LaTeX2e] in Chapter 2
+[References], page 3.), is not currently supported in Texinfo.
 
 2 References
 ************
 
-[LaTeX2e] Leslie Lamport, LaTeX User's Guide and Reference Manual, 2nd edition,
-Addison-Wesley, Reading, Massachusetts, 1994.
+[LaTeX2e] Leslie Lamport, LaTeX User's Guide and Reference Manual,
+2nd edition, Addison-Wesley, Reading, Massachusetts, 1994.
 @end verbatim
 
 
@@ -1754,12 +1760,14 @@ Cites the cross reference REF.
 
 @<Bib-Cite-Ref---Ref@>=
 @macro mybibcite{ref}
-@inlineifclear{mybibrefnode, @mybibmakeref{mybibsetrefnode was not used, \ref\}}
+@inlineifclear{mybibrefnode,
+  @mybibmakeref{mybibsetrefnode was not used, \ref\}}
 @c %**else if
 @ifset mybibrefnode
 @mybibmakeref{@mybibnode{}, \ref\}
 @end ifset
-@c for whatever reason, a space betwee @end ifset and @end macro is mandatory
+@c a space between @end ifset and @end macro is mandatory
+@c (prevents an error)
 @end macro
 
 @
@@ -1842,9 +1850,10 @@ Creates a bibliography item in a table or list, as appropriate.
 # VARIABLE DEFINITIONS
 ######################
 
-ROOT  := /usr/local/dev/programming/Security
+ROOT  := $(PWD)
 FILE  := Security
 SHELL := /bin/bash
+LODESTONE := .lodestone
 
 @
 
@@ -1892,24 +1901,34 @@ default : INFO PDF HTML
 @cindex TWJR targets
 
 These targets are all related to processing the main source @acronym{TWJR} file
-in  some  way.   The  target  @code{twjr} ``tangles  and  weaves''  the  source
-document.     @code{info}    runs     @command{makeinfo},    @code{pdf}    runs
-@command{pdftexi2dvi}, and @code{html} runs @command{makeinfo --html}.
+in  some way.   The  target  @code{twjr} first  deletes  everything except  the
+@acronym{TWJR} file, then``tangles and  weaves'' the source document, producing
+a fresh distribution.   Note that at this time,  ``weaving'' includes automatic
+menu and  node updating, so that  an @acronym{INFO} file can  also be generated
+without needing to manually update the @acronym{TEXI} file firest.  @code{info}
+runs @command{makeinfo}, @code{pdf} runs @command{pdftexi2dvi}, and @code{html}
+runs @command{makeinfo --html}.
+
+The file @file{.lodestone} is used to set a reference time for the @acronym{TWJR}
+file, so that if the @acronym{TWJR} file changes, new source documents will be
+generated; otherwise, it will simply be left alone.  In other words, if @file{.lodestone}
+is older than @file{.twjr}, then @file{.twjr} has been modified, and it should
+be ``tangled'' and ``weaved''.
 
 @<Makefile---TWJR Targets@>=
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : jrtangle jrweave worldclean
+twjr : jrtangle jrweave info pdf html distclean
 
-lodestone : $(FILE).twjr
+$(LODESTONE) : $(FILE).twjr
 	jrtangle $(FILE).twjr
-	touch $(FILE).twjr
-	touch lodestone;
+	jrweave $(FILE).twjr
+	touch $(LODESTONE)
 
 JRTANGLE : jrtangle
 jrtangle : tangle
-tangle   : lodestone
+tangle   : $(LODESTONE)
 
 JRWEAVE : WEAVE
 WEAVE   : jrweave
@@ -1919,14 +1938,15 @@ TEXI    : texi
 texi    : $(FILE).texi
 $(FILE).texi : $(FILE).twjr
 	jrweave $(FILE).twjr > $(FILE).texi
-	emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) (texinfo-master-menu 1) (save-buffer 0))'
+	emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) \
+	  (texinfo-master-menu 1) (save-buffer 0))'
 
 INFO : info
 info : $(FILE).info
 $(FILE).info : $(FILE).texi $(FILE).twjr
 	makeinfo $(FILE).texi
 openinfo : INFO
-	open -na EmacsMac --args --eval '(info "($(ROOT)/$(FILE).info)top" "$(FILE).texi")'
+	emacsclient -s server --eval '(info "($(ROOT)/$(FILE).info)top")'
 
 PDF : pdf
 pdf : $(FILE).pdf
@@ -1974,15 +1994,15 @@ The @file{TEXI} file is always left because  it will be accurate so long as the
 @file{TEXI} file will be resourced automatically.
 
 @<Makefile---Clean Targets@>=
-.PHONY : clean dirclean distclean worldclean
+.PHONY : clean dirclean distclean worldclean refresh
 
 # remove backup files
 clean :
 	@echo clean
 	@rm -f *~ .*~ #*#
 
-# remove  all directories;  leave the  source files  @file{TWJR}, @{TEXI},  and
-# @file{Makefile}; resources dir
+# remove  all directories;  leave the  source files
+# @file{TWJR}, @{TEXI}, and @file{Makefile}; resources dir
 dirclean : clean
 	@echo dirclean
 	@for file in *; do          \
@@ -2004,6 +2024,12 @@ distclean : dirclean
 worldclean : distclean
 	@echo worldclean
 	@rm -vfr *.info* my-bib-macros.texi
+
+# refresh: remove everything and start over
+refresh : worldclean
+	@echo refresh
+	@rm -vfr $(FILE).texi $(LODESTONE)
+	make twjr
 
 @
 
