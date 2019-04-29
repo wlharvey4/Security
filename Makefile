@@ -4,9 +4,10 @@
 # VARIABLE DEFINITIONS
 ######################
 
-ROOT  := /usr/local/dev/programming/Security
+ROOT  := $(PWD)
 FILE  := Security
 SHELL := /bin/bash
+LODESTONE := .lodestone
 
 # DEFAULT Target
 ################
@@ -17,16 +18,16 @@ default : INFO PDF HTML
 # TWJR TARGETS
 ##############
 TWJR : twjr
-twjr : jrtangle jrweave worldclean
+twjr : jrtangle jrweave info pdf html distclean
 
-lodestone : $(FILE).twjr
+$(LODESTONE) : $(FILE).twjr
 	jrtangle $(FILE).twjr
-	touch $(FILE).twjr
-	touch lodestone;
+	jrweave $(FILE).twjr
+	touch $(LODESTONE)
 
 JRTANGLE : jrtangle
 jrtangle : tangle
-tangle   : lodestone
+tangle   : $(LODESTONE)
 
 JRWEAVE : WEAVE
 WEAVE   : jrweave
@@ -36,14 +37,15 @@ TEXI    : texi
 texi    : $(FILE).texi
 $(FILE).texi : $(FILE).twjr
 	jrweave $(FILE).twjr > $(FILE).texi
-	emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) (texinfo-master-menu 1) (save-buffer 0))'
+	emacs --batch --eval '(progn (find-file "./$(FILE).texi" nil) \
+	  (texinfo-master-menu 1) (save-buffer 0))'
 
 INFO : info
 info : $(FILE).info
 $(FILE).info : $(FILE).texi $(FILE).twjr
 	makeinfo $(FILE).texi
 openinfo : INFO
-	open -na EmacsMac --args --eval '(info "($(ROOT)/$(FILE).info)top" "$(FILE).texi")'
+	emacsclient -s server --eval '(info "($(ROOT)/$(FILE).info)top")'
 
 PDF : pdf
 pdf : $(FILE).pdf
@@ -59,7 +61,7 @@ $(FILE)/index.html : $(FILE).texi
 openhtml : HTML
 	open $(FILE)/index.html
 
-.PHONY : clean dirclean distclean worldclean
+.PHONY : clean dirclean distclean worldclean refresh
 
 # remove backup files
 clean :
@@ -89,6 +91,12 @@ distclean : dirclean
 worldclean : distclean
 	@echo worldclean
 	@rm -vfr *.info* my-bib-macros.texi
+
+# refresh: remove everything and start over
+refresh : worldclean
+	@echo refresh
+	@rm -vfr $(FILE).texi $(LODESTONE)
+	make twjr
 
 # BIB MACROS EXAMPLE TARGET
 # #########################
