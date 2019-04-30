@@ -3,8 +3,9 @@
 #+author:Pinecone062
 #+date:April 14, 2019
 #+macro:version Version 0.2.0.<2019-04-29 Mon 17:06>
+Version 0.2.1.<2019-04-30 Tue 10:00>
 By {{{author}}}
-{{{version}}}
+
 * JSON Web Tokens
 ** Article---How JWTs Secure Your API
 :PROPERTIES:
@@ -23,7 +24,7 @@ without crossing your eyes!
 
 *** API Authentication
 
-{{{heading(Need to Authenticate Access)}}}
+@@texinfo:@heading Need to Authenticate Access@@
 
 #+CINDEX:authentication
 Certain API resources need restricted access.  We don't want one user to be
@@ -31,7 +32,7 @@ able to change the password of another user, for example.  That's why we
 protect certain resources---make users supply their ID and password before
 allowing access---in other words, we authenticate them.
 
-{{{heading(HTTP Requests are Stateless)}}}
+@@texinfo:@heading HTTP Requests are Stateless@@
 
 #+CINDEX:stateless, HTTP
 The difficulty in securing an HTTP API is that requests are stateless---the API
@@ -50,7 +51,7 @@ but then be identified in another way by the server in subsequent requests.
 Several systems have been designed for doing this, and the current
 state-of-the-art standard is the JSON Web Token.
 
-{{{heading(How JWTs Work)}}}
+@@texinfo:@heading How JWTs Work@@
 
 There's a great [[https://robmclarty.com/blog/what-is-a-json-web-token][article]] on the topic which makes a good analogy about how JSON
 web tokens work:
@@ -63,7 +64,7 @@ the hotel, you give the card back.  This is analogous to logging out.
 
 *** Structure of the Token
 
-{{{heading(What a JWT Looks Like)}}}
+@@texinfo:@heading What a JWT Looks Like@@
 
 #+CINDEX:HTTP request header
 #+CINDEX:header, HTTP request
@@ -78,7 +79,7 @@ one looks like:
 In fact, the token is the part after "Authorization: Bearer", which is just the
 HTTP header info.
 
-{{{heading(The Header Payload and Signature)}}}
+@@texinfo:@heading The Header Payload and Signature@@
 
 #+CINDEX:header
 #+CINDEX:payload
@@ -98,32 +99,32 @@ correspond to:
 
 We can decode these strings to get a better understand of the structure of JWT.
 
-{{{subheading(Header)}}}
+@@texinfo:@subheading Header@@
 
 #+CINDEX:header, dfn
-The following is the decoded header from the token.  The {{{dfn(header)}}} is
+The following is the decoded header from the token.  The @@texinfo:@dfn{header}@@ is
 meta information about the token.  It doesn't tell us much to help build our
 basic understanding, so we won't get into any detail about it.
 
-#+begin_src js
+#+BEGIN_SRC js
 {
   "alg": "HS256",
   "typ": "JWT"
 }
-#+end_src
+#+END_SRC
 
-{{{subheading(Payload)}}}
+@@texinfo:@subheading Payload@@
 
 #+CINDEX:payload, dfn
-The payload is of much more interest.  The {{{dfn(payload)}}} can include any
+The payload is of much more interest.  The @@texinfo:@dfn{payload}@@ can include any
 data you like, but you might just include a user ID if the purpose of your
 token is API access authentication.
 
-#+begin_src js
+#+BEGIN_SRC js
 {
   "userId": "1234567890"
 }
-#+end_src
+#+END_SRC
 
 It's important to note that the payload is not secure.  Anyone can decode the
 token and see exactly what's in the payload.  For that reason, we usually
@@ -141,8 +142,8 @@ the token.
 #+CINDEX:hash, dfn
 #+CINDEX:SHA256 hashing algorithm
 Before we explain how the signature works, we need to define what a
-{{{dfn(hashing algorithm)}}} is.  To begin with, it's a function for
-transforming a string into a new string called a {{{dfn(hash)}}}.  For example,
+@@texinfo:@dfn{hashing algorithm}@@ is.  To begin with, it's a function for
+transforming a string into a new string called a @@texinfo:@dfn{hash}@@.  For example,
 say we wanted to hash the string "Hello, world".  Here's the output we'd get
 using the =SHA256= hashing algorithm:
 : 4ae7c3b6ac0beff671efa8cf57386151c06e58ca53a78d83f36107316cec125f
@@ -153,18 +154,18 @@ string was "Hello, world". The hash is complicated enough that guessing the
 original string would be infeasible.  There are many different types of hashing
 algorithms, but =SHA256= is commonly used with JWT.
 
-{{{heading(JWT Signature)}}}
+@@texinfo:@heading JWT Signature@@
 
 #+CINDEX:signature, dfn
 So coming back to the JWT structure, let's now look at the third piece of the
-token, the {{{dfn(signature)}}}.  This actually needs to be calculated:
+token, the @@texinfo:@dfn{signature}@@.  This actually needs to be calculated:
 
-#+begin_src js
+#+BEGIN_SRC js
 HMACSHA256(
   base64UrlEncode(header) + "." + base64UrlEncode(payload),
   "secret string"
 );
-#+end_src
+#+END_SRC
 
 Here's an explanation of what's going on here:
 
@@ -182,10 +183,10 @@ Here's an explanation of what's going on here:
 Why include the header and payload in the signature hash?  This ensures the
 signature is unique to this particular token.
 
-{{{subheading(The Secret)}}}
+@@texinfo:@subheading The Secret@@
 
 #+CINDEX:secret
-What's the {{{dfn(secret)}}}?  To answer this, let's think about how you would
+What's the @@texinfo:@dfn{secret}@@?  To answer this, let's think about how you would
 forge a token.  We said before that you can't determine a hash's input from
 looking at the output.  However, since we know that the signature includes the
 header and payload, as those are public information, if you know the hashing
@@ -195,10 +196,10 @@ information.  Including it in the hash prevents someone generating their own
 hash to forge the token.  And since the hash obscures the information used to
 create it, no one can figure out the secret from the hash, either.
 
-{{{subheading(Salting)}}}
+@@texinfo:@subheading Salting@@
 
 #+CINDEX:salting
-The process of adding private data to a hash is called {{{dfn(salting)}}} and
+The process of adding private data to a hash is called @@texinfo:@dfn{salting}@@ and
 makes cracking the token almost impossible.
 
 *** Authentication Process
@@ -206,7 +207,7 @@ makes cracking the token almost impossible.
 So now you have a good idea of how a token is created.  How do you use it to
 authenticate your API?
 
-{{{heading(Login)}}}
+@@texinfo:@heading Login@@
 
 #+CINDEX:token, generate
 #+CINDEX:generate token
@@ -216,15 +217,15 @@ response to the login request.
 
 #+caption:Generating a Token Upon Login; ~loginController.js~
 #+name:generate-token
-#+begin_src js
+#+BEGIN_SRC js
 if (passwordCorrect) {
   user.token = generateToken(user.id);
   user.save();
   res.headers("authorization", `Bearer ${token}`).send();
 }
-#+end_src
+#+END_SRC
 
-{{{heading(Authenticating requests)}}}
+@@texinfo:@heading Authenticating requests@@
 
 #+CINDEX:requests, authenticate
 #+CINDEX:authenticate requests
@@ -239,7 +240,7 @@ an authorization token attached, the following happens:
 
 #+caption:The Server authenticates requests from the Client; ~authMiddleware.js~
 #+name:authenticate-requests
-#+begin_src js
+#+BEGIN_SRC js
 const token = req.header.token;
 const payload = decodeToken(token);
 const user = User.findById(payload.id);
@@ -248,9 +249,9 @@ if (user.token = token) {
 } else {
   // Unauthorized
 }
-#+end_src
+#+END_SRC
 
-{{{heading(Logging out)}}}
+@@texinfo:@heading Logging out@@
 
 #+CINDEX:logout
 If the user logs out, simply delete the token attached to the user model, and
@@ -259,10 +260,10 @@ a new token.
 
 #+caption:Logging a user out; ~logoutController.js~
 #+name:logout
-#+begin_src js
+#+BEGIN_SRC js
 user.token = null;
 user.save();
-#+end_src
+#+END_SRC
 
 *** Wrapup
 So that's a very basic explanation of how you can secure an API using JSON Web
@@ -323,14 +324,19 @@ secure identity management and federated log in to your users.  Go ahead, watch
 this course, and learn how to build more secure applications right now.
 **** Directory and Package Setup
 The course will be set up in a root directory ~egghead-jwt-auth~, with
-~lesson#~ directories for each lesson 1 through 8.  The following code creates
-the root directory and initializes a Node package within it.
+~lesson#~ directories for each lesson 1 through 8.  The following two code
+blocks create the root directory and then initializes a Node package within it.
 
-#+name:directory-setup
-#+begin_src sh :results output append :exports both
-[ -d egghead-jwt-auth ] && echo "Root directory has already been created" || mkdir -v egghead-jwt-auth
-cd egghead-jwt-auth
-[ -e package.json ] && echo "package.json has already been created" || yarn --yes init
+#+NAME:tangle-files
+#+BEGIN_SRC emacs-lisp :results silent :exports results
+(org-babel-tangle-file (buffer-file-name))
+#+END_SRC
+
+#+name:package-init
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
+[ -e package.json ] && \
+  echo "package.json has already been created" || \
+  yarn --yes init
 #+end_src
 
 *** Lesson 1---Set Up a Web Server in Node.js Using Express
@@ -361,7 +367,7 @@ yarn add express
 const express = require('express');
 #+end_src
 
-{{{heading(Setup Constants)}}}
+@@texinfo:@heading Setup Constants@@
 
 #+CINDEX:PORT, define
 00:16 We'll go back to our code.  We'll declare a new constant ~app~ which will
@@ -374,9 +380,9 @@ const app = express();
 const PORT = 8888;
 #+end_src
 
-{{{heading(Setup Routes)}}}
+@@texinfo:@heading Setup Routes@@
 
-{{{subheading(Status Route)}}}
+@@texinfo:@subheading Status Route@@
 
 #+CINDEX:route, define
 #+CINDEX:@code{app.get}
@@ -393,7 +399,7 @@ app.get('/status', (req, res) => {
 });
 #+end_src
 
-{{{subheading(Catchall Route)}}}
+@@texinfo:@subheading Catchall Route@@
 
 #+CINDEX:catchall route
 01:13 Let's also add a catchall route. We'll just use star (=*=), which means
@@ -408,7 +414,7 @@ app.get('*', (req, res) => {
 });
 #+end_src
 
-{{{heading(Start the App Listening)}}}
+@@texinfo:@heading Start the App Listening@@
 
 #+CINDEX:@code{app.listen}
 #+CINDEX:app, run
