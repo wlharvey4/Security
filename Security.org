@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.2.<2019-04-30 Tue 11:54>
+#+macro:version 0.2.3.<2019-04-30 Tue 13:00>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -323,8 +323,11 @@ secure identity management and federated log in to your users.  Go ahead, watch
 this course, and learn how to build more secure applications right now.
 **** Directory and Package Setup
 The course will be set up in a root directory ~egghead-jwt-auth~, with
-~lesson#~ directories for each lesson 1 through 8.  The following two code
-blocks create the root directory and then initializes a Node package within it.
+~lesson#~ directories for each lesson 1 through 8.  The following shell script
+checks for the existence of a ~package.json~ file in the root directory; if one
+is found, it simply prints a message.  If one is not found, then it initializes
+a new package using the ~yarn init~ command using default values.  The lessons
+will add and install prerequisites to this ~package.json~ file.
 
 #+NAME:tangle-files
 #+BEGIN_SRC emacs-lisp :results silent :exports results
@@ -336,6 +339,7 @@ blocks create the root directory and then initializes a Node package within it.
 [ -e package.json ] && \
   echo "package.json has already been created" || \
   yarn --yes init
+  cat package.json
 #+end_src
 
 *** Lesson 1---Set Up a Web Server in Node.js Using Express
@@ -351,19 +355,33 @@ pages.
 #+CINDEX:Express server, build
 00:00 To build your first Express server, the first thing you need to do is to
 ~require express~.  In order for your code to be able to use it, you need to
-install it using ~yarn add express:
+install it using ~yarn add express~:
 
 #+name:lesson1-package.json
-#+begin_src sh :dir egghead-jwt-auth :results output :exports both
+#+begin_src sh :dir egghead-jwt-auth :results output :exports results
 yarn add express
 #+end_src
 
-#+name:lesson01-requires
-#+begin_src js
-const express = require('express');
+#+begin_src sh :dir egghead-jwt-auth :results output :exports results
+echo
+echo package.json
+echo ------------
+cat package.json
 #+end_src
 
-@@texinfo:@heading Setup Constants@@
+#+Begin_src sh :dir egghead-jwt-auth :results output :exports results
+echo
+echo index.js
+echo --------
+#+END_SRC
+
+#+name:lesson01-requires
+#+begin_src js -n
+const express = require("express");
+
+#+end_src
+
+{{{heading(Setup Constants)}}}
 
 #+CINDEX:PORT, define
 00:16 We'll go back to our code.  We'll declare a new constant ~app~ which will
@@ -371,9 +389,10 @@ use the ~express~ library that we've just included.  We'll also declare a new
 constant for the =PORT= number.  We'll use =8888= for now.
 
 #+name:lesson01-setup
-#+begin_src js
+#+begin_src js +n
 const app = express();
 const PORT = 8888;
+
 #+end_src
 
 {{{heading(Setup Routes)}}}
@@ -388,14 +407,15 @@ the name of the route.  In this case, we're using =status=, and it takes a
 callback which has a request and a response as parameters.
 
 #+name:lesson01-routes
-#+begin_src js
-app.get('/status', (req, res) => {
+#+begin_src js +n
+app.get("/status", (req, res) => {
     const localTime = (new Date()).toLocaleTimeString();
     res.status(200).send(`Server time is ${localTime}.`);
 });
+
 #+end_src
 
-@@texinfo:@subheading Catchall Route@@
+{{{subheading(Catchall Route)}}}
 
 #+CINDEX:catchall route
 01:13 Let's also add a catchall route. We'll just use star (=*=), which means
@@ -404,10 +424,11 @@ request and response.  We can build our response here, and it will simply sense
 that as =404=, or 'page not found'.
 
 #+name:lesson01-routes
-#+begin_src js
-app.get('*', (req, res) => {
+#+begin_src js +n
+app.get("*", (req, res) => {
     res.sendStatus(404);
 });
+
 #+end_src
 
 {{{heading(Start the App Listening)}}}
@@ -420,10 +441,11 @@ success.  01:42 We'll simply say "Server is running on port", and we'll specify
 the =PORT= number here.  You now have your first express server.
 
 #+name:lesson01-listen
-#+begin_src js
+#+begin_src js +n
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
+
 #+end_src
 
 **** Testing the Server
@@ -481,13 +503,10 @@ That's it.  You've got your first Express server up and running.
 **** Express Server Index.js Code
 #+caption:Lesson 1 Index.js
 #+name:lesson01-index.js
-#+begin_src js :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
+#+begin_src js -n :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
 <<lesson01-requires>>
-
 <<lesson01-setup>>
-
 <<lesson01-routes>>
-
 <<lesson01-listen>>
 #+end_src
 
@@ -504,7 +523,7 @@ That's it.  You've got your first Express server up and running.
 :END:
 * Export Settings                                                  :noexport:
 ** Options
-#+options: H:4
+#+options: H:4 ':t
 ** Texinfo Export Settings
 #+texinfo_filename:security.info
 #+texinfo_class: info
