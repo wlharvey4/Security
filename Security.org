@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version Version 0.1.0.<2019-04-29 Mon 10:30>
+#+macro:version Version 0.2.0.<2019-04-29 Mon 17:06>
 By {{{author}}}
 {{{version}}}
 * JSON Web Tokens
@@ -267,6 +267,191 @@ user.save();
 *** Wrapup
 So that's a very basic explanation of how you can secure an API using JSON Web
 Tokens.  I hope your head doesn't hurt too much.
+** Course---JSON Weg Token Authentication with Node.js
+:PROPERTIES:
+:source:   Egghead.io
+:author:   Joel Lord
+:END:
+*** About the Course
+In this course, we will build a simple authentication server that will act as a
+token issuer, and we will use those tokens to access resources on an API.
+Starting from scratch, the participants will learn how easy token based
+authentication can be and will understand how to use them on their APIs as well
+as on the front end of their web applications.
+**** Source Code
+[[https://github.com/eggheadio-projects/egghead-auth-course/tree/master][eggheadio-projects/egghead-auth-course]]
+**** About the Author
+- Joel Lord
+- [[http://www.javascripteverything.com/about][About the author]]
+- [[http://www.javascripteverything.com/about][Javascript Everything]] author's blog
+- [[https://github.com/joellord][GitHub]]
+**** Author's Introduction
+00:00 Hey everyone, welcome to this course on JSON web token authentication
+with Node.JS.  The goal of this course is to introduce you to web-based
+authentication using JWTs.
+
+00:11 Through these few lessons, we will build a simple application that will
+connect to a secured API and we will build an authentication server to provide
+us with tokens that we need in order to connect and access those routes.
+
+00:25 We will start slowly by building a simple web server using Express.  We
+will then see how to make this API more flexible by introducing environment
+variables, and then how to handle post request, and how to parse the body of
+those requests.
+
+00:40 At this point, we will be able to start building our authentication
+server.  The server will validate the user credentials and provide those users
+with a JSON web token.  Using this token, we will be able to go back to our API
+and secure one of our routes so that only an authenticated user can access
+those resources.
+
+00:59 Finally, what would a back-end be without a good UI? We will build a
+quick front-end that will connect to our API.  This UI will also collect user
+credentials and send them over to the authentication server to fetch a JWT.
+
+01:13 All this will be done using plain old vanilla JavaScript and none of
+those fancy frameworks.  This will give you all the necessary tools to
+implement this solution in any application you might build.
+
+01:25 Of course, the examples in this course will be simple, and we will focus
+more on the concepts rather than building a real secure API.  For that reason,
+we will also show you how to switch your primitive authentication server to use
+a proven solution.
+
+01:40 In this lesson, you will be introduced to Auth0 as a solution to provide
+secure identity management and federated log in to your users.  Go ahead, watch
+this course, and learn how to build more secure applications right now.
+**** Directory and Package Setup
+The course will be set up in a root directory ~egghead-jwt-auth~, with
+~lesson#~ directories for each lesson 1 through 8.  The following code creates
+the root directory and initializes a Node package within it.
+
+#+name:directory-setup
+#+begin_src sh :results output append :exports both
+[ -d egghead-jwt-auth ] && echo "Root directory has already been created" || mkdir -v egghead-jwt-auth
+cd egghead-jwt-auth
+[ -e package.json ] && echo "package.json has already been created" || yarn --yes init
+#+end_src
+
+*** Lesson 1---Set Up a Web Server in Node.js Using Express
+#+CINDEX:Express web server
+#+CINDEX:web server, Express
+#+CINDEX:server, Express web
+#+CINDEX:404 error
+In this lesson, we build a very simple Express server.  This server will have a
+single route that displays the current date and time and a handler for =404=
+pages.
+
+**** Setting Up A Little Express Server
+#+CINDEX:Express server, build
+00:00 To build your first Express server, the first thing you need to do is to
+~require express~.  In order for your code to be able to use it, you need to
+install it using ~yarn add express:
+
+#+name:lesson1-package.json
+#+begin_src sh  :results output :exports both
+cd egghead-jwt-auth
+yarn add express
+#+end_src
+
+#+RESULTS: lesson1-package.json
+
+#+name:lesson01-requires
+#+begin_src js
+const express = require('express');
+#+end_src
+
+{{{heading(Setup Constants)}}}
+
+#+CINDEX:PORT, define
+00:16 We'll go back to our code.  We'll declare a new constant ~app~ which will
+use the ~express~ library that we've just included.  We'll also declare a new
+constant for the =PORT= number.  We'll use =8888= for now.
+
+#+name:lesson01-setup
+#+begin_src js
+const app = express();
+const PORT = 8888;
+#+end_src
+
+{{{heading(Setup Routes)}}}
+
+{{{subheading(Status Route)}}}
+
+#+CINDEX:route, define
+#+CINDEX:@code{app.get}
+#+CINDEX:status route
+00:30 Then we can do our first route.  We'll use ~app.get~, and we'll specify
+the name of the route.  In this case, we're using =status=, and it takes a
+callback which has a request and a response as parameters.
+
+#+name:lesson01-routes
+#+begin_src js
+app.get('/status', (req, res) => {
+    const localTime = (new Date()).toLocaleTimeString();
+    res.status(200).send(`Server time is ${localTime}.`);
+});
+#+end_src
+
+{{{subheading(Catchall Route)}}}
+
+#+CINDEX:catchall route
+01:13 Let's also add a catchall route. We'll just use star (=*=), which means
+any route that wasn't defined already.  01:19 It also takes a callback with a
+request and response.  We can build our response here, and it will simply sense
+that as =404=, or 'page not found'.
+
+#+name:lesson01-routes
+#+begin_src js
+app.get('*', (req, res) => {
+    res.sendStatus(404);
+});
+#+end_src
+
+{{{heading(Start the App Listening)}}}
+
+#+CINDEX:@code{app.listen}
+#+CINDEX:app, run
+01:30 Finally, we'll use ~app.listen~ to initialize our server.  It'll take a
+=PORT=---which we've defined earlier---as a parameter, and a callback for on
+success.  01:42 We'll simply say "Server is running on port", and we'll specify
+the =PORT= number here.  You now have your first express server.
+
+#+name:lesson01-listen
+#+begin_src js
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+});
+#+end_src
+
+**** Testing the Server
+
+01:53 If we go back to our terminal, we can start the server by using Node.
+: node run
+We've got our server running.
+
+#+CINDEX:page not found error
+02:02 Now if we go through our browser window, we can type in the
+~localhost:8888~.  We'll get a 'page not found' because that route was not
+defined.
+
+#+CINDEX:status route
+02:10 We can use =/status= to get the server time, and any other page will give
+us a =404= error.  That's it.  You've got your first Express server up and
+running.
+
+**** Express Server Index.js Code
+#+caption:Lesson 1 Index.js
+#+name:lesson01-index.js
+#+begin_src js :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
+<<lesson01-requires>>
+
+<<lesson01-setup>>
+
+<<lesson01-routes>>
+
+<<lesson01-listen>>
+#+end_src
 
 * Listings
 :PROPERTIES:
@@ -280,6 +465,8 @@ Tokens.  I hope your head doesn't hurt too much.
 :unnumbered: t
 :END:
 * Export Settings                                                  :noexport:
+** Options
+#+options: H:4
 ** Texinfo Export Settings
 #+texinfo_filename:security.info
 #+texinfo_class: info
