@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.3.<2019-04-30 Tue 13:00>
+#+macro:version 0.2.4.<2019-04-30 Tue 16:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -23,7 +23,7 @@ without crossing your eyes!
 
 *** API Authentication
 
-@@texinfo:@heading Need to Authenticate Access@@
+{{{heading(Need to Authenticate Access)}}}
 
 #+CINDEX:authentication
 Certain API resources need restricted access.  We don't want one user to be
@@ -31,7 +31,7 @@ able to change the password of another user, for example.  That's why we
 protect certain resources---make users supply their ID and password before
 allowing access---in other words, we authenticate them.
 
-@@texinfo:@heading HTTP Requests are Stateless@@
+{{{heading(HTTP Requests are Stateless)}}}
 
 #+CINDEX:stateless, HTTP
 The difficulty in securing an HTTP API is that requests are stateless---the API
@@ -50,7 +50,7 @@ but then be identified in another way by the server in subsequent requests.
 Several systems have been designed for doing this, and the current
 state-of-the-art standard is the JSON Web Token.
 
-@@texinfo:@heading How JWTs Work@@
+{{{heading(How JWTs Work)}}}
 
 There's a great [[https://robmclarty.com/blog/what-is-a-json-web-token][article]] on the topic which makes a good analogy about how JSON
 web tokens work:
@@ -63,7 +63,7 @@ the hotel, you give the card back.  This is analogous to logging out.
 
 *** Structure of the Token
 
-@@texinfo:@heading What a JWT Looks Like@@
+{{{heading(What a JWT Looks Like)}}}
 
 #+CINDEX:HTTP request header
 #+CINDEX:header, HTTP request
@@ -78,7 +78,7 @@ one looks like:
 In fact, the token is the part after "Authorization: Bearer", which is just the
 HTTP header info.
 
-@@texinfo:@heading The Header Payload and Signature@@
+{{{heading(The Header Payload and Signature)}}}
 
 #+CINDEX:header
 #+CINDEX:payload
@@ -98,7 +98,7 @@ correspond to:
 
 We can decode these strings to get a better understand of the structure of JWT.
 
-@@texinfo:@subheading Header@@
+{{{subheading(Header)}}}
 
 #+CINDEX:header, dfn
 The following is the decoded header from the token.  The @@texinfo:@dfn{header}@@ is
@@ -112,7 +112,7 @@ basic understanding, so we won't get into any detail about it.
 }
 #+END_SRC
 
-@@texinfo:@subheading Payload@@
+{{{subheading(Payload)}}}
 
 #+CINDEX:payload, dfn
 The payload is of much more interest.  The @@texinfo:@dfn{payload}@@ can include any
@@ -153,7 +153,7 @@ string was "Hello, world". The hash is complicated enough that guessing the
 original string would be infeasible.  There are many different types of hashing
 algorithms, but =SHA256= is commonly used with JWT.
 
-@@texinfo:@heading JWT Signature@@
+{{{heading(JWT Signature)}}}
 
 #+CINDEX:signature, dfn
 So coming back to the JWT structure, let's now look at the third piece of the
@@ -182,7 +182,7 @@ Here's an explanation of what's going on here:
 Why include the header and payload in the signature hash?  This ensures the
 signature is unique to this particular token.
 
-@@texinfo:@subheading The Secret@@
+{{{subheading(The Secret)}}}
 
 #+CINDEX:secret
 What's the @@texinfo:@dfn{secret}@@?  To answer this, let's think about how you would
@@ -195,7 +195,7 @@ information.  Including it in the hash prevents someone generating their own
 hash to forge the token.  And since the hash obscures the information used to
 create it, no one can figure out the secret from the hash, either.
 
-@@texinfo:@subheading Salting@@
+{{{subheading(Salting)}}}
 
 #+CINDEX:salting
 The process of adding private data to a hash is called @@texinfo:@dfn{salting}@@ and
@@ -206,7 +206,7 @@ makes cracking the token almost impossible.
 So now you have a good idea of how a token is created.  How do you use it to
 authenticate your API?
 
-@@texinfo:@heading Login@@
+{{{heading(Login)}}}
 
 #+CINDEX:token, generate
 #+CINDEX:generate token
@@ -224,7 +224,7 @@ if (passwordCorrect) {
 }
 #+END_SRC
 
-@@texinfo:@heading Authenticating requests@@
+{{{heading(Authenticating requests)}}}
 
 #+CINDEX:requests, authenticate
 #+CINDEX:authenticate requests
@@ -250,7 +250,7 @@ if (user.token = token) {
 }
 #+END_SRC
 
-@@texinfo:@heading Logging out@@
+{{{heading(Logging out)}}}
 
 #+CINDEX:logout
 If the user logs out, simply delete the token attached to the user model, and
@@ -267,6 +267,7 @@ user.save();
 *** Wrapup
 So that's a very basic explanation of how you can secure an API using JSON Web
 Tokens.  I hope your head doesn't hurt too much.
+
 ** Course---JSON Web Token Authentication with Node.js
 :PROPERTIES:
 :source:   Egghead.io
@@ -280,7 +281,7 @@ authentication can be and will understand how to use them on their APIs as well
 as on the front end of their web applications.
 **** Source Code
 [[https://github.com/eggheadio-projects/egghead-auth-course/tree/master][eggheadio-projects/egghead-auth-course]]
-**** About the Author
+**** The Author
 - Joel Lord
 - [[http://www.javascripteverything.com/about][About the author]]
 - [[http://www.javascripteverything.com/about][Javascript Everything]] author's blog
@@ -321,7 +322,7 @@ a proven solution.
 01:40 In this lesson, you will be introduced to Auth0 as a solution to provide
 secure identity management and federated log in to your users.  Go ahead, watch
 this course, and learn how to build more secure applications right now.
-**** Directory and Package Setup
+*** Lesson 0---Package Setup
 The course will be set up in a root directory ~egghead-jwt-auth~, with
 ~lesson#~ directories for each lesson 1 through 8.  The following shell script
 checks for the existence of a ~package.json~ file in the root directory; if one
@@ -375,10 +376,9 @@ echo index.js
 echo --------
 #+END_SRC
 
-#+name:lesson01-requires
+#+name:require-express
 #+begin_src js -n
 const express = require("express");
-
 #+end_src
 
 {{{heading(Setup Constants)}}}
@@ -388,11 +388,10 @@ const express = require("express");
 use the ~express~ library that we've just included.  We'll also declare a new
 constant for the =PORT= number.  We'll use =8888= for now.
 
-#+name:lesson01-setup
+#+name:express-constants
 #+begin_src js +n
 const app = express();
 const PORT = 8888;
-
 #+end_src
 
 {{{heading(Setup Routes)}}}
@@ -406,15 +405,13 @@ const PORT = 8888;
 the name of the route.  In this case, we're using =status=, and it takes a
 callback which has a request and a response as parameters.
 
-#+name:lesson01-routes
+#+name:status-route
 #+begin_src js +n
 app.get("/status", (req, res) => {
     const localTime = (new Date()).toLocaleTimeString();
     res.status(200).send(`Server time is ${localTime}.`);
 });
-
 #+end_src
-
 {{{subheading(Catchall Route)}}}
 
 #+CINDEX:catchall route
@@ -423,12 +420,11 @@ any route that wasn't defined already.  01:19 It also takes a callback with a
 request and response.  We can build our response here, and it will simply sense
 that as =404=, or 'page not found'.
 
-#+name:lesson01-routes
+#+name:catchall-route
 #+begin_src js +n
 app.get("*", (req, res) => {
     res.sendStatus(404);
 });
-
 #+end_src
 
 {{{heading(Start the App Listening)}}}
@@ -440,12 +436,11 @@ app.get("*", (req, res) => {
 success.  01:42 We'll simply say "Server is running on port", and we'll specify
 the =PORT= number here.  You now have your first express server.
 
-#+name:lesson01-listen
+#+name:app-listen
 #+begin_src js +n
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
-
 #+end_src
 
 **** Testing the Server
@@ -453,7 +448,7 @@ app.listen(PORT, () => {
 This Makefile sets up some commands to run specific lessons.  This first rule
 links Lesson1 ~index.js~ into the root directory, then starts the server.
 
-#+BEGIN_SRC sh :tangle egghead-jwt-auth/Makefile
+#+BEGIN_SRC sh :mkdirp yes :tangle egghead-jwt-auth/Makefile
 FORCE:
 
 .phony : lesson1
@@ -504,10 +499,12 @@ That's it.  You've got your first Express server up and running.
 #+caption:Lesson 1 Index.js
 #+name:lesson01-index.js
 #+begin_src js -n :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
-<<lesson01-requires>>
-<<lesson01-setup>>
-<<lesson01-routes>>
-<<lesson01-listen>>
+<<require-express>>
+<<express-constants>>
+
+<<status-route>>
+<<catchall--route>>
+<<app-listen>>
 #+end_src
 
 * Listings
