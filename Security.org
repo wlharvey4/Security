@@ -2,9 +2,8 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version Version 0.2.0.<2019-04-29 Mon 17:06>
-Version 0.2.1.<2019-04-30 Tue 10:00>
-By {{{author}}}
+#+macro:version 0.2.2.<2019-04-30 Tue 11:54>
+Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
 ** Article---How JWTs Secure Your API
@@ -268,7 +267,7 @@ user.save();
 *** Wrapup
 So that's a very basic explanation of how you can secure an API using JSON Web
 Tokens.  I hope your head doesn't hurt too much.
-** Course---JSON Weg Token Authentication with Node.js
+** Course---JSON Web Token Authentication with Node.js
 :PROPERTIES:
 :source:   Egghead.io
 :author:   Joel Lord
@@ -355,12 +354,9 @@ pages.
 install it using ~yarn add express:
 
 #+name:lesson1-package.json
-#+begin_src sh  :results output :exports both
-cd egghead-jwt-auth
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
 yarn add express
 #+end_src
-
-#+RESULTS: lesson1-package.json
 
 #+name:lesson01-requires
 #+begin_src js
@@ -380,9 +376,9 @@ const app = express();
 const PORT = 8888;
 #+end_src
 
-@@texinfo:@heading Setup Routes@@
+{{{heading(Setup Routes)}}}
 
-@@texinfo:@subheading Status Route@@
+{{{subheading(Status Route)}}}
 
 #+CINDEX:route, define
 #+CINDEX:@code{app.get}
@@ -414,7 +410,7 @@ app.get('*', (req, res) => {
 });
 #+end_src
 
-@@texinfo:@heading Start the App Listening@@
+{{{heading(Start the App Listening)}}}
 
 #+CINDEX:@code{app.listen}
 #+CINDEX:app, run
@@ -432,20 +428,56 @@ app.listen(PORT, () => {
 
 **** Testing the Server
 
-01:53 If we go back to our terminal, we can start the server by using Node.
-: node run
+This Makefile sets up some commands to run specific lessons.  This first rule
+links Lesson1 ~index.js~ into the root directory, then starts the server.
+
+#+BEGIN_SRC sh :tangle egghead-jwt-auth/Makefile
+FORCE:
+
+.phony : lesson1
+lesson1 : FORCE
+	ln -f lesson1/index.js index.js
+	node .
+
+#+END_SRC
+
+01:53 If we go back to our terminal, we can start the server by using Node from
+the root directory:
+: make lesson1
+
 We've got our server running.
+
+These three Makefile rules provide easy commands to open different routes in
+your default browser:
+
+#+BEGIN_SRC sh :tangle egghead-jwt-auth/Makefile
+.phony: open-browser
+open-browser :
+	open http://localhost:8888/
+
+.phony: open-browser-status
+open-browser-status :
+	open http://localhost:8888/status/
+
+.phone: open-browser-random
+open-browser-random :
+	open http://localhost:8888/random/
+
+#+END_SRC
 
 #+CINDEX:page not found error
 02:02 Now if we go through our browser window, we can type in the
 ~localhost:8888~.  We'll get a 'page not found' because that route was not
 defined.
+: make open-browser
 
 #+CINDEX:status route
 02:10 We can use =/status= to get the server time, and any other page will give
-us a =404= error.  That's it.  You've got your first Express server up and
-running.
+us a =404= error.
+: make open-browser-status
+: make open-browser-random
 
+That's it.  You've got your first Express server up and running.
 **** Express Server Index.js Code
 #+caption:Lesson 1 Index.js
 #+name:lesson01-index.js
