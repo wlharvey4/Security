@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.8.<2019-05-01 Wed 00:42>
+#+macro:version 0.2.9.<2019-05-01 Wed 09:48>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -942,6 +942,129 @@ this time.
 <<status-route>>
 <<authentication-login>>
 <<create-access-token>>
+<<catchall-route>>
+
+<<port-env-or-assign>>
+<<app-listen>>
+#+end_src
+
+*** Lesson 5---Allow CORS in Node.js and Expres
+In this quick lesson, we see how to add the CORS middleware so that our Express
+server can handle requests from different origins.
+
+**** The CORS Prohibition
+#+CINDEX:CORS prohibition
+00:00 If you have an API that runs on a different server or even a different
+port than your application, and you try to do a ~fetch~, you should see a
+message in your console complaining about
+=Access-Control-Allow-Origin=.[fn::Safari allows such a fetch, but Google
+Chrome does not.]
+
+[[file:./resources/cors-error-50.png]]
+
+**** The Fix to the CORS Prohibition
+00:19 The fix for this in your Express server is very simple.
+
+#+CINDEX:@code{cors} library
+First of all, you need to require the CORS library:
+
+#+name:require-cors
+#+begin_src js -n
+const cors = require("cors");
+#+end_src
+
+Secondly, you need to tell your Express server to use this middleware by using
+~app.use~ and the library that we've just installed.
+
+#+name:app-use-cors
+#+begin_src js +n
+app.use(cors());
+#+end_src
+
+#+CINDEX:@code{express-jwt} library
+Thirdly, use a different JSON web token library, ~express-jwt~, which the author
+does not explain here, but explains in the next lesson.
+
+#+name:require-expressjwt
+#+begin_src js +n
+const expressjwt = require("express-jwt");
+#+end_src
+
+#+name:jwtCheck
+#+begin_src js +n
+const jwtCheck = expressjwt({secret: "mysupersecretkey"});
+#+end_src
+
+You'll also need to install both using ~yarn add~:
+
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
+yarn add cors express-jwt
+#+end_src
+
+Our ~package.json~ now looks like this:
+
+: package.json
+: ------------
+#+begin_src sh :dir egghead-jwt-auth :results output :exports results
+cat package.json
+#+end_src
+
+**** Start Lesson 5 Server Running
+00:46 Now, if you restart your server and try the same ~fetch~ call in your
+browser, you won't have that CORS error any more.
+
+Start the server for this lesson with:
+: make lesson5
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson5
+lesson5 : FORCE
+	(export PORT=3000;node lesson5;)
+#+end_src
+
+[[file:./resources/cors-fix-50.png]]
+
+**** Set Up Two New Routes for Public and Private Resources
+Two new routes will be added here, and explained in the next lesson.
+
+#+name:public-resource-route
+#+begin_src js -n
+app.get("/resource", (req, res) => {
+    res
+    .status(200)
+    .send("Public resource; okay to see");
+});
+
+#+end_src
+
+#+name:private-resource-route
+#+begin_src js +n
+app.get("/resource/secret", jwtCheck, (req, res) => {
+    res
+    .status(200)
+    .send("Secret resource; you must be logged in to see this.");
+});
+
+#+end_src
+
+**** Lesson 5 ~index.js~ Code
+Here is the code for Lesson 5 in ~index.js~.  The two routes will be explained
+in the next lesson.
+
+#+name:Lesson5-index.js
+#+begin_src js :tangle egghead-jwt-auth/lesson5/index.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+<<require-cors>>
+<<require-expressjwt>>
+<<jwtCheck>>
+
+<<app-express>>
+<<app-use-body-parser>>
+<<app-use-cors>>
+
+<<public-resource-route>>
+<<private-resource-route>>
 <<catchall-route>>
 
 <<port-env-or-assign>>
