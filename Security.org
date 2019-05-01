@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.5.<2019-04-30 Tue 17:18>
+#+macro:version 0.2.6.<2019-04-30 Tue 23:06>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -510,7 +510,7 @@ That's it.  You've got your first Express server up and running.
 <<app-listen>>
 #+end_src
 
-*** Lesson 2---Set the Server Port in Express Using Environment Variables
+*** Lesson 2---Set the Server Port in Express Using an Environment Variable
 #+CINDEX:environment variables
 In this lesson we learn how to use an environment variable to set the port of
 an express server.
@@ -582,6 +582,156 @@ open-browser-status-3000 :
 .phony : open-browser-random-3000
 open-browser-random-3000 :
 	open http://localhost:3000/random/
+#+end_src
+
+*** Lesson 3---Add a =POST= Route To Express And Parse the Body
+#+CINDEX:POST requests
+#+CINDEX:@code{body-parser}
+In this lesson, we see how to handle =POST= requests on our server and we
+extract the data that was passed in the body of the requests using
+~body-parser~.
+
+**** Add a =POST= Method to ~index.js~
+#+CINDEX:POST method
+#+CINDEX:user login
+#+CINDEX:login route
+00:01 In order to handle our first post request, we will use Express' =POST=
+method.  We will create a route that handles user logins.
+
+#+CINDEX:request
+#+CINDEX:response
+00:08 The first argument is a route, which is =/login= in our case.  The second
+argument is a callback with the =request= and =response= arguments.
+
+#+CINDEX:username property
+#+CINDEX:JSON object
+#+CINDEX:post login route
+00:15 Let's now define a constant that will contain the name of the user that
+was posted to this route.  The constant name =user= will have the value of the
+=username= property that was passed in our =request= as a JSON object.
+
+#+name:post-route
+#+begin_src js -n
+app.post("/login", (req, res) => {
+    const user = req.body.username;
+
+#+end_src
+
+**** Add ~body-parser~ Middleware
+#+CINDEX:middleware, body-parser
+#+CINDEX:body-parser middleware
+00:27 At this point, Express can't read the body of the request.  We will need
+to ~require~ an additional middleware called ~body-parser~.
+
+#+name:require-body-parser
+#+begin_src js -n
+const bodyParser = require("body-parser");
+#+end_src
+
+We also go into the terminal to install this new library.
+
+#+name:install-body-parser
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
+yarn add body-parser
+#+end_src
+
+: package.json
+: ------------
+#+begin_src sh :dir egghead-jwt-auth
+cat package.json
+#+end_src
+
+#+CINDEX:use method, express
+#+CINDEX:JSON responses
+00:40 Now that it's installed, we can add the middleware to Express using the
+=use= method.  We will specify that it will handle JSON responses.
+
+#+name:app-use-body-parser
+#+begin_src js -n
+app.use(bodyParser.json());
+#+end_src
+
+**** Build the =response=
+#+CINDEX:response, post request
+#+CINDEX:200 status
+#+CINDEX:status 200
+#+CINDEX:success status 200
+00:49 We are now able to read the =request= body, so our constant contains the
+=username= that was passed into login route.  We are ready to build our
+=response=, which has a status of =200= because this is a success.
+
+01:01 We will send back a simple string that says, "You logged in with
+username: ${user}".  It will display the =username= that we just received.
+
+#+name:post-route-res
+#+begin_src js -n
+    res
+    .status(200)
+    .send(`You logged in with username: "${user}"`);
+});
+#+end_src
+
+**** Start the Server
+01:08 Let's start our server using ~node~.  From the root directory type:
+: make lesson3
+
+#+name:Makefile
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson3
+lesson3 : FORCE
+	ln -f lesson3/index.js index.js
+	(export PORT=3000;node .)
+#+end_src
+
+The server is now listening on =localhost:3000=, which was defined as an
+environment variable previously.
+
+**** Test the Server
+#+CINDEX:Postman
+#+CINDEX:@command{curl}
+01:18 To test this new route, we can use Postman (or ~curl~).  If we try to do
+a =GET= request to =/status=, we should get the local time:
+: make open-browser-status-3000
+
+#+CINDEX:POST request
+#+CINDEX:@code{username} property
+#+CINDEX:Content-Type
+#+CINDEX:application/json
+01:28 Now, we can do a =POST= request to the =/login= route.  Let's start by
+specifying the body of our request.  It will be a JSON object with a =username=
+property.  Make sure that you change the Content-Type to =application/json=.
+
+#+name:Makefile
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : post-login
+post-login : FORCE
+	curl \
+	  --header Content-Type:application/json \
+	  --data   '{"username":"admin"}' \
+	  http://localhost:3000/login \
+#+end_src
+
+#+CINDEX:parse POST request
+01:43 If we run this, you get a, "You logged in with username: \"admin\""
+message.  That is how you parse a =POST= request and handle the =request= data.
+
+**** Lesson 3 ~index.js~ Code
+#+caption:Lesson 3 ~index.js~
+#+name:lesson3-index.js
+#+begin_src js :tangle egghead-jwt-auth/lesson3/index.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+
+<<app-express>>
+<<app-use-body-parser>>
+
+<<status-route>>
+<<post-route>>
+<<post-route-res>>
+<<catchall-route>>
+
+<<port-env-or-assign>>
+<<app-listen>>
 #+end_src
 
 * Listings
