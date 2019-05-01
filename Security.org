@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.6.<2019-04-30 Tue 23:06>
+#+macro:version 0.2.7.<2019-05-01 Wed 00:30>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -637,7 +637,7 @@ yarn add body-parser
 
 : package.json
 : ------------
-#+begin_src sh :dir egghead-jwt-auth
+#+begin_src sh :dir egghead-jwt-auth :results output :exports results
 cat package.json
 #+end_src
 
@@ -728,6 +728,218 @@ message.  That is how you parse a =POST= request and handle the =request= data.
 <<status-route>>
 <<post-route>>
 <<post-route-res>>
+<<catchall-route>>
+
+<<port-env-or-assign>>
+<<app-listen>>
+#+end_src
+
+*** Lesson 4---Provide Users With A JSON Web Token
+#+CINDEX:token issuer
+#+CINDEX:JSON web token
+In this lesson, we will build a token issuer that will return a JSON Web
+Token.  This simple server will have a single endpoint for login that queries a
+list of users and returns a web token for the matching user.
+
+**** The User Database
+#+CINDEX:authentication server
+#+CINDEX:user database
+#+CINDEX:user array
+00:00 Since this lesson is all about creating an authentication server, let's
+start by creating a user database.  We will use a user array that contains all
+of our users and store the passwords in plain text right now.
+
+#+CINDEX:warning
+00:11 Warning, do not do this in production.  You should always encrypt
+passwords and ensure that no sensitive information about your users is
+accessible to potential hackers.  For the sake of this lesson, let's just do it
+this way.
+
+#+name:users-array
+#+begin_src js -n
+const users = [
+    {id: 1, username: "admin", password: "admin"},
+    {id: 2, username: "guest", password: "guest"}
+];
+#+end_src
+
+**** Authentication Route
+#+CINDEX:@code{/login} route
+#+CINDEX:@code{POST} request
+#+CINDEX:user authentication
+00:26 We can now start with our =/login= =POST= request.  This is the request
+that will handle user authentication.  The first thing to check is if the
+request is formatted correctly.  We are expecting both a username and a
+password.
+
+#+CINDEX:400 status
+#+CINDEX:status 400
+#+CINDEX:invalid request, status 400
+00:45 If we don't have both, we =return= a status code of =400= for invalid
+request, and we =send= a message to the user, saying that "You need a username
+and password".  We can then do a ~return~ to stop the execution of this
+callback.
+
+#+CINDEX:@code{find} method
+01:08 Now, if we have a valid request, we need to check if the user is in our
+database.  Using the =find= method, we will check if we have a user that has a
+=username= and =password= that matches those in the =request=.
+
+#+CINDEX:401 status
+#+CINDEX:status 401
+#+CINDEX:unauthorized request
+01:20 If we find a matching user, it will be stored in a constant, ~user~.  If
+we can't find a matching user, we can send a response with the status of =401=
+for =unauthorized=.  We can also ~send~ a message to the user, saying "User not
+found".  Once again, we ~return~ to stop the execution of this callback.
+
+#+name:authentication-login
+#+begin_src js -n
+app.post("/login", (req, res) => {
+    if (!req.body.username || !req.body.password) {
+        res
+        .status(400)
+        .send("You need a username and password");
+        return;
+    }
+
+    const user = users.find((u) => {
+        return u.username === req.body.username && u.password === req.body.password;
+    });
+
+    if (!user) {
+        res
+        .status(401)
+        .send("User not found");
+        return;
+    }
+
+#+end_src
+
+**** Create a JWT for a Valid User
+#+CINDEX:JSON web token
+01:45 If we have a valid user, we will send back a JSON web token as a
+response.
+
+#+CINDEX:@code{jsonwebtoken} library
+In order to do so, we will need to ~require~ the ~jsonwebtoken~ library.  We will
+also need to install it using ~yarn add jsonwebtoken~.
+
+#+name:require-jsonwebtoken
+#+begin_src js -n
+const jwt = require("jsonwebtoken");
+#+end_src
+
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
+yarn add jsonwebtoken
+#+end_src
+
+: package.json
+: ------------
+#+begin_src sh :results output :exports both :dir egghead-jwt-auth
+cat package.json
+#+end_src
+
+#+CINDEX:@code{sign} method
+#+CINDEX:sign token
+#+CINDEX:payload
+#+CINDEX:secret key
+02:13 Now that it's installed, we can use the =sign= method to create a sign
+token.  We start by passing the payload we want to attach in the =jwt=.  We
+then pass a string which is the =secret key=.  In this case, it's
+"mysupersecretkey".
+
+#+CINDEX:options
+#+CINDEX:access_token
+02:34 Finally, we can pass some options like in how much time this token will
+expire, so we'll say expires in three hours for us.  Finally, we can send back
+our response with a status of =200= and a JSON object with our =access_token=.
+
+#+name:create-access-token
+#+begin_src js -n
+      const token = jwt.sign(
+        {
+          sub: user.id,
+          username: user.username
+        }, "mysupersecretkey", {expiresIn: "3 hours"}
+      );
+
+      res
+       .status(200)
+       .send({access_token: token});
+  });
+#+end_src
+
+**** Testing the Lesson 4 Server
+#+CINDEX:authentication server, run
+03:01 We can now run the authentication server using node and the name of the
+file.
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson4
+lesson4 : FORCE
+	(export PORT=3000;node lesson4)
+#+end_src
+
+Let's now open Postman (use ~curl~) to test this out.
+
+03:10 If we try a =GET= request on the server, we're getting a =404= because we
+haven't defined any =GET= route on the server.
+
+#+begin_src sh :dir egghead-jwt-auth
+make open-browser-status-3000
+#+end_src
+
+Let's change that to a =POST= and use the =/login= endpoint that we just
+created.  Sending a ~request~ to that URL without a body will give us a =400= with a
+message, "You need a username and password."  Let's try to add those.
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : wrong-auth-login
+wrong-auth-login :
+	curl \
+	  --header Content-Type:application/json \
+	  --data   '{"username":"Felix","password":"the-cat"}' \
+	  http://localhost:3000/login \
+
+.phony : auth-login
+auth-login :
+	curl \
+	  --header Content-Type:application/json \
+	  --data   '{"username":"admin","password":"admin"}' \
+	  http://localhost:3000/login \
+
+#+end_src
+
+03:29 For the =body=, select =raw= and make sure that the =type= is set to
+=application/json=.  You can now type in a =username= and =password= in JSON
+format.  If we type a wrong password, we should be getting the "User not found"
+message.  If we fix the password to use the right one, we get our JSON object
+with an =access_token=.
+
+03:56 You can copy and paste this JSON web token in a website like ~jwt.io~ and
+you will be able to see the content.  If you try it with another user like
+=guest=, you will get a different =access_token=, and if we go into ~jwt.io~,
+we can once again see all of the content and we can see that it's different
+this time.
+
+04:28 That's it.  You have now created your first authentication server.
+
+**** Lesson 4 ~index.js~ Code
+#+caption:Lesson 4 ~index.js~ Code
+#+name:lesson4-index.js
+#+begin_src js :tangle egghead-jwt-auth/lesson4/index.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+<<require-jsonwebtoken>>
+
+<<app-express>>
+<<app-use-body-parser>>
+<<users-array>>
+
+<<status-route>>
+<<authentication-login>>
+<<create-access-token>>
 <<catchall-route>>
 
 <<port-env-or-assign>>
