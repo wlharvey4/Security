@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.7.<2019-05-01 Wed 00:30>
+#+macro:version 0.2.8.<2019-05-01 Wed 00:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -446,16 +446,20 @@ app.listen(PORT, () => {
 
 **** Testing the Server
 
-This Makefile sets up some commands to run specific lessons.  This first rule
-links Lesson1 ~index.js~ into the root directory, then starts the server.
+This Makefile sets up some commands to run specific lessons.  Each lesson's
+server can be started by moving into the root directory (~egghead-jwt-auth/~)
+and typing:
+: make lesson# where =#= is one of 1..8.
+
+Thereafter, specific commands can be run from a different terminal, such as:
+: make open-browser-status
 
 #+BEGIN_SRC sh :mkdirp yes :tangle egghead-jwt-auth/Makefile
 FORCE:
 
 .phony : lesson1
 lesson1 : FORCE
-	ln -f lesson1/index.js index.js
-	node .
+	node lesson1
 
 #+END_SRC
 
@@ -571,8 +575,7 @@ to test.
 #+begin_src sh :tangle egghead-jwt-auth/Makefile
 .phony : lesson2
 lesson2 : FORCE
-	ln -f lesson2/index.js index.js
-	(export PORT=3000; node .)
+	(export PORT=3000; node lesson2)
 .phony : open-browser-3000
 open-browser-3000 :
 	open http://localhost:3000/
@@ -679,8 +682,7 @@ username: ${user}".  It will display the =username= that we just received.
 #+begin_src sh :tangle egghead-jwt-auth/Makefile
 .phony : lesson3
 lesson3 : FORCE
-	ln -f lesson3/index.js index.js
-	(export PORT=3000;node .)
+	(export PORT=3000;node lesson3)
 #+end_src
 
 The server is now listening on =localhost:3000=, which was defined as an
