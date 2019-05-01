@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.4.<2019-04-30 Tue 16:18>
+#+macro:version 0.2.5.<2019-04-30 Tue 17:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -363,18 +363,15 @@ install it using ~yarn add express~:
 yarn add express
 #+end_src
 
+: package.json
+: ------------
+
 #+begin_src sh :dir egghead-jwt-auth :results output :exports results
-echo
-echo package.json
-echo ------------
 cat package.json
 #+end_src
 
-#+Begin_src sh :dir egghead-jwt-auth :results output :exports results
-echo
-echo index.js
-echo --------
-#+END_SRC
+: index.js
+: --------
 
 #+name:require-express
 #+begin_src js -n
@@ -388,9 +385,13 @@ const express = require("express");
 use the ~express~ library that we've just included.  We'll also declare a new
 constant for the =PORT= number.  We'll use =8888= for now.
 
-#+name:express-constants
+#+name:app-express
 #+begin_src js +n
 const app = express();
+#+end_src
+
+#+name:port-8888
+#+begin_src js +n
 const PORT = 8888;
 #+end_src
 
@@ -476,7 +477,7 @@ open-browser :
 open-browser-status :
 	open http://localhost:8888/status/
 
-.phone: open-browser-random
+.phony: open-browser-random
 open-browser-random :
 	open http://localhost:8888/random/
 
@@ -496,15 +497,91 @@ us a =404= error.
 
 That's it.  You've got your first Express server up and running.
 **** Express Server Index.js Code
-#+caption:Lesson 1 Index.js
+#+caption:Lesson 1 ~index.js~
 #+name:lesson01-index.js
 #+begin_src js -n :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
 <<require-express>>
-<<express-constants>>
+<<app-express>>
+<<port-8888>>
 
 <<status-route>>
-<<catchall--route>>
+<<catchall-route>>
+
 <<app-listen>>
+#+end_src
+
+*** Lesson 2---Set the Server Port in Express Using Environment Variables
+#+CINDEX:environment variables
+In this lesson we learn how to use an environment variable to set the port of
+an express server.
+
+**** Use ~process.env~ to Set the =PORT= Variable
+#+CINDEX:@code{process.env}
+#+CINDEX:@code{PORT} environment variable, set
+00:00 We'll change the =PORT= that this server is using.  We'll use
+~process.env~ to access the environment variables from our ~index.js~, and then
+we'll create a new variable called =PORT=.  If the =PORT= environment variable
+is not defined, we'll still use =8888= as a default.
+
+: index.js
+: ----------
+#+name:port-env-or-assign
+#+begin_src js -n
+const PORT = process.env.PORT || 8888;
+#+end_src
+
+**** Testing the =PORT= Assignment
+00:15 If you run this server, we see that the server is running on =port 8888=.
+If we do an ~export~ in our terminal and we set the =PORT= environement
+variable for our operating system to say =3000=
+: export PORT=3000
+{{{noindent}}}and we run this server again, we can see that the server is now
+running on ~port 3000~.
+
+00:34 If we open our browser, we go to =localhost:8888=, it can't be
+reached.  If we go to =3000=, we're getting a =404= in this case.  If we go to
+=localhost:3000/status=, we are getting the server time.
+
+00:48 That's how you set the =PORT= inside an environment variable.
+
+**** Lesson 2 ~index.js~ Code
+#+caption:Lesson 2 ~index.js~
+#+name:lesson2-index.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson2/index.js :mkdirp yes :noweb yes
+<<require-express>>
+<<app-express>>
+<<port-env-or-assign>>
+
+<<status-route>>
+<<catchall-route>>
+
+<<app-listen>>
+#+end_src
+
+{{{heading(Adding a Makefile Rule for Lesson 2)}}}
+
+From within the root directory (~egghead-jwt-auth/~) run the command:
+: make lesson2
+to start the server.  Then type:
+: open-browser-3000
+: open-browser-status-3000
+: open-browser-random-3000
+to test.
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson2
+lesson2 : FORCE
+	ln -f lesson2/index.js index.js
+	(export PORT=3000; node .)
+.phony : open-browser-3000
+open-browser-3000 :
+	open http://localhost:3000/
+.phony : open-browser-status-3000
+open-browser-status-3000 :
+	open http://localhost:3000/status/
+.phony : open-browser-random-3000
+open-browser-random-3000 :
+	open http://localhost:3000/random/
 #+end_src
 
 * Listings
@@ -536,3 +613,4 @@ That's it.  You've got your first Express server up and running.
 #+macro:heading @@texinfo:@heading $1@@
 #+macro:subheading @@texinfo:@subheading $1@@
 #+macro:dfn @@texinfo:@dfn{$1}@@
+#+macro:noindent @@texinfo:@noindent @@
