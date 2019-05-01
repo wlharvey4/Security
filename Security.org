@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.11.<2019-05-01 Wed 12:12>
+#+macro:version 0.2.12.<2019-05-01 Wed 13:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1206,8 +1206,284 @@ the content of this route.  Now, you have an API with a secured endpoint.
 
 *** Lesson 7---Connect a Front-End to a Secure API using JWTs
 In this lesson, we add the login form to a single page application and we pass
-our tokens to the API. Should the token be valid, we will have access to the
+our tokens to the API.  Should the token be valid, we will have access to the
 data from the secure endpoint in the API.
+
+**** Connect the Front End to the API Server
+#+CINDEX:api server
+00:00 To connect our front-end to our API in our authentication server, we
+first need the URL for those.  In this case, I started the API on port 8888, so
+we can add that to a constant.
+: const API_URL = "http://localhost:8888;
+
+#+CINDEX:authentication server
+00:18 The authentication server is also running at =http://localhost:3000=.
+Let's add this to the =AUTH_URL= constant.
+: const AUTH_URL = "http://localhost:3000";
+
+#+CINDEX:@code{ACCESS_TOKEN}
+We will keep the =ACCESS_TOKEN= from our authentication server stored in
+memory.  For now, we can initialize the =ACCESS_TOKEN= constant to =undefined=.
+: let ACCESS_TOKEN = undefined;
+
+**** Look at the Prebuilt Front End
+#+CINDEX:front end
+#+CINDEX:jumbotron
+#+CINDEX:AJAX calls
+00:36 Let's take a look at the front-end that was pre-built for us.  There was
+a button labeled =public=, and another labeled =private=.  They will both
+update the jumbotron beneath it with the response that we're getting from our
+AJAX calls.
+
+#+CINDEX:helper functions
+#+CINDEX:@code{UI_Updates}
+00:50 The image of the cat will also be updated with the status code that we
+are getting from the server.  For the =UI_updates=, the helper functions are
+already created.  We will focus on the actual logic in here.
+
+**** Set Up Buttons in Front End
+
+{{{heading{The PUBLIC Button)}}}
+
+#+CINDEX:public button
+01:03 For now, none of the buttons do anything.  Let's go back to our code.
+=headlineBtn= here is the button labeled =public=.  We will start by doing a
+~fetch~ to our public ~/resource~, which is on the API server at the
+~/resource~ endpoint.
+
+#+CINDEX:@code{fetch}
+01:23 ~fetch~ returns a promise, so we will use the ~then~ method with the
+response and we will return the result of =resp.text=.  This will return the
+actual data in text format to the next chained ~.then~ method.
+
+#+CINDEX:jumbotron
+#+CINDEX:@code{UI_Update} object
+01:40 Finally, we can use the =UIUpdate= object and the ~alertBox~ method to update
+the jumbotron with the data from our response.
+
+#+name:headlineBtn.addEventListener
+#+begin_src js -n
+headlineBtn.addEventListener("click", () => {
+	fetch(`${API_URL}/resource`).then(resp => {
+		return resp.text() ;
+	}).then(data => {
+		UIUpdate.alertBox(data);
+	});
+});
+#+end_src
+
+{{{subheading(Test the PUBLIC Button)}}}
+
+01:51 We are ready to test our first AJAX call.  Clicking on the =public=
+button shows the public resource.  You can see this message.  That works.
+
+{{{heading(The PRIVATE Button)}}}
+
+#+CINDEX:private button
+02:00 Let's now move on to the second button, the one labeled =private=.  In
+here, we will do a very similar code.  We start by doing a ~fetch~ to the
+=API_URL= and ~/resource/secret~ URL.  We return the ~.text~ from the response
+and we update our jumbotron the same way we did for the public button.
+
+#+begin_src js -n
+secretBtn.addEventListener("click", (event) => {
+	fetch(`${API_URL}/resource/secret`,.then(resp => {
+		return resp.text();
+	}).then(data => {
+		UIUpdate.alertBox(data);
+	});
+});
+#+end_src
+
+{{{subheading(Test the PRIVATE Button)}}}
+
+#+CINDEX:authorization header
+02:25 If we go and test this, we will see that we are getting an error message
+instead of the actual response that we are expecting.  That is due to the fact
+that we have not passed in an authorization header.
+
+#+CINDEX:@code{UIUpdate.updateCat} method
+#+CINDEX:@code{resp.status} code
+02:35 Now that we know that this URL will sometimes return us an error code,
+let's update our =httpCat= with the response that we get from the server.
+Before we return the parse body of our response, we can use the
+=UIUpdate.updateCat= method with the =resp.status= code.
+
+#+name:secretBtn.addEventListener
+#+begin_src js
+secretBtn.addEventListener("click", (event) => {
+	fetch(`${API_URL}/resource/secret`,.then(resp => {
+        UIUpdate.updateCat(resp.status);
+		return resp.text();
+	}).then(data => {
+		UIUpdate.alertBox(data);
+	});
+});
+#+end_src
+
+#+CINDEX:401 error code
+#+CINDEX:unauthorized access
+02:52 If we try this again, we see that we're getting a =401=, which is the error
+code for an =unauthorized access=.
+
+**** Authentication
+#+CINDEX:authenticate
+#+CINDEX:login
+#+CINDEX:@code{LOGIN} button
+#+CINDEX:authorization server
+03:00 Before we can pass in a token with our request, we will need to
+authenticate.  Let's go the =login= button click event listener and do a =POST=
+request to our authorization server.
+
+#+CINDEX:Content-Type
+#+CINDEX:application/json
+#+CINDEX:request headers
+#+CINDEX:headers, request
+#+CINDEX:accept header
+03:12 In here, we will do a request to the =${AUTH_URL}/login= endpoint.  We
+will also specify a few options to our request.  First, this is not a =GET=, so
+we will need to add method =POST=; then we need to specify the headers to tell
+our server that we are sending =Content-Type:= "application/json".
+
+#+CINDEX:@code{UIUpdate} helper object
+03:31 We need to specify that we are ~accepting~ a response type of
+"application/json".  The body of our request will be the =username= and
+=password= in JSON format provided by our =UIUpdate= helper object.
+
+#+CINDEX:@code{httpCat}
+03:47 We will update our =httpCat= with the ~resp.status~ code.  If we get a
+=200=, we will send the JSON object from our response to the next promise.  If
+our response was anything else, we will use the text of the response.
+
+#+CINDEX:@code{ACCESS_TOKEN}
+04:01 We can then chain with another ~.then~ and verify the presence of an
+=ACCESS_TOKEN=.  If we have one, we can store the =ACCESS_TOKEN= in the
+=ACCESS_TOKEN= variable that we defined in the beginning.
+
+#+CINDEX:@code{UIUpdate.loggedIn} method
+04:22 We can also overwrite the content of data with =ACCESS_TOKEN=: and the
+content of the token.  If we have an =ACCESS_TOKEN=, this means that we are
+logged in, so we can use the ~UIUpdate.loggedIn~ method to update our UI.
+
+#+CINDEX:jumbotron
+04:43 Finally, we will update our jumbotron with our data variable.
+
+#+name:loginBtn.addEventListener
+#+begin_src js -n
+loginBtn.addEventListener("click", (event) => {
+	fetch(`${AUTH_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        "accept": "application/json",
+      },
+      body: JSON.stringify(UIUpdate.getUsernamePassword())
+    }).then(resp => {
+    	UIUpdate.updateCat(resp.status);
+    	if (resp.status == 200) {
+    		return resp.json();
+    	} else {
+    		return resp.text();
+    	}
+	}).then(data => {
+		if (data.access_token) {
+			ACCESS_TOKEN = data.access_token;
+			data = `Access Token: ${data.access_token}`;
+			UIUpdate.loggedIn();
+		}
+		UIUpdate.alertBox(data);
+	});
+});
+#+end_src
+
+**** Test the Authentication Login
+Let's try this out.
+
+#+CINDEX:400 status
+#+CINDEX:bad request, 400
+04:54 If we click on =login=, we have a modal asking for our credentials.  If we
+enter nothing, we are getting a =400= bad request error with the message, "You
+need a username and password."
+
+#+CINDEX:401 status
+#+CINDEX:unauthorized error
+05:05 Let's try to enter =username= "admin", and an invalid password.  This
+time, we are getting a =401= =unauthorized= with the message, "User not found."
+
+#+CINDEX:access token, receive
+Now, if we use the right =username= and =password= combination, we are getting
+an access token.
+
+#+CINDEX:@url{jwt.io}
+05:20 If we copy and paste the access token in ~jwt.io~, we can see the content
+of the token.  It has the right username.
+
+05:30 Back to our application, if we click on =private=, we are still getting a
+"No authorization token was found" error message.  That's because we are still
+not passing a token with our request.
+
+**** Set Up Authentication to the Private Route
+#+CINDEX:headers, request
+#+CINDEX:@code{secretBtn}
+05:43 Back to the =secretBtn=, let's start by defining our headers.  We can
+start by initializing with an empty object, then we test to see if =ACCESS_TOKEN=
+is still =undefined= or if we have an =ACCESS_TOKEN= stored there.
+
+#+CINDEX:bearer token
+05:58 If we do, we can specify the headers.  We will add an "Authorization" with
+the value of =Bearer= followed by a space, and then =${ACCESS_TOKEN}=.
+
+06:13 Now, we can add those through our request as a second argument to our
+~fetch~.
+
+#+name:secretBtn.addEventListener
+#+begin_src js -n
+secretBtn.addEventListener("click", (event) => {
+	let headers = {};
+	if (ACCESS_TOKEN) {
+		headers = {
+			"Authorization": `Bearer ${ACCESS_TOKEN}`
+		};
+	}
+	fetch(`${API_URL}/resource/secret`, { headers }).then(resp => {
+		UIUpdate.updateCat(resp.status);
+		return resp.text();
+	}).then(data => {
+		UIUpdate.alertBox(data);
+	});
+});
+#+end_src
+
+**** Test Authentication to Private Resource Route
+Let's test this out.  Start by refreshing the app, and then log in using =admin=
+and the valid password.
+
+#+CINDEX:secret resource
+06:27 Now, if you click on =private=, you'll get the secret resource.  You should
+be logged in to see this message.  We now have access to our secret resource.
+
+**** Log Out Procedure
+#+CINDEX:@code{logoutBtn}
+#+CINDEX:@code{UIUpdate.loggedout} method
+06:36 Finally, we will need a way to log out.  If we go to the =logoutBtn= "click"
+event handler, we can simply reset our =ACCESS_TOKEN= to =undefined= and use the
+~UIUpdate.loggedout~ method.
+
+#+name:logoutBtn.addEventListener
+#+begin_src js -n
+logoutBtn.addEventListener("click", (event) => {
+	ACCESS_TOKEN = undefined;
+	UIUpdate.loggedOut();
+});
+#+end_src
+
+06:51 One last time to our application, and we can now ~login~ using a valid
+credential and get access to the =private= button.  Now, if you log out and try
+the =private= button again, you're getting the =401= error with the "No
+authorization token found" error message again.
+
+07:09 That's it.  You now have a front-end that access both public and private
+data from an API using a JSON web token.
 
 * Listings
 :PROPERTIES:
