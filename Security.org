@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.12.<2019-05-01 Wed 13:24>
+#+macro:version 0.2.13.<2019-05-01 Wed 16:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1209,49 +1209,331 @@ In this lesson, we add the login form to a single page application and we pass
 our tokens to the API.  Should the token be valid, we will have access to the
 data from the secure endpoint in the API.
 
+**** The Single Page Application
+#+name:index.html
+#+begin_src html -n :tangle egghead-jwt-auth/lesson7/index.html :mkdirp yes
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+<div class="container container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Secure your SPA</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active" data-route="#">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+            </ul>
+            <form class="form-inline">
+                <button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#loginModal" type="button" id="loginModalBtn">Login</button>&nbsp;
+                <button class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <span id="mainPage">
+
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10 text-center">
+                <p>Welcome to the headline generator application.  Click on the buttons to get a headline</p>
+            </div>
+            <div class="col-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <button class="btn btn-lg btn-primary" id="headline">Public</button>&nbsp;
+                <button class="btn btn-lg btn-secondary" id="secret">Private</button>
+            </div>
+        </div>
+
+        <div class="row">&nbsp;</div>
+
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                <div class="alert alert-dark" style="overflow-wrap: break-word">
+                    Test the API
+                </div>
+            </div>
+            <div class="col-2"></div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-4 text-center">
+                <img src="http://http.cat/200" id="httpcat" width="350px"/>
+            </div>
+        </div>
+    </span>
+
+    <span id="secretPage" class="d-none">
+        This is a secret area!
+    </span>
+
+    <span id="unauthorizedPage" class="d-none">
+        You are not authorized to see this page.
+    </span>
+</div>
+
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="loginBtn">Login</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script src="./ui-update.js"></script>
+<script src="./index.js"></script>
+</body>
+</html>
+#+end_src
+
+**** The Helper Functions in UI-Update
+#+name:ui-update.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson7/ui-update.js :mkdirp yes
+let UIUpdate = {};
+
+UIUpdate.loggedIn = function(token) {
+  UIUpdate.alertBox(`Just logged in<br>Token:<br>${localStorage.getItem("access_token")}`);
+  loginModalBtn.classList.add("d-none");
+  logoutBtn.classList.remove("d-none");
+};
+
+UIUpdate.loggedOut = function() {
+  localStorage.removeItem("access_token");
+  loginModalBtn.classList.remove("d-none");
+  logoutBtn.classList.add("d-none");
+};
+
+UIUpdate.routeChange = function() {
+  if (document.querySelector(".navbar-nav li.active")) {
+    document.querySelector(".navbar-nav li.active").classList.remove("active");
+  }
+  document.querySelector(".navbar [data-route='#" + window.location.hash.replace("#", "") + "']").classList.add("active");
+};
+
+UIUpdate.updateCat = function(status) {
+  const httpCat = document.querySelector("#httpcat");
+  httpCat.src = "http://http.cat/" + status;
+};
+
+UIUpdate.alertBox = function(message) {
+  const alertBox = document.querySelector(".alert");
+  alertBox.innerHTML = message;
+};
+
+UIUpdate.getUsernamePassword = function() {
+  return {
+    username: document.querySelector("#username").value,
+    password: document.querySelector("#password").value
+  }
+};
+
+window.addEventListener("hashchange", UIUpdate.routeChange);
+#+end_src
+
+**** The Authentication Server
+#+name:auth.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson7/auth.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+<<require-jsonwebtoken>>
+<<require-cors>>
+<<users-array>>
+
+<<app-express>>
+<<app-use-body-parser>>
+<<app-use-cors>>
+
+<<authentication-login>>
+<<create-access-token>>
+<<catchall-route>>
+
+<<port-env-or-assign>>
+<<app-listen>>
+#+end_src
+
+**** The API Server
+#+name:api.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson7/api.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+<<require-cors>>
+<<require-expressjwt>>
+<<jwtCheck>>
+
+<<app-express>>
+<<app-use-body-parser>>
+<<app-use-cors>>
+
+<<public-resource-route>>
+<<private-resource-route>>
+<<catchall-route>>
+
+<<api-port>>
+<<app-listen-api-port>>
+#+end_src
+
+**** Install Static Server ~httpster~
+To set up a static file server for the front end, install ~httpster~ from NPM.
+To start the server using =PORT 5000=, use
+: yarn run httpster -p 5000 -d lesson7
+from inside the root directory (~egghead-jwt-auth/~).
+
+To start all of the servers (~auth~, ~api~, and ~frontend~), run the ~make~
+command ~make lesson7~.  To terminate all of the servers, run the ~make~
+command ~make kill~.  The ~auth~ server will run on =PORT 3000= while the ~api~
+server will run on =PORT 3333=.
+
+#+begin_src sh :results output :exports both :dir egghead-jwt-auth
+yarn add httpster --dev
+#+end_src
+
+: package.json
+: ------------
+#+begin_src sh :results output :exports both :dir egghead-jwt-auth
+cat package.json
+#+end_src
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson7
+lesson7 : FORCE
+	yarn run httpster -d lesson7 -p 5000 &
+	export PORT=3000;node lesson7/auth.js &
+	export API_PORT=3333;node lesson7/api.js &
+
+.phony : kill
+kill :
+	pkill node
+#+end_src
+
+**** Framework of the Front End Connection
+#+name:index.js
+#+begin_src js -n :noweb tangle :tangle egghead-jwt-auth/lesson7/index.js
+/* To run this file on a server, we are using httpster.
+Type `httpster index.html -p 5000` in your console to start the server. */
+
+<<api-url>>
+<<auth-url>>
+
+<<access-token>>
+
+const headlineBtn = document.querySelector("#headline");
+const secretBtn = document.querySelector("#secret");
+const loginBtn = document.querySelector("#loginBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
+
+<<headlineBtn.addEventListener>>
+
+secretBtn.addEventListener("click", (event) => {
+
+});
+
+logoutBtn.addEventListener("click", (event) => {
+
+});
+
+loginBtn.addEventListener("click", (event) => {
+
+});
+#+end_src
 **** Connect the Front End to the API Server
 #+CINDEX:api server
 00:00 To connect our front-end to our API in our authentication server, we
 first need the URL for those.  In this case, I started the API on port 8888, so
 we can add that to a constant.
-: const API_URL = "http://localhost:8888;
+
+#+name:api-url
+#+begin_src js
+const API_URL = "http://localhost:3333";
+#+end_src
 
 #+CINDEX:authentication server
 00:18 The authentication server is also running at =http://localhost:3000=.
 Let's add this to the =AUTH_URL= constant.
-: const AUTH_URL = "http://localhost:3000";
+
+#+name:auth-url
+#+begin_src js
+const AUTH_URL = "http://localhost:3000";
+#+end_src
 
 #+CINDEX:@code{ACCESS_TOKEN}
 We will keep the =ACCESS_TOKEN= from our authentication server stored in
 memory.  For now, we can initialize the =ACCESS_TOKEN= constant to =undefined=.
-: let ACCESS_TOKEN = undefined;
+
+#+name:access-token
+#+begin_src js
+let ACCESS_TOKEN = undefined;
+#+end_src
 
 **** Look at the Prebuilt Front End
 #+CINDEX:front end
 #+CINDEX:jumbotron
 #+CINDEX:AJAX calls
-00:36 Let's take a look at the front-end that was pre-built for us.  There was
-a button labeled =public=, and another labeled =private=.  They will both
-update the jumbotron beneath it with the response that we're getting from our
-AJAX calls.
+00:36 Let's take a look at the front-end that was pre-built for us.  There is a
+button labeled =public=, and another labeled =private=.  They will both update
+the jumbotron beneath it with the response that we're getting from our AJAX
+calls.
+
+[[file:./resources/prebuilt-frontend-25.png]]
 
 #+CINDEX:helper functions
 #+CINDEX:@code{UI_Updates}
 00:50 The image of the cat will also be updated with the status code that we
-are getting from the server.  For the =UI_updates=, the helper functions are
-already created.  We will focus on the actual logic in here.
+are getting from the server.  For the =UIUpdate= functions, all of the helper
+functions are already created.  We will focus on the actual logic in here.
 
 **** Set Up Buttons in Front End
 
-{{{heading{The PUBLIC Button)}}}
+{{{heading(The PUBLIC Button)}}}
 
 #+CINDEX:public button
-01:03 For now, none of the buttons do anything.  Let's go back to our code.
-=headlineBtn= here is the button labeled =public=.  We will start by doing a
-~fetch~ to our public ~/resource~, which is on the API server at the
-~/resource~ endpoint.
+01:03 For now, none of the buttons do anything.  Let's go back to our code in
+~index.js~.
+
+#+CINDEX:@code{/resource} endpoint
+#+CINDEX:API server
+The variable =headlineBtn= holds a reference to the button labeled =public=.
+We will start by doing a ~fetch~ to our public ~/resource~, which is on the API
+server at the ~/resource~ endpoint.
 
 #+CINDEX:@code{fetch}
+#+CINDEX:promise, from @code{fetch} call
 01:23 ~fetch~ returns a promise, so we will use the ~then~ method with the
 response and we will return the result of =resp.text=.  This will return the
 actual data in text format to the next chained ~.then~ method.
