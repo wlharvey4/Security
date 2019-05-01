@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.10.<2019-05-01 Wed 11:48>
+#+macro:version 0.2.11.<2019-05-01 Wed 12:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1123,6 +1123,9 @@ try ~localhost:5000/resource~, we should see our public resource there.  If we t
 ~localhost:5000/resource/secret~, we can also see the content of this resource.
 
 **** Block the Secret Resource Route
+#+CINDEX:@code{express-jwt}
+#+CINDEX:block protected routes
+#+CINDEX:middleware
 Our next step will be to block those requests by requesting a valid JSON web
 token.  To do so, we will require the ~expressjwt~ middleware.
 
@@ -1133,13 +1136,13 @@ token.  To do so, we will require the ~expressjwt~ middleware.
 01:39 Let's now open a terminal, and install it, using ~yarn~[fn::this was done
 in the prior lesson] [[add-express-jwt][express-jwt]].
 
+#+CINDEX:@code{express-jwt} initialization
 Good.  Now, let's define this middleware.  We can initialize this middleware by
 using ~expressjwt~ and passing it some options.  If you are using a real
 authentication server, you'd want to check for the =issuer=, the =audience=,
 and more to validate the integrity of the server.
 
-**** Setting Up Middleware to Check the Secret
-02:01 In our case, we will only check to see in the signature matches the one
+02:01 In our case, we will only check to see if the signature matches the one
 from our authentication server, "mysupersecretkey", in this case.
 
 #+begin_src js -n :noweb yes
@@ -1156,14 +1159,20 @@ argument of our =app.get= method.
 **** Testing the Server with a Protected Route
 We are now ready to restart our server and test it in Postman.
 
-02:24 Now, if we try a route again, we see that we're getting an error message,
-saying that no authorization token was found.
+02:24 Now, if we try a protected route again, we see that we're getting an
+error message, saying that no authorization token was found.
 
-Let's go to the Authorization section, and select a Bearer Token type of
+[[file:./resources/postman-unauthorized-get-40.png]]
+
+Let's go to the Authorization section, and select a =Bearer Token= type of
 authentication.
 
-02:38 We can take a valid token from ~jwt.io~ in this case, and simply paste
-that in the token box in Postman.
+[[file:./resources/bearer-token-authentication-type-50.png]]
+
+02:38 We can take a valid token from ~jwt.io~ in this case[fn::After first
+entering the secret key "mysupersecretkey" in the =verify signature= box
+[[file:./resources/jwt.io-secret-key-25.png]]], and simply paste that in the token
+box in Postman.
 : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp\
 : vaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.oGFhqfFFDi9sJMJ1U2dWJZNYEiUQBEtZRVuwKE7Uiak
 
@@ -1172,7 +1181,7 @@ the content of this route.  Now, you have an API with a secured endpoint.
 
 [[file:./resources/postman-with-bearer-token-40.png]]
 
-*** Lesson 6 ~index.js~ Code
+**** Lesson 6 ~index.js~ Code
 
 #+caption:Lesson 6 ~index.js~ Code
 #+name:Lesson6-index.js
@@ -1194,6 +1203,11 @@ the content of this route.  Now, you have an API with a secured endpoint.
 <<api-port>>
 <<app-listen-api-port>>
 #+end_src
+
+*** Lesson 7---Connect a Front-End to a Secure API using JWTs
+In this lesson, we add the login form to a single page application and we pass
+our tokens to the API. Should the token be valid, we will have access to the
+data from the secure endpoint in the API.
 
 * Listings
 :PROPERTIES:
