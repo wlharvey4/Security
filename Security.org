@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.17.<2019-05-02 Thu 10:06>
+#+macro:version 0.2.18.<2019-05-02 Thu 11:06>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2319,7 +2319,6 @@ content: SWTs with HMAC SHA-256 and JWTs with a choice of algorithms, including
 signature, MAC, and encryption algorithms.
 
 * MACs and HMACs
-
 ** Articles
 *** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
@@ -2333,6 +2332,82 @@ data integrity/message authentication is usually achieved through a mechanism
 known as HMAC.  In this post, we explain what HMAC is, its basic inner
 workings, and how it secures data transfers.
 
+**** Importance of data integrity checks in secure file transfers
+Business decisions and processes are highly dependent on accurate and reliable
+data. If data gets tampered and the alterations go unnoticed, it could affect
+decisions and processes down the line. So if your data has to be transmitted
+over a network, especially one as perilous as the Internet, you have to take
+precautionary measures to preserve its integrity or at least know if it
+underwent unauthorized alterations.
+
+This is precisely the reason why secure file transfer protocols like FTPS,
+SFTP, and HTTPS are equipped with mechanisms for countering threats to data
+integrity. The most commonly used mechanism today is HMAC. Let me explain what
+it is.
+
+**** What is HMAC?
+HMAC stands for Keyed-Hashing for Message Authentication. It's a message
+authentication code obtained by running a cryptographic hash function (like
+MD5, SHA1, and SHA256) over the data (to be authenticated) and a shared secret
+key. HMAC is specified in RFC 2104.
+
+HMACs are almost similar to digital signatures. They both enforce integrity and
+authenticity. They both use cryptographic keys. And they both employ hash
+functions. The main difference is that digital signatures use asymmetric keys,
+while HMACs use symmetric keys.
+
+**** How HMAC works
+To understand how HMAC works, let's first examine how a hash function (on its
+own) could be used for conducting a data integrity check on a file
+transfer. Let's say a client application downloads a file from a remote
+server. It's assumed that the client and server have already agreed on a common
+hash function, say SHA2.
+
+Before the server sends out the file, it first obtains a hash of that file
+using the SHA2 hash function. It then sends that hash (a.k.a. message digest)
+along with the file itself. Upon receiving the two items (i.e. the downloaded
+file and the hash), the client obtains the SHA2 hash of the downloaded file and
+then compares it with the downloaded hash. If the two match, then that would
+mean the file was not tampered along the way.
+
+If an attacker manages to intercept the downloaded file, alter the file's
+contents, and then forward the tampered file to the recipient, that malicious
+act won't go unnoticed. That's because, once the client runs the tampered file
+through the agreed hash algorithm, the resulting hash won't match the
+downloaded hash. This will let the receiver know the file was tampered along he
+way.
+
+So a hash function should do the trick then? Not so fast. While a hash function
+can establish *data integrity*, i.e. that the file or message wasn't altered
+along the way, it can't establish *authenticity*. How would the client know the
+message it received came from the legitimate source?
+
+That's why secure file transfer protocols like FTPS, SFTP, and HTTPS use HMACs
+instead of just hash functions.  When two parties exchange messages through
+those secure file transfer protocols, those messages will be accompanied by
+HMACs instead of plain hashes. An HMAC employs both a hash function and a
+shared secret key.
+
+A shared secret key provides exchanging parties a way to establish the
+authenticity of the message. That is, it provides the two parties a way of
+verifying whether both the message and MAC (more specifically, an HMAC) they
+receive really came from the party they're supposed to be transacting with.
+
+The secret key enables this capability because it's generated during key
+exchange, a preliminary process that requires the participation of the two
+parties. Only those two parties who participated in the key exchange would know
+what the shared secret key is. In turn, they would be the only ones who would
+be able to arrive at the same result if they compute the message's
+corresponding MAC using the shared secret key.
+
+**** Why is HMAC suitable for file transfers?
+Aside from its ability to enable data integrity and message authentication,
+another reason why HMAC is an excellent file transfer data integrity-checking
+mechanism is its efficiency. As discussed in the article Understanding Hashing,
+hash functions can take a message of arbitrary length and transform it into a
+fixed-length digest. That means, even if you have relatively long messages,
+their corresponding message digests can remain short, thereby allowing you to
+maximize bandwidth.
 
 *** [[https://www.jscape.com/blog/bid/84422/Symmetric-vs-Asymmetric-Encryption][Symmetric vs Asymmetric Encryption]]
 
@@ -2450,6 +2525,345 @@ File transfer systems normally use hybrid cryptosystems, i.e. a combination of
 symmetric and asymmetric key encryption, to provide secure file
 transfers. Symmetric keys facilitate faster file encryptions, while asymmetric
 keys simplify the key distribution process.
+
+*** [[https://www.jscape.com/blog/understanding-hashing][Understanding Hashing]]
+Hashes are essential to secure file transfers. You can find them in operations
+involving passwords, file integrity checks, digital signatures, digital
+certificate thumbprints or fingerprints, and others. But what are hashes? In
+this post, we'll introduce you to hashes, the concept of hashing, and its
+applications in various areas of security.
+
+**** What is hashing?
+Hashing is an operation that takes any string of text, regardless of length or
+size, as input and then provides a fixed-length string of characters as output.
+
+**** Encryption vs Hashing
+A hash looks pretty much like the output of an encryption operation
+(a.k.a. ciphertext) does it? Well, encryption and hashing operations do have
+similarities. However, they also have a couple of differences. First of all,
+unlike encryption, hashing is always one way. In fact, hashing is often called
+"one way encryption". So, while you can decrypt an encrypted text, you cannot
+"de-hash" a hashed text. We'll see why this can be a useful feature when we
+explain how hashes are used, e.g. in password authentication systems.
+
+**** Properties of secure cryptographic hash functions
+When hash functions (the underlying functions responsible for mapping the
+original text into a hash) are used in information security, they must adhere
+to certain properties. These three are the most important:
+
+1. *They must be efficient.* The cryptographic hash function must not consume a
+   lot of CPU cycles even if it's made to operate on a huge file.
+
+2. *They must be one way functions.* Meaning, it should be virtually impossible
+   to obtain the original text (a.k.a. the pre-image of the hash) from the
+   hash.
+
+3. *They must have collision resistance.* This means that it should be
+   virtually impossible to find two different text or documents that would
+   yield the same hash.
+
+
+**** Commonly used hash algorithms
+Some of the commonly used hashing algorithms include:
+
+- MD5 ::
+
+         Message Digest 5 or MD5 was developed by Ron Rivest, whose name is
+         immortalised as the R in RSA (a public key cryptosystem common in
+         various secure FTP protocols ). MD5 uses multiples of 512 bits as
+         input and produces a 128-bit message digest (or the hash) as
+         output. It is one of the older hashing algorithms but is now known to
+         have certain vulnerabilities in its collision resistance properties.
+
+- SHA1 ::
+
+          Like the MD5 hash, SHA1 (secure hash algorithm) also takes 512 bits
+          of input at a time. However, its output is 160 bits. SHA-1 was the
+          result of a joint project between the NSA and the NIST. Like MD5,
+          this cryptographic hash function has been proven to be relatively
+          vulnerable to certain collision attacks.
+
+- CRC ::
+
+         CRC or Cyclic Redundancy Check is an example of a non-cryptographic
+         hash function. Compared to cryptographic hash functions, CRC hash
+         functions can be easily reversed. Hence, it isn't ideal for
+         applications (e.g. digital signatures) that require functions with
+         strong irreversibility properties. It's more suitable for detecting
+         accidental changes in stored or transmitted files. In other words,
+         it's used for data integrity checks.
+
+- SHA-2 ::
+
+           Once the SHA1 hash function was found to have potential
+           vulnerabilities, the NSA decided to design a set of stronger hash
+           functions. The resulting product was SHA-2, a family of hash
+           functions that had 224, 256 and 384, and 512 bits. These were known
+           respectively as SHA224, SHA256, SHA384, and SHA512.
+
+
+**** Hashing passwords
+Secure systems never store passwords in the clear. That is, if you look at a
+password file, the list of usernames and their corresponding passwords wouldn't
+look like this:
+
+#+begin_example
+peter: password1234
+
+james: mac@pRoS
+
+sharon: shadowfax
+#+end_example
+
+Instead, it would likely look like this:
+
+#+begin_example
+peter: uclQZA4bN0DpisuT5mnGV2b2Zw3RYJupH/QQUrpIxvM=
+
+james: xw5UIGACzaNtYyZZjkaRY4a6uoVKhriy7NGLlW+COeM=
+
+sharon: VgGAZRvmCKHoedevnDP2fUHMfuUNTcTL2XqFJGK7/qg=
+#+end_example
+
+The strings of characters you see after the equal signs are actually hashes
+(actually, base-64 equivalents of hashes if you want to be more accurate) of
+each password. When a user logs in, the system first grabs whatever is entered
+into the password field and converts that into a password hash. It's that hash
+that's used when looking up the username/password pair in the password file. If
+a match is found, the user is allowed entry.
+
+That way, even if an attacker gets a hold of the password hash file, he
+wouldn't be able to use that file to login to the system.
+
+Hashing is better than encryption in this case because it eliminates the
+possibility of the hashed password being converted back to its plaintext
+equivalent. If you use encryption, it would be possible for an attacker to
+acquire all passwords (in plaintext) if he were somehow able to acquire the
+decryption key.
+
+**** Integrity checking
+Remember the second characteristic we were able to observe in the section "What
+is hashing?"? If you recall, we noticed that even the slightest change in the
+original text can result in an entirely different hash. This characteristic can
+be put to good use in data integrity checks. Let me give you a simple example.
+
+Let's say a user wants to download an important electronic document from a
+server. Because the integrity of the data in that document is important to him,
+he would like to know if the document is altered along the way. One way to do
+achieve this is by using a client and a server that supports the same hash
+function.
+
+Before sending the file, the server must first obtain a hash value of the file
+using that hash function. Once the client receives the file, it too must use
+the same hash function to generate a hash value. The two hash values must then
+be compared. If the two values are equal, then it would be safe to conclude
+that the file has been unchanged.
+
+**** Digital signatures
+Most data integrity checks are only carried out by the client. When a file is
+downloaded, it's usually already accompanied by the file's hash a.k.a. message
+digest. The client then generates its own hash from the file it downloaded and
+compares it with the message digest that came along with the download. This
+method has a flaw.
+
+What's to stop an attacker from intercepting the file, altering it, generating
+its own message digest using the same hash function, and then forwarding the
+altered file (along with the new message digest) to the client? Once the client
+receives the downloaded file and compares its locally-generated hash with the
+downloaded hash, they will naturally appear equal. No way will this qualify for
+a HIPAA compliant file transfer. It's therefore important for the client to
+*make sure that both the downloaded file and the downloaded hash came from the
+original source*.
+
+This can be done using *asymmetric encryption keys*. Assuming the client has
+the corresponding public key, the server can generate a "digital signature"
+using its private key and the message digest. Its this digital signature that
+will then be sent together with the file. So, when the client receives them, it
+can then use the public key to verify the authenticity of the signature and
+retrieve the message digest. Only then can the client compare the message
+digest with its locally-generated hash of the file.
+
+[[file:./resources/hashing-digital-signature.png]]
+
+A failure to authenticate could only mean that the private key that was used to
+generate the digital signature is not the pair of the public key used by the
+client. Digital signatures are common in SSL-secured protocols like FTPS.
+
+*** [[https://www.jscape.com/blog/what-is-a-digital-signature][What is a Digital Signature?]]
+Digital signatures help enforce security during data transfers. They're mainly
+responsible for establishing authentication, data integrity, and
+non-repudiation. Today, we'll be talking about the basic concepts behind
+digital signatures, where they're used, how they work, and why they're always
+an integral part of highly secure file transfers.
+
+**** Uses of digital signatures
+#+CINDEX:digital signatures
+Digital signatures are used to meet three important goals of information
+security: integrity, authentication, and non-repudiation.
+
+***** Data integrity
+#+CINDEX:integrity, data
+#+CINDEX:data integrity
+Message or Data integrity is particularly crucial during data transfers. Data
+integrity ensures that the message received by the recipient is exactly the
+same message sent by the sender. In wide area networks like the Internet, where
+messages have to hop from one node or network device to another before arriving
+at their intended final destination, there's always that risk of messages
+getting altered along the way whether deliberately or accidentally. Data
+integrity mechanisms help mitigate those risks. Through a data integrity check,
+you'll know if the message you received has been tampered.
+
+***** Authentication
+#+CINDEX:authentication
+When you receive a sensitive file, it's sometimes not enough to know that the
+information in that file has been unaltered. You would also want to be sure
+whether it really came from the person who you think sent it. In other words,
+you would need a mechanism that would enable you to authenticate the source.
+
+***** Non-repudiation
+#+CINDEX:non-repudiation
+Lastly, there may be data exchanges where you wouldn't want senders to disown
+transmissions they actually sent some time in the past. For example, if someone
+submits a report and the report is later found to be fraudulent, you wouldn't
+want the sender to deny the fact that he sent it.
+
+**** How digital signatures work
+So how do digital signatures help you achieve these information security goals?
+Perhaps it would be best to start by explaining how they work.
+
+#+CINDEX:asymmetric encryption keys
+#+CINDEX:public, private keys
+#+CINDEX:private, public keys
+#+CINDEX:secret keys
+#+CINDEX:verify digital signature
+#+CINDEX:key pair
+Cryptographic digital signatures make use of asymmetric encryption keys,
+i.e. public keys and their corresponding private keys (a.k.a. secret keys). The
+private key is used to create a digital signature (in other words, for
+"signing"), while the public encryption key is used for verifying the digital
+signature. What makes this work is the fact that a pair of public and private
+keys are so closely linked with one another that it would be virtually
+impossible for a public key to authenticate a signature generated by a private
+key that it isn't associated with.
+
+#+CINDEX:digital signature, create
+#+CINDEX:create digital signature
+So how does one create a digital signature?
+
+#+CINDEX:signing algorithm
+#+CINDEX:RSA, DSA, signing algorithms
+#+CINDEX:DSA, RSA, signing algorithms
+#+CINDEX:hash function, digital signature
+#+CINDEX:message digest, digital signature
+To create a digital signature, you would take the message or file you would
+like to sign and run it through a hash function. After that, you take the
+resulting message digest or hash, combine it with your private key, and then
+run them through a signing algorithm like RSA or DSA. The final result is that
+message's digital signature. Of course, in applications like a secure file
+transfer server, these things happen behind the scenes.
+
+Theoretically, you could skip that hash function part and simply run the file
+and the private key through some "signing algorithm" and still produce a
+"digital signature". However, if the file is so large, this would take a great
+deal of time. Besides, the resulting "signature" would also consume an
+impractically huge amount of space.
+
+#+CINDEX:verification process, digital signature
+#+CINDEX:digital signature verification process
+How about the digital signature verification process? This process now involves
+the secret key's public key pair. While the secret key is used to sign
+documents, its corresponding public key is used for verifying their
+authenticity. Remember when I told you that the public key is tightly linked to
+its private key?
+
+If you have a public key and the key fails to authenticate a document you just
+received, that would mean the secret key used for signing wasn't this public
+key's pair. Consequently, it would also mean that the document's source isn't
+who you expected it to be. That's how digital signatures are used for
+authentication.
+
+#+CINDEX:message digest, verification process
+During the same verification process, the public key is also used to extract
+the message digest that was originally combined with the private key to produce
+the digital signature. The retrieved message digest is then compared with the
+recipient's own locally-generated hash value of the received message. The
+recipient must know what hash function was used by the sender. If the
+locally-generated hash value and the extracted message digest are equal, then
+it would mean that integrity of the message has been preserved.
+
+Here's a simplified illustration of what we just discussed:
+
+[[file:./resources/hashing-digital-signature.png]]
+
+**** Summary of Digital Signature Creation
+
+#+CINDEX:hash function, SHA2 hashing algorithm
+#+CINDEX:SHA2 hashing algorithm
+#+CINDEX:message digest (hash)
+#+CINDEX:private key, digital signature
+1. At the source (in this case, a server), the document is run through a hash
+   function (e.g. SHA2 hashing algorithm) to produce a hash a.k.a. message
+   digest. The message digest is combined with the source's private key to
+   produce the document's digital signature.
+
+2. The digital signature is affixed to the document and both are sent to the
+   recipient (in this case, a client application).
+
+   #+CINDEX:public key, digital signature
+   #+CINDEX:message digest, decrypting
+3. At the client side, the message digest is extracted from the digital
+   signature using a copy of the server's public key that's in the client's
+   possession. Note that the client wouldn't be able to extract the message
+   digest if the public key in its possession doesn't match the private key
+   used to generate the digital signature.
+
+   #+CINDEX:hash function, identical to sender
+   #+CINDEX:locally-generated hash
+4. The client runs the document through the same hash function used by the
+   sender to produce its own locally-generated hash.
+
+5. The two hashes are compared.
+
+
+**** Goals of Digital Signatures
+If the two hashes are equal, it would prove two things:
+
+{{{subheading(Data Integrity and Authenticity)}}}
+
+#+CINDEX:integrity
+#+CINDEX:authenticity
+1. that the document was unaltered (thereby achieving *integrity*) and
+2. that the source is who the recipient expected it to be (thereby achieving
+   *authentication*).
+
+
+{{{subheading(Non-Repudiation)}}}
+
+#+CINDEX:non-repudiation
+If both are achieved, then there is no way the sender can later on deny that he
+sent the document. That's because none of these would be achieved if the wrong
+private key was used in step 1. Since only the source could (theoretically)
+have a hold of the private key, only the source could have initiated this
+particular transaction. And that is how digital signatures help establish
+*non-repudiation*.
+
+Its ability to help enforce *authentication*, *data integrity*, and
+*non-repudiation* can be very useful in automated business transactions and is
+the reason why digital signatures are integral to secure data transfer
+protocols like SFTP, FTPS, OFTP, and AS2.
+
+**** When digital signatures alone are not enough
+Notice how digital signatures are very dependent on the integrity of the
+encryption keys. What if the public key in your possession actually belongs to
+an impostor? It's possible for an attacker to pose as someone else and then
+dupe you into obtaining his (the attacker's) public key. Once that happens, the
+entire process illustrated earlier (from step 1 through 5) will proceed as
+normal even if (in actuality) it has already been compromised.
+
+In our next post, you'll learn how to mitigate this particular risk by using
+- digital certificates,
+- certificate authorities, and
+- other trust models.
 
 * Listings
 :PROPERTIES:
