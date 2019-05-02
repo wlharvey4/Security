@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.14.<2019-05-01 Wed 23:00>
+#+macro:version 0.2.15.<2019-05-02 Thu 02:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1762,6 +1762,374 @@ authorization token found" error message again.
 
 07:09 That's it.  You now have a front-end that access both public and private
 data from an API using a JSON web token.
+
+*** Lesson 8---Authenticate Users in a Single Page Application with Auth0
+In this lesson, we take the previous API and front-end and we convert them to
+use Auth0 to replace our custom authentication server built in the previous
+lessons.
+
+00:00 Since this lesson is aimed at using Auth0 for authentication, the first
+thing we'll need to do is to go to the [[https://auth0.com/][auth0.com]] website and create a free
+account.
+
+00:09 The sign-up process is fairly straightforward.  You can use an email and
+password or you can use any of the social connections here.  This free account
+will give you access to most of the Auth0 API for up to 7,000 users, which is
+more than enough for the purpose of this lesson.
+
+00:24 Once you're signed up, you can log into your account, and you will land
+on this dashboard.  This shows you your active users and the number of logins
+in the last few days.
+
+00:34 From here, we'll want to go to the API section to create a new
+entry.  This is what will be used to protect our API.
+
+00:42 You can pick anything for the name.  Let's just use =egghead-demo=.  For
+the identifier, you can use anything, but it is recommended that you use the
+URL of your application.  In this case, we don't have a URL, so we'll just use
+=egghead-demo= as well.
+
+00:58 Finally, you will want to use =HS256= for the signing algorithm, because
+this is what we used in the previous lesson.
+
+Once you have this, you click on =create=, and the modal is closed, and you get
+redirected to the quick start page.
+
+01:11 If you look at this page, you get code examples on how to implement this
+with your API.  As you can see, it uses the same middleware as we currently use,
+the main difference being the settings for the middleware itself.
+
+01:24 We will have a secret key, but we also check who is the token meant for,
+the audience, and who created this token, the issuer.  Those are additional
+checks that will make your API even more secure.
+
+Let's now go back at our code editor and open ~api.js~.
+
+01:41 You can simply change the settings of the middleware by pasting the
+values you copied from the Auth0 website.  Note that those values will need to
+be the ones from your Auth0 account.  If you try to copy the values that I just
+pasted in, this won't work for you.
+
+#+begin_src js -n
+const jwtCheck = expressjwt({
+  secret: 't2ABNgm7aB8YrMrnsutSB0bPNtLZbC7P',
+  audience: 'secure-spa-auth0',
+  issuer: "https://joel-1.auth0.com/"
+});
+#+end_src
+
+01:56 We can now head to our terminal window and start our API server by
+running ~node api~.  Your server is now running on port 8888.
+
+If you try this now, nothing will work.  Your front end also needs to get a
+token from Auth0.  Let's get back to our code and do those changes.
+
+02:13 Because we won't be using our authorization server anymore, we can go
+ahead and remove the ~auth.js~ file from this folder altogether.
+
+It's now time to edit our ~index.html~ page to use Auth0's authentication server
+instead of ours.
+
+02:28 The first thing that we'll want to do is to remove the login modal.  We
+will be using Auth0's login screen, so let's go to line 21 and remove those
+data tags that were used to open the modal.
+
+02:40 We can also rename this button to be =loginBtn= instead.
+
+Since we won't be using the modal anymore, we can go down here and delete all
+of the markup for our login modal.
+
+02:55 We will use Auth0's library, which we will get from their CDN.  We can
+add a script tag.  The source will be =https://cdn.auth0.com/js/auth0/=, the
+version number, which is =9.5.1=, the latest at this moment, and finally
+=/auth0.min.js=.
+: <script src="https://cdn.auth0.com/js/auth0/9.5.1/auth0.min.js"></script>
+
+03:21 Our ~index.html~ file is not ready, but to finish the UI changes, we will
+need to go to the ~ui-update.js~ file and do a few minor changes in
+there.  Instead of showing and hiding the login modal button, we will do that on
+the =loginBtn=.  Let's change line 5 to use =loginBtn=, and same thing on
+line 11.  We're almost done.
+
+: ui-update.js
+: ------------
+
+#+begin_src js -n
+UIUpdate.loggedIn = function(token) {
+  UIUpdate.alertBox(`Just logged in<br>Token:<br>${ACCESS_TOKEN}`);
+  loginBtn.classList.add("d-none");
+  logoutBtn.classList.remove("d-none");
+};
+
+UIUpdate.loggedOut = function() {
+  localStorage.removeItem("access_token");
+  loginBtn.classList.remove("d-none");
+  logoutBtn.classList.add("d-none");
+};
+#+end_src
+
+03:44 Let's open our ~index.js~ file to change our code to use Auth0's
+authentication server instead of the one we built.  In here, we will need to
+use Auth0's =webAuth= object.  First, we need to get the settings for this
+object.  Let's go back to Auth0's website and go into the =Applications=
+section.
+
+04:03 In here, we choose to create a new application.  We can name it whatever,
+but we will use =egghead-demo= for consistency.  This application is of type
+=single-page application=, so we can select this and click on create.
+
+04:17 Similar to when we created the API, we get a screen that suggests us
+various quick starts.  In here, you can find for most major JavaScript
+frameworks, but we are going to use plain vanilla JavaScript here.
+
+04:30 If you scroll down, you will find a section which has all of your
+settings for your application.  Once again, make sure that you copy those from
+your Auth0 account, and not those from this video.  Let's copy that and go back
+to our code.
+
+04:44 Now we can create a =webAuth= object using a new =auth0.WebAuth=, and we
+can paste the settings we got from the quick start.
+
+: index.js
+: --------
+
+#+begin_src js -n
+let webAuth = new auth0.WebAuth({
+  domain: 'joel-1.auth0.com',
+  clientID: '8vXPduLlATyDg69DF13J7JY4xN2vveOG',
+  responseType: 'token id_token',
+  audience: 'https://joel-sandbox.auth0.com/userinfo',
+  scope: 'openid',
+  redirectUri: window.location.href
+});
+#+end_src
+
+04:52 If you use Auth0's application with a default setting, it is =OpenID
+Connect-enabled=, which is outside the scope of this lesson.  We will need to
+tweak the settings of this application in order to be able to use it.
+
+05:04 Going back to Auth0 and into the settings of our application, the first
+thing that we will need to change is the Callback URL.
+
+This is the page where users are redirected after they're logged in on
+Auth0.  You can go to your application, get the URL from there, and simply paste
+it in the settings.
+
+05:22 We will also need to go all the way down to the =Advanced= settings.  This
+is not an OIDC conformant application, so we can uncheck this.  We can change
+our JWT signature to also use =HS256=.  We're good.  Just save this, and we can
+head back to our code editor.
+
+05:42 We need to tweak our settings just a little bit here.  Our domain is the
+issuer of the token.  It's what is referred to as =tenant= in Auth0's website.  The
+=clientID= is found in your settings.  This should be good.
+
+05:54 In =responseType=, we won't need the =id_token=, so we can remove
+this.  The =audience= is the API that we want to connect to.  Let's change this to
+=egghead-demo=.  Finally, the scope is irrelevant in this case, so we can simply
+remove this.
+
+** Reference
+
+*** RFC 7797
+- https://tools.ietf.org/html/rfc7519
+
+**** Abstract
+JSON Web Token (JWT) is a compact, URL-safe means of representing /claims/ to
+be transferred between two parties.  The /claims/ in a JWT are encoded as a
+JSON object that is used as the /payload/ of a JSON Web Signature (JWS)
+structure or as the plaintext of a JSON Web Encryption (JWE) structure,
+enabling the claims to be digitally signed or integrity protected with a
+Message Authentication Code (MAC) and/or encrypted.
+
+- claims
+- payload
+- JSON Web Signature structure (JWS) [[https://www.rfc-editor.org/info/rfc7515][RFC 7515]]
+- JSON Web Encryption structure (JWE) [[https://tools.ietf.org/html/rfc7516][RFC 7516]]
+- digital signature
+- integrity protected
+- Message Authentication Code (MAC)
+- Base64url Encoding
+
+The terms "JSON Web Signature (JWS)", "Base64url Encoding", "Header Parameter",
+"JOSE Header", "JWS Compact Serialization", "JWS Payload", "JWS Signature", and
+"Unsecured JWS" are defined by the JWS specification:
+- https://tools.ietf.org/html/rfc7519#ref-JWS
+
+*JSON Web Signature (JWS)* represents content secured with digital signatures
+or Message Authentication Codes (MACs) using JSON-based data structures.
+Related encryption capabilities are described in the separate JSON Web
+Encryption (JWE) specification.  The JWS cryptographic mechanisms provide
+integrity protection for an arbitrary sequence of octets.
+- https://www.rfc-editor.org/rfc/rfc7515.txt
+
+
+*JSON Web Encryption (JWE)* represents encrypted content using JSON-based data
+structures.  Cryptographic algorithms and identifiers for use with this
+specification are described in the separate JSON Web Algorithms (JWA)
+specification and IANA registries defined by that specification.  The JWE
+cryptographic mechanisms encrypt and provide integrity protection for an
+arbitrary sequence of octets.
+- https://tools.ietf.org/html/rfc7516
+
+Two closely related serializations for JWEs are defined.  The JWE Compact
+Serialization is a compact, URL-safe representation intended for space
+constrained environments such as HTTP Authorization headers and URI query
+parameters.  The JWE JSON Serialization represents JWEs as JSON objects and
+enables the same content to be encrypted to multiple parties.  Both share the
+same cryptographic underpinnings.
+- https://tools.ietf.org/html/rfc7516
+
+**** Introduction
+JSON Web Token (JWT) is a compact /claims representation format/ intended for
+space constrained environments such as HTTP Authorization headers and URI query
+parameters.
+
+JWTs encode /claims/ to be transmitted as a JSON [RFC7159] object that is used
+as the payload of a JSON Web Signature (JWS) [JWS] structure or as the
+plaintext of a JSON Web Encryption (JWE) [JWE] structure, enabling the /claims/
+to be digitally signed or integrity protected with a Message Authentication
+Code (MAC) and/or encrypted.
+
+ The suggested pronunciation of JWT is the same as the English word "jot".
+
+**** Definitions
+
+- JSON Web Token (JWT) ::
+
+     A string representing a set of claims as a JSON object that is encoded in
+     a JWS or JWE, enabling the claims to be digitally signed or MACed and/or
+     encrypted.
+
+- JSON Web Signature (JWS) ::
+
+     A data structure representing a digitally signed or MACed message.
+
+- JOSE Header ::
+
+                 JSON object containing the parameters describing the
+                 cryptographic operations and parameters employed.  The JOSE
+                 (JSON Object Signing and Encryption) Header is comprised of a
+                 set of Header Parameters.
+
+- JWS Payload ::
+                 The sequence of octets to be secured -- a.k.a. the message.
+                 The payload can contain an arbitrary sequence of octets.
+
+- JWS Signature ::
+
+                   Digital signature or MAC over the JWS Protected Header and
+                   the JWS Payload.
+
+- Base64url Encoding ::
+
+     Base64 encoding using the URL- and filename-safe character set defined in
+     Section 5 of RFC 4648 [RFC4648], with all trailing '=' characters omitted
+     (as permitted by Section 3.2) and without the inclusion of any line
+     breaks, whitespace, or other additional characters.
+
+- JSON Web Encryption (JWE) ::
+
+     A data structure representing an encrypted and integrity-protected
+     message.  JWE represents encrypted content using JSON data structures and
+     base64url encoding.
+
+- JWT Claims Set ::
+
+                    A JSON object that contains the claims conveyed by the JWT.
+
+- Claim ::
+
+           A piece of information asserted about a subject.  A claim is
+           represented as a name/value pair consisting of a Claim Name and a
+           Claim Value.
+
+- Claim Name ::
+
+                The name portion of a claim representation.  A Claim Name is
+                always a string.
+
+- Claim Value ::
+
+                 The value portion of a claim representation.  A Claim Value
+                 can be any JSON value.
+
+- Nested JWT ::
+
+                A JWT in which nested signing and/or encryption are employed.
+                In Nested JWTs, a JWT is used as the payload or plaintext value
+                of an enclosing JWS or JWE structure, respectively.
+
+- Unsecured JWT ::
+
+                   A JWT whose claims are not integrity protected or encrypted.
+
+- Collision-Resistant Name ::
+
+     A name in a namespace that enables names to be allocated in a manner such
+     that they are highly unlikely to collide with other names.
+
+- StringOrURI ::
+
+                 A JSON string value, with the additional requirement that
+                 while arbitrary string values MAY be used, any value
+                 containing a ":" character MUST be a URI [RFC3986].
+                 StringOrURI values are compared as case-sensitive strings with
+                 no transformations or canonicalizations applied.
+
+- NumericDate ::
+
+                 A JSON numeric value representing the number of seconds from
+                 1970-01-01T00:00:00Z UTC until the specified UTC date/time,
+                 ignoring leap seconds.  This is equivalent to the IEEE Std
+                 1003.1, 2013 Edition [POSIX.1] definition "Seconds Since the
+                 Epoch", in which each day is accounted for by exactly 86400
+                 seconds, other than that non-integer values can be
+                 represented.  See RFC 3339 [RFC3339] for details regarding
+                 date/times in general and UTC in particular.
+
+**** Overview
+JWTs represent a set of /claims/ as a JSON object that is encoded in a JWS
+and/or JWE structure.  This JSON object is the JWT Claims Set.
+
+As per Section 4 of RFC 7159 [RFC7159], the JSON object consists of zero or
+more /name/value pairs/ (or /members/), where the names are strings and the
+values are arbitrary JSON values.  These members are the /claims/ represented
+by the JWT.
+
+This JSON object MAY contain whitespace and/or line breaks before or after any
+JSON values or structural characters, in accordance with Section 2 of RFC 7159
+[RFC7159].
+
+The member names within the JWT Claims Set are referred to as /Claim Names/.
+The corresponding values are referred to as /Claim Values/.
+
+The contents of the *JOSE Header* describe the cryptographic operations applied
+to the JWT Claims Set.
+
+If the JOSE Header is for a *JWS*, the JWT is represented as a JWS and the claims
+are digitally signed or MACed, with the JWT Claims Set being the JWS Payload.
+
+If the JOSE Header is for a *JWE*, the JWT is represented as a JWE and the
+claims are encrypted, with the JWT Claims Set being the plaintext encrypted by
+the JWE.
+
+A JWT may be enclosed in another JWE or JWS structure to create a *Nested JWT*,
+enabling nested signing and encryption to be performed.
+
+A JWT is represented as a sequence of URL-safe parts separated by period ('.')
+characters.  Each part contains a /base64url-encoded value/.  The number of parts
+in the JWT is dependent upon the representation of the resulting JWS using the
+JWS Compact Serialization or JWE using the JWE Compact Serialization.
+
+**** Example JWT
+The following example JOSE Header declares that the encoded object is a JWT,
+and the JWT is a JWS that is MACed using the HMAC SHA-256 algorithm:
+
+#+begin_src js
+{"typ":"JWT",
+      "alg":"HS256"}
+#+end_src
 
 * Listings
 :PROPERTIES:
