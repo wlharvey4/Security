@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.18.<2019-05-02 Thu 11:06>
+#+macro:version 0.3.0.<2019-05-02 Thu 12:54>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2319,8 +2319,10 @@ content: SWTs with HMAC SHA-256 and JWTs with a choice of algorithms, including
 signature, MAC, and encryption algorithms.
 
 * MACs and HMACs
-** Articles
-*** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
+[[*%5B%5Bhttps://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers%5D%5BWhat Is HMAC And How Does It Secure File Transfers?%5D%5D][What Is HMAC And How Does It Secure File Transfers?]]
+
+* Security Articles
+** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
   #+CINDEX:integrity
   #+CINDEX:authenticity
@@ -2332,7 +2334,7 @@ data integrity/message authentication is usually achieved through a mechanism
 known as HMAC.  In this post, we explain what HMAC is, its basic inner
 workings, and how it secures data transfers.
 
-**** Importance of data integrity checks in secure file transfers
+*** Importance of data integrity checks in secure file transfers
 Business decisions and processes are highly dependent on accurate and reliable
 data. If data gets tampered and the alterations go unnoticed, it could affect
 decisions and processes down the line. So if your data has to be transmitted
@@ -2345,7 +2347,7 @@ SFTP, and HTTPS are equipped with mechanisms for countering threats to data
 integrity. The most commonly used mechanism today is HMAC. Let me explain what
 it is.
 
-**** What is HMAC?
+*** What is HMAC?
 HMAC stands for Keyed-Hashing for Message Authentication. It's a message
 authentication code obtained by running a cryptographic hash function (like
 MD5, SHA1, and SHA256) over the data (to be authenticated) and a shared secret
@@ -2356,7 +2358,7 @@ authenticity. They both use cryptographic keys. And they both employ hash
 functions. The main difference is that digital signatures use asymmetric keys,
 while HMACs use symmetric keys.
 
-**** How HMAC works
+*** How HMAC works
 To understand how HMAC works, let's first examine how a hash function (on its
 own) could be used for conducting a data integrity check on a file
 transfer. Let's say a client application downloads a file from a remote
@@ -2400,7 +2402,7 @@ what the shared secret key is. In turn, they would be the only ones who would
 be able to arrive at the same result if they compute the message's
 corresponding MAC using the shared secret key.
 
-**** Why is HMAC suitable for file transfers?
+*** Why is HMAC suitable for file transfers?
 Aside from its ability to enable data integrity and message authentication,
 another reason why HMAC is an excellent file transfer data integrity-checking
 mechanism is its efficiency. As discussed in the article Understanding Hashing,
@@ -2409,7 +2411,7 @@ fixed-length digest. That means, even if you have relatively long messages,
 their corresponding message digests can remain short, thereby allowing you to
 maximize bandwidth.
 
-*** [[https://www.jscape.com/blog/bid/84422/Symmetric-vs-Asymmetric-Encryption][Symmetric vs Asymmetric Encryption]]
+** [[https://www.jscape.com/blog/bid/84422/Symmetric-vs-Asymmetric-Encryption][Symmetric vs Asymmetric Encryption]]
 
 Secure file transfer protocols generally employ a combination of symmetric and
 asymmetric encryption to preserve the confidentiality of data while in
@@ -2417,7 +2419,7 @@ transit. So why the need for two kinds of encryption? In this post, we take a
 closer look at the main functions of symmetric and asymmetric encryption, their
 strengths, their weaknesses, and why we'd prefer having both.
 
-**** Symmetric key encryption
+*** Symmetric key encryption
 Symmetric key encryption is a type of encryption that makes use of a single key
 for both the encryption and decryption process. Some of the encryption
 algorithms that use symmetric keys include: AES (Advanced Encryption Standard),
@@ -2433,7 +2435,7 @@ encryption and one of your users wants to encrypt a file first before uploading
 it, one of you (either the user or you, the server admin) should first generate
 a key and then send the other person a copy of that key.
 
-**** Asymmetric key encryption
+*** Asymmetric key encryption
 Asymmetric key encryption, on the other hand, makes use of two keys. A private
 key and a public key. The public key is used for encrypting, while the private
 key is used for decrypting. Two of the most widely used asymmetric key
@@ -2449,7 +2451,7 @@ uploading it, it would typically be your duty to generate the key pair. You
 should then send the public key to your user and leave the private key on the
 server.
 
-**** Which is stronger?
+*** Which is stronger?
 Actually, it's difficult to compare the cryptographic strengths of symmetric
 and asymmetric key encryptions. Even though asymmetric key lengths are
 generally much longer (e.g. 1024 and 2048) than symmetric key lengths (e.g. 128
@@ -2489,7 +2491,7 @@ attacks on public keys but that's for another story). Anyone who holds a copy
 of that public key can encrypt a file prior to uploading to your server. Then
 once the file gets uploaded, you can decrypt it with your private key.
 
-**** Getting the best of both worlds with hybrid cryptosystems
+*** Getting the best of both worlds with hybrid cryptosystems
 Because both symmetric and asymmetric key cryptography have their own
 advantages, modern file transfer systems typically employ a hybrid of the
 two. Some hybrid cryptosystems are:
@@ -2520,24 +2522,24 @@ used in secure file transfer protocols like SFTP and FTPS.
 
 [[file:./resources/hybrid_cryptosystem.png]]
 
-**** Summary
+*** Summary
 File transfer systems normally use hybrid cryptosystems, i.e. a combination of
 symmetric and asymmetric key encryption, to provide secure file
 transfers. Symmetric keys facilitate faster file encryptions, while asymmetric
 keys simplify the key distribution process.
 
-*** [[https://www.jscape.com/blog/understanding-hashing][Understanding Hashing]]
+** [[https://www.jscape.com/blog/understanding-hashing][Understanding Hashing]]
 Hashes are essential to secure file transfers. You can find them in operations
 involving passwords, file integrity checks, digital signatures, digital
 certificate thumbprints or fingerprints, and others. But what are hashes? In
 this post, we'll introduce you to hashes, the concept of hashing, and its
 applications in various areas of security.
 
-**** What is hashing?
+*** What is hashing?
 Hashing is an operation that takes any string of text, regardless of length or
 size, as input and then provides a fixed-length string of characters as output.
 
-**** Encryption vs Hashing
+*** Encryption vs Hashing
 A hash looks pretty much like the output of an encryption operation
 (a.k.a. ciphertext) does it? Well, encryption and hashing operations do have
 similarities. However, they also have a couple of differences. First of all,
@@ -2546,7 +2548,7 @@ unlike encryption, hashing is always one way. In fact, hashing is often called
 "de-hash" a hashed text. We'll see why this can be a useful feature when we
 explain how hashes are used, e.g. in password authentication systems.
 
-**** Properties of secure cryptographic hash functions
+*** Properties of secure cryptographic hash functions
 When hash functions (the underlying functions responsible for mapping the
 original text into a hash) are used in information security, they must adhere
 to certain properties. These three are the most important:
@@ -2563,7 +2565,7 @@ to certain properties. These three are the most important:
    yield the same hash.
 
 
-**** Commonly used hash algorithms
+*** Commonly used hash algorithms
 Some of the commonly used hashing algorithms include:
 
 - MD5 ::
@@ -2602,7 +2604,7 @@ Some of the commonly used hashing algorithms include:
            respectively as SHA224, SHA256, SHA384, and SHA512.
 
 
-**** Hashing passwords
+*** Hashing passwords
 Secure systems never store passwords in the clear. That is, if you look at a
 password file, the list of usernames and their corresponding passwords wouldn't
 look like this:
@@ -2641,7 +2643,7 @@ equivalent. If you use encryption, it would be possible for an attacker to
 acquire all passwords (in plaintext) if he were somehow able to acquire the
 decryption key.
 
-**** Integrity checking
+*** Integrity checking
 Remember the second characteristic we were able to observe in the section "What
 is hashing?"? If you recall, we noticed that even the slightest change in the
 original text can result in an entirely different hash. This characteristic can
@@ -2659,7 +2661,7 @@ the same hash function to generate a hash value. The two hash values must then
 be compared. If the two values are equal, then it would be safe to conclude
 that the file has been unchanged.
 
-**** Digital signatures
+*** Digital signatures
 Most data integrity checks are only carried out by the client. When a file is
 downloaded, it's usually already accompanied by the file's hash a.k.a. message
 digest. The client then generates its own hash from the file it downloaded and
@@ -2689,19 +2691,19 @@ A failure to authenticate could only mean that the private key that was used to
 generate the digital signature is not the pair of the public key used by the
 client. Digital signatures are common in SSL-secured protocols like FTPS.
 
-*** [[https://www.jscape.com/blog/what-is-a-digital-signature][What is a Digital Signature?]]
+** [[https://www.jscape.com/blog/what-is-a-digital-signature][What is a Digital Signature?]]
 Digital signatures help enforce security during data transfers. They're mainly
 responsible for establishing authentication, data integrity, and
 non-repudiation. Today, we'll be talking about the basic concepts behind
 digital signatures, where they're used, how they work, and why they're always
 an integral part of highly secure file transfers.
 
-**** Uses of digital signatures
+*** Uses of digital signatures
 #+CINDEX:digital signatures
 Digital signatures are used to meet three important goals of information
 security: integrity, authentication, and non-repudiation.
 
-***** Data integrity
+**** Data integrity
 #+CINDEX:integrity, data
 #+CINDEX:data integrity
 Message or Data integrity is particularly crucial during data transfers. Data
@@ -2713,21 +2715,21 @@ getting altered along the way whether deliberately or accidentally. Data
 integrity mechanisms help mitigate those risks. Through a data integrity check,
 you'll know if the message you received has been tampered.
 
-***** Authentication
+**** Authentication
 #+CINDEX:authentication
 When you receive a sensitive file, it's sometimes not enough to know that the
 information in that file has been unaltered. You would also want to be sure
 whether it really came from the person who you think sent it. In other words,
 you would need a mechanism that would enable you to authenticate the source.
 
-***** Non-repudiation
+**** Non-repudiation
 #+CINDEX:non-repudiation
 Lastly, there may be data exchanges where you wouldn't want senders to disown
 transmissions they actually sent some time in the past. For example, if someone
 submits a report and the report is later found to be fraudulent, you wouldn't
 want the sender to deny the fact that he sent it.
 
-**** How digital signatures work
+*** How digital signatures work
 So how do digital signatures help you achieve these information security goals?
 Perhaps it would be best to start by explaining how they work.
 
@@ -2795,7 +2797,7 @@ Here's a simplified illustration of what we just discussed:
 
 [[file:./resources/hashing-digital-signature.png]]
 
-**** Summary of Digital Signature Creation
+*** Summary of Digital Signature Creation
 
 #+CINDEX:hash function, SHA2 hashing algorithm
 #+CINDEX:SHA2 hashing algorithm
@@ -2825,7 +2827,7 @@ Here's a simplified illustration of what we just discussed:
 5. The two hashes are compared.
 
 
-**** Goals of Digital Signatures
+*** Goals of Digital Signatures
 If the two hashes are equal, it would prove two things:
 
 {{{subheading(Data Integrity and Authenticity)}}}
@@ -2852,7 +2854,7 @@ Its ability to help enforce *authentication*, *data integrity*, and
 the reason why digital signatures are integral to secure data transfer
 protocols like SFTP, FTPS, OFTP, and AS2.
 
-**** When digital signatures alone are not enough
+*** When digital signatures alone are not enough
 Notice how digital signatures are very dependent on the integrity of the
 encryption keys. What if the public key in your possession actually belongs to
 an impostor? It's possible for an attacker to pose as someone else and then
@@ -2864,6 +2866,731 @@ In our next post, you'll learn how to mitigate this particular risk by using
 - digital certificates,
 - certificate authorities, and
 - other trust models.
+** [[https://www.jscape.com/blog/what-is-a-digital-certificate][What Is A Digital Certificate?]]
+When users come to your website, they have a way of telling whether your site
+is safe to connect with or not. It comes in the form of something called a
+digital certificate. Today, we'll help you understand what a digital
+certificate is, its key components, the role it plays in Web security, and
+other concepts associated with it.
+*** What a digital certificate is in a nutshell
+#+CINDEX:digital certificate
+#+CINDEX:cert
+A digital certificate primarily acts like an identification card; something
+like a driver's license, a passport, a company ID, or a school ID. It basically
+tells other people who you are. So that, for example, when a user arrives at
+your site looking for =yourdomain.com=, your site's digital certificate
+(a.k.a. "cert") will help that user confirm whether he actually landed at
+=yourdomain.com=.
+
+#+CINDEX:public key, digital certificate
+In addition, a cert also holds a copy of your site's public key, which is used
+in encrypting data transmitted between your site and the user's web client (in
+most cases, a web browser).
+
+Not all websites offer digital certificates. In the past, the use of digital
+certificates were mostly limited to sites with whom users had to engage in
+secure transactions or share sensitive information. For instance, you normally
+encountered certs on online banking websites, secure file transfer servers,
+major e-commerce sites, or EDI servers. But because users are now becoming more
+conscious about web security, more and more sites are employing digital
+certificates to gain users' trust.
+
+You won't actually see the entire digital certificate as you connect to a
+site. However, you'll easily know it's there. Websites protected by certs
+usually display a lock icon followed by "https" on the leftmost part of that
+site's URL when viewed on your browser's URL bar. To view the contents of the
+cert, just click on the lock icon.
+
+#+CINDEX:X.509 standard, digital certificates
+Most digital certificates in use today follow what is known as the X.509
+standard. X.509 is used in SSL (Secure Sockets Layer) and TLS (Transport Layer
+Security), so yes, it's what's being used in HTTPS, FTPS, WebDAVS and other
+secure data transfer protocols. Let's now take a look at the kind of
+information you'll find in this kind of certificate.
+
+*** Contents of a X.509 certificate
+The contents of a digital certificate typically include the following:
+
+- Information about the subject a.k.a. Subject Name ::
+
+     "subject" refers to the site represented by the cert.
+
+- Information about the certificate issuer/certificate authority (CA) ::
+
+     The CA is the body that issued and signed the certificate. More about this
+     shortly
+
+- Serial number ::
+
+                   This is the serial number assigned by the issuer to this
+                   certificate. Each issuer must make sure each certificate it
+                   issues has a unique serial number.
+
+- Version ::
+
+             The X.509 version used by a given certificate. These days, you'll
+             usually find version 3.
+
+- Validity period ::
+
+     Certs aren't meant to last forever. The validity period defines the period
+     over which the cert can still be deemed trustworthy.
+
+- Signature ::
+
+               This is the digital signature of the entire digital certificate,
+               generated using the certificate issuer's private key.
+
+- Signature algorithm ::
+
+     The cryptographic signature algorithm used to generate the digital
+     signature (e.g. SHA-1 with RSA Encryption)
+
+- Public key information ::
+
+     Information about the subject's public key. This includes:
+  - the algorithm (e.g. Elliptic Curve Public Key),
+  - the key size (e.g. 256 bits),
+  - the key usage (e.g. can encrypt, verify, derive), and
+  - the public key itself
+
+*** Certificate Key
+#+CINDEX:public key, digital certificates
+While most of the contents of a digital certificate are there for providing
+information regarding the subject, the issuer, or the certificate itself, the
+certificate key or public key has a special purpose. It's a vital component in
+the encryption of data exchanged between the server and the client.
+
+*** Certificate Authorities
+#+CINDEX:certificate authorities
+Another element of a digital certificate that does more than provide
+information is the certificate's digital signature. As mentioned earlier, the
+certificate's digital signature is generated using the certificate issuer's
+private key. If you've read the article on digital signatures, you know that a
+cert's digital signature can be used in authentication. But in order for a web
+client to verify/authenticate a digital signature, it will need a copy of the
+issuer's public key.
+
+If the issuer happens to be a widely recognized certificate authority (CA),
+that won't be a problem. A copy of that CA's public key will likely be
+pre-installed in the user's web browser. Popular Web browser's like Chrome,
+Firefox, Safari, and Internet Explorer all come with the certificates of
+recognized CAs. That means, they already contain copies of those certificate
+authorities' public keys and can therefore be used for verifying certificates
+issued/signed by them.
+
+#+CINDEX:signed certificates
+#+CINDEX:self-signed certificate
+Certificates signed by widely recognized CAs are called {{{dfn(signed
+certificates)}}}. There are also certificates that are simply signed by issuers
+who aren't widely recognized certificate authorities. For example, when you
+create your own digital certificate using JSCAPE MFT Server but don't bother
+processing a Certificate Signing Request (CSR), you will end up with what is
+known as a {{{dfn(self-signed certificate)}}}.
+
+If you want to see how a digital certificate is created, read the article [[HTTPS File Transfer][How
+To Set Up A HTTPS File Transfer]], especially the section entitled Preparing
+Server Keys.
+
+*** Signed vs Self-signed certificates
+#+CINDEX:certificate authorities
+#+CINDEX:due diligence
+In theory, certificate authorities are supposed to exercise due diligence
+before signing digital certificates submitted to them through CSRs. They need
+to verify first whether the information placed on the digital certificates are
+in fact true. This is important because their attestation would later on serve
+as the sole basis that certain websites who are able to present certs signed by
+them can really be trusted.
+
+So, assuming due diligence is really exercised, it would be safe to assume that
+signed certificates are more reliable and trustworthy than self-signed
+certificates. In fact, when a user attempts to connect to your site and your
+site only has a self-signed certificate, the user's browser will display
+a warning message.
+
+#+CINDEX:self-signed certificates, when safe
+Self-signed certificates are relatively safe to use internally, i.e., within
+your organization, where you have more control over the servers that operate in
+the network. So, for instance, you can use it to add security to a web file
+transfer that takes place behind your corporate firewall.
+
+** [[https://www.jscape.com/blog/an-overview-of-how-digital-certificates-work][An Overview of How Digital Certificates Work]]
+In our previous post, we discussed what a digital certificate is. Today, we're
+going to give you an overview of the basic process involving the creation,
+signing, deployment, and use of digital certificates.
+
+*** Server Certificates
+#+CINDEX:server certificates
+There are different types of digital certificates but we'll be focusing on the
+server certificates used in secure web servers since they're the most
+common. You come across these kinds of certificates on the Web everyday,
+particularly when you connect to sites that support HTTPS. A CA-signed server
+certificate is the kind of certificate you would need to deploy if you don't
+want Web browsers to display a warning when users attempt to connect to your
+secure file transfer server.
+
+*** CA Certificates - the certificates in your browser
+#+CINDEX:CA certificates
+#+CINDEX:Certificate Authority certificates
+Before any major Web browser like Chrome, Firefox, Safari or Internet Explorer
+connects to your server via HTTPS, it already has in its possession a set of
+certificates that can be used to verify the digital signature that will be
+found on your server certificate. These certificates are called {{{dfn(CA
+(Certificate Authority) certificates)}}}. On these certificates is a copy of
+the public key of the CA who might issue (sign) your server certificate.
+
+CA certificates of widely accepted certificate authorities are already
+pre-installed on popular Web browsers, so we don't worry about installing them
+anymore. This explains how CA certificates can verify the digital signature on
+server certificates (more about this process later). The private keys that are
+used for signing the server certificates already have their corresponding
+public key pairs on our users' Web browsers.
+
+*** Generating CSRs and having your cert signed by a CA
+You can create your own digital certificate if you want. You can use free tools
+like OpenSSL. Alternatively, you can also use built-in tools that come with
+secure file transfer software like JSCAPE MFT Server.
+
+#+CINDEX:CSR
+#+CINDEX:Certificate Signing Request (CSR)
+#+CINDEX:generate key pair
+You usually start by generating a private key / public key pair, followed by a
+CSR (Certificate Signing Request). The CSR would contain a copy of the public
+key and some basic information about the subject. Once you've generated a CSR,
+you would then submit that CSR to a CA.
+
+Once the CA is done signing the cert, the CA would then return the cert to you
+and you would then import that signed certificate to your server.
+
+If we recall our discussion on digital certificates, the signed cert would
+contain some basic information regarding the subject (your site), the issuer,
+the validity period, the public key (of your site), and a digital signature of
+the cert signed using the CA's private key.
+
+In summary,
+
+1. You generate a private key / public key pair and submit a CSR to a
+   Certificate Authority. The contents of the CSR will form part of the final
+   server certificate.
+
+2. The CA verifies whether the information on the certificate is correct and
+   then signs it using its (the CA's) private key. It then returns the signed
+   server certificate to you.
+
+3. You import the signed server certificate unto your server.
+
+*** Sending of server certificate during SSL Handshake
+Before a browser and an HTTPS server can exchange data over an encrypted
+connection, they first engage in a process known as the SSL handshake. One
+important part in the SSL handshake is the sending of the server certificate to
+the web browser. It's here when the Web browser is able to authenticate the
+identity of the server it's connecting to.
+
+As soon as the browser receives a copy of the server certificate, it checks
+which CA signed the server cert and then retrieves the CA certificate of that
+particular Certificate Authority. It then uses the public key on that CA
+certificate to verify the digital signature on the server cert.
+
+Once the digital signature has been authenticated, the browser and server can
+proceed with the rest of the SSL process.
+
+** [[https://www.jscape.com/blog/how-to-set-up-https-file-transfer][How To Set Up A HTTPS File Transfer]] (on JSCAPE MFT Server)
+#+CINDEX:HTTPS file transfer
+<<HTTPS File Transfer>> In this post, you'll learn how to set up a HTTPS file
+transfer. We'll begin with a "quickstart", where you'll use the default
+settings in order to get a HTTPS file transfer service up and running with just
+a few clicks. After that, we'll tackle some of the more advanced settings so
+you can choose your desired set of SSL/TLS cipher suites and server key. Your
+choice of cipher suites and keys will have an effect on the security of your
+HTTPS service and its compatibility with your users' web browsers.
+
+#+CINDEX:RFC 2818
+*Note*: The HTTPS or HTTP Secure protocol is defined in [[https://tools.ietf.org/html/rfc2818][RFC 2818]], so if you
+want a really technical discussion on HTTPS alone, feel free to read that.
+
+[[https://youtu.be/PeN4mhFSbjc][Video of Article]]
+
+** [[https://www.jscape.com/blog/bid/105104/how-to-set-up-a-web-file-transfer][How to Set Up a Web File Transfer]] (on JSCAPE MFT Server)
+In this post, you'll learn how to set up a web-based file transfer service
+using JSCAPE MFT Server. A web file transfer will allow your users to perform
+file transfers without having to install a file transfer client. To upload or
+download files, they'll just need to fire up their favorite Web browser like
+Firefox, Chrome, Safari, Internet Explorer, or Edge, enter the web server's
+URL, and login to the interface.
+** [[https://www.jscape.com/blog/bid/82339/What-is-an-SSL-File-Transfer][What is an SSL File Transfer?]]
+#+CINDEX:FTPS
+#+CINDEX:FTP-SSL
+#+CINDEX:SSL file transfer
+SSL file transfer is a term sometimes used in referring to a secure file
+transfer protocol known as FTPS or FTP-SSL. FTP is a network protocol used for
+transferring files, while SSL is a protocol for encrypting information sent
+over a network. This post is meant to help users understand what FTPS is and
+what it is capable of doing, particularly in terms of enhancing the security of
+your file transfers.
+
+The term "SSL file transfer" is also used to refer to file transfers using
+HTTPS, another secure network protocol. However, to keep this post concise,
+we'll just focus on FTPS.
+
+*** SSL Certificates
+#+CINDEX:SSL certificates
+At the heart of SSL (Secure Sockets Layer) file transfers are special files
+called SSL certificates. These files contain information that is vital to
+achieving security during file transfers. The two most common security
+functions of an SSL certificate is to help in authenticating the identity of a
+server and in facilitating encryption.
+
+#+CINDEX:digital certificate, SSL
+#+CINDEX:SSL certificate
+Some of the information found in an SSL certificate (a.k.a. digital
+certificate) include:
+
+- The dates over which the certificate could be considered valid;
+
+- Information regarding the subject (usually the organization/company who owns
+  the server or the server itself);
+
+- The subject's public key (this is what is used for encryption);
+
+- Information regarding the issuer of the certificate; and
+
+- The digital signature of the issuer
+
+
+#+CINDEX:X.509 standard
+All the information that should go into an SSL certificate is outlined by what
+is known as the X.509 standard.
+
+#+CINDEX:digital signature, SSL
+The digital signature (which is virtually impossible to forge) is an
+attestation of the issuer that the public key belongs to the "subject" whose
+identity is being described in the certificate.
+
+When used internally in an organization, SSL certificates are mostly
+self-signed. The person in charge of generating the certificates would use the
+company's certificate-generating program to issue the certificates. The program
+would then automatically affix the company's signature to each generated
+certificate.
+
+#+CINDEX:Certificate Signing Request (CSR)
+#+CINDEX:CSR
+#+CINDEX:Certificate Authority (CA)
+#+CINDEX:CA
+In the case of companies who offer file transfer services to a large number of
+external users, these companies normally issue what is known as a Certificate
+Signing Request (CSR) and submit it to a Certificate Authority or CA. The CA
+then puts the company under a vetting process to verify the company's true
+identity before issuing the requested digital certificate.
+
+Certificate Authorities are independent, trusted bodies whose digital signature
+on a certificate is meant to assure end users that the bearer of the
+certificate is really who he claims to be.
+
+*** How authentication is done in SSL File Transfers
+When a user attempts to connect to your managed file transfer server via FTPS,
+the server will send the user an SSL certificate. The user (or the user's file
+transfer client) should then review the contents of that certificate to verify
+whether the server he is about to establish a connection with is in fact the
+server he wants to connect to.
+
+You see, it is possible for an attacker to go between a user and your managed
+file transfer server and then pretend to be your server. If that attacker
+succeeds in impersonating your server, the user can be duped into sending vital
+information to him instead. SSL certificates can prevent that from happening.
+
+When a user does not recognize the SSL certificate coming from a server, that
+user can opt to cancel the connection. This would prevent any confidential
+information from falling into the wrong hands.
+
+But how can you be sure a certificate itself is legit? Can't an attacker simply
+issue a fake certificate and use that to trick your users?
+
+#+CINDEX:AnyClient service
+If your file transfer client is designed to identify certificates signed by
+CAs, it would prompt the user the moment it receives a certificate that hasn't
+been signed by one. If a CA's signature is found, the session will be allowed
+to proceed. The client ([[https://www.jscape.com/products/file-transfer-clients/anyclient/][AnyClient]] is used in figure below) would also prompt
+the user if it receives a self-signed certificate. In this case, the user may
+contact the server admin to verify the certificate.
+
+Prompting is mostly only done at the start of the first session. After
+verifying the certificate, the user can opt to save the certificate details
+into the client to avoid getting prompted again in future sessions.
+
+*** How SSL certificates facilitate encryption
+As mentioned earlier, one of the items in an SSL certificate is the server's
+public key. This public key has a corresponding private key, which is stored on
+the server. This pair of keys is responsible for encrypting the session key,
+which in turn is responsible for encrypting data exchanged over the FTPS
+connection.
+
+Because encryption renders information unreadable, any attacker who manages to
+get hold of data during transmission would not be able to read, tamper with, or
+make unauthorized alterations to the contents. Therefore, even if files have to
+go through highly insecure networks like the Internet, their contents can be
+kept safe when sent through an SSL file transfer.
+
+** [[https://www.jscape.com/blog/ssl-vs-tls-know-the-difference][SSL vs. TLS | Knowing the Difference Between SSL and TLS]]
+#+CINDEX:SSL
+#+CINDEX:TLS
+#+CINDEX:SSL/TLS
+SSL and TLS have many similarities. That's why, in most software applications,
+they're configured together as "SSL/TLS". However, there are several
+differences between SSL and TLS well, which is what we're going to talk about
+now.
+
+*** A brief discussion on the similarities
+#+CINDEX:Secure Socket Layer (SSL)
+#+CINDEX:Transport Layer Security (TLS)
+SSL (Secure Socket Layer) and TLS (Transport Layer Security) are very similar
+in many aspects. They both:
+
+- protect data privacy through data-in-motion encryption;
+- provide server and (optionally) client authentication;
+- check for message integrity using message authentication codes; and
+- perform a preliminary handshake process wherein the two communicating parties
+  negotiate for a common cipher suite.
+
+
+The similarities are closest between the first version of TLS (TLS 1.0) and the
+last version of SSL (SSL 3.0). In fact, TLS v 1.0 is often considered SSL v
+3.1. The former even had the ability to downgrade an ongoing connection to
+SSL 3.
+
+So how does TLS differ from SSL? What we have below is by no means an
+exhaustive list but here are some of the key differences:
+
+*Note*: All of our comparisons will be between TLS and SSLv3.0 because version
+3 is the only SSL version that's still (relatively) widely used.
+
+*** Absence of a =no_certificate= error alert in TLS
+In SSLv3.0 (refer to RFC 6101), a client would typically respond with a
+=no_certificate= alert message whenever the server requested a certificate for
+authentication but it (the client) had none to give. In TLS, this alert is no
+longer necessary. However, the client must (especially in TLS 1.2 - RFC 5246)
+send a certificate message containing no certificates.
+
+*** TLS has more Alert descriptions
+Whenever a problem is encountered during the course of a SSL or TLS connection,
+the party who discovers the problem would send out an alert message.
+
+SSLv3 had 12 of these messages.
+
+{{{subheading(SSL Alert Descriptions)}}}
+
+- Close Notify,
+- Unexpected Message,
+- Bad Record MAC,
+- Decompression Failure,
+- Handshake Failure,
+- No Certificate,
+- Bad Certificate,
+- Unsupported Certificate,
+- Certificate Revoked,
+- Certificate Expired,
+- Certificate Unknown, and
+- Illegal Parameter.
+
+
+TLS added 19 more to that (although "No Certificate" was removed). 
+
+{{{subheading(Additional Alert Descriptions only found in TLS)}}}
+
+- Decryption Failed,
+- Record Overflow,
+- Unknown CA (Certificate Authority),
+- Access Denied,
+- Decode Error,
+- Decrypt Error,
+- Export Restriction,
+- Protocol Version,
+- Insufficient Security,
+- Internal Error,
+- User Canceled,
+- No Renegotiation,
+- Unsupported Extension,
+- Certificate Unobtainable,
+- Unrecognized Name,
+- Bad Certificate Status Response,
+- Bad Certificate Hash Value,
+- Unkown PSK, and
+- No Application Protocol.
+
+*** TLS uses HMAC for message authentication
+#+CINDEX:integrity checks
+#+CINDEX:MAC
+#+CINDEX:HMAC
+SSL performs message integrity checks (to determine whether a message has been
+altered) through Message Authentication Codes (MACs) that use either MD5 or
+SHA. TLS, on the other hand, uses HMAC, allowing it to work with a wider
+variety of hash functions; not just MD5 and SHA.
+
+*** TLS uses a pseudorandom function to generate the key material
+#+CINDEX:pseudorandom function
+To generate the key material, TLS uses an HMAC-based pseudorandom function
+(PRF). SSL doesn't.
+
+*** TLS has a simpler way of arriving at the CertificateVerify message
+In cases wherein the server requests for a client certificate (to authenticate
+the client), the client is supposed to send a follow-up message some time after
+sending the Certificate message (the message that contains the client
+certificate). In TLSv1.2, this message must be sent right after the
+ClientKeyExchange message.
+
+This follow-up message, known as the CertificateVerify message, would enable
+the server to verify that the client certificate in fact originated from the
+actual client and not an impostor.
+
+This CertificateVerify message is actually a signature of the previous
+handhsake messages signed using the client certificate's corresponding private
+key. Because the server would have already had the corresponding public key
+(which accompanied the client certificate sent earlier) in its possession, it
+would be able to verify the signature.
+
+In TLS, everything that's needed to construct the CertificateVerify message can
+be found in the previous handshake messages. It wasn't the same in SSL, which,
+in addition to the handshake messages, also required the master secret and a
+couple of other values known as =pad_1= and =pad_2= (see RFC 6101, section
+5.6.8)
+
+*** Different set of cipher suites
+Another difference between TLS and SSL are their collection of cipher
+suites. SSL cipher suites typically begin with SSL_, while TLS cipher suites
+begin with TLS_. Notably missing in TLS are the FORTEZZA cipher suites, which
+are supported in SSLv3. On the other hand, notably present in the later
+versions of TLS (more specifically, starting at TLSv1.1) are the AES cipher
+suites. The Advanced Encryption Standard (AES) ciphersuites were integrated
+into TLS by virtue of RFC 3268.
+
+** [[https://www.jscape.com/blog/bid/81215/Roles-of-Server-and-Client-Keys-in-Secure-File-Transfers-Part-1][Roles of Server and Client Keys in Secure File Transfers - Part 1]]
+[Last updated on Feb 2019] Secure file transfers typically employ public key
+cryptography. This cryptographic system involves the use of two different keys:
+a public key and a private key. In JSCAPE MFT Server, such keys can be easily
+generated, imported, and exported in the Key Manager. But some first-time users
+find it hard to even start using the Key Manager. One reason for that is
+because they fail to see the difference between server keys and client keys.
+
+You see, both of them deal with public keys and private keys. Also, whether you
+generate server keys or client keys, the user interface and the fields you're
+asked to complete are quite identical.
+
+So what exactly is the difference between these two?
+
+Actually, server keys are primarily used for preserving the confidentiality of
+information contained in your file transfers and for authenticating a server's
+identity, while client keys are used for authenticating a client's identity.
+
+Perhaps we should start by defining what authentication and confidentiality
+exactly are.
+
+*** Authentication and Confidentiality
+Authentication and confidentiality are both vital ingredients for achieving
+information security; in our case, the security of our file transfers. But
+they're two different things.
+
+{{{subheading(Authentication)}}}
+
+Authentication allows you to verify the identity of anyone or even anything (as
+in the case of servers, workstations, and other machines) trying to gain access
+to your system. For instance, let's say you only want your trusted assistant,
+George, to download files from a certain directory in your managed file
+transfer server.
+
+If someone logs in to that directory as George, you would want to make sure
+that guy is really George and not someone just trying to impersonate him. The
+most common way of applying authentication is by requiring the person to login
+using George's username and password. This is known as {{{dfn(password
+authentication)}}}. Ideally, George's username and password are things only
+George would know.
+
+Another way to authenticate a user would be to require the user to submit
+something that only he should *have*. One example of this "something" is a
+/private key/, which is used in public key authentication. This is what we're
+interested in here.
+
+Here's a file transfer client ([[https://www.jscape.com/products/file-transfer-clients/anyclient/][AnyClient]]) requiring both password
+authentication and public key authentication:
+
+[[file:./resources/password_and_public_key_authentication-resized-600.png]]
+
+Once you are able to authenticate the identity of a person or machine, you
+would then be able to enforce other vital elements of information security such
+as authorization, accountability, and non-repudiation. But these terms are for
+another post. The next term we would like to define now is "confidentiality".
+
+{{{subheading(Confidentiality)}}}
+
+Authentication is usually applied at the start of a secure file transfer. Once
+identities have been verified, file transfers can be allowed to proceed. The
+next security objective would then be to preserve the confidentiality of
+whatever information is being transferred. That is, to keep the information
+private between the sender and the recipient.
+
+In most IT systems, confidentiality is enforced through encryption. Encryption
+renders normal text (known as plaintext) into something unreadable (known as
+ciphertext). This can be very useful especially if your file transfers go
+through highly unprotected networks like the Internet. Once the ciphertext
+reaches its intended recipient, it can then be transformed back to plaintext by
+'decrypting' it.
+
+Encryption and decryption are usually done through the use of keys. Some
+cryptographic systems use just one key for both encryption and
+decryption. Other systems use two; one key for encrypting and another key for
+decrypting.
+
+The most widely accepted kind of strong encryption is public key encryption and
+it uses two keys - a private key and a public key.
+
+*** How public key cryptography implements authentication and confidentiality
+Having learned about authentication and confidentiality, you're probably now in
+the position to understand how JSCAPE MFT Server uses public key cryptography
+(a.k.a. asymmetric key cryptography) to implement these two important elements
+of information security. Let's start by discussing how public key cryptography
+is able to uphold file transfer confidentiality.
+
+{{{subheading(Public keys and private keys for encryption)}}}
+
+Public key cryptography makes use of a pair of keys. One key in the key pair is
+called a private key, while the other one is called a public key. Public keys
+are used for encrypting files, while private keys are used for decrypting them.
+
+A private key is kept by the key's owner and, as its name implies, is supposed
+to be kept private. Meaning, only the owner should know what it is or where it
+is. A public key, on the other hand, is generally shared with others
+(sometimes, even to the general public).
+
+Proceed to [[Server-Client-Keys-Part 2][Part 2]].
+
+** [[https://www.jscape.com/blog/bid/82332/Roles-of-Server-and-Client-Keys-in-Secure-File-Transfers-Part-2][Roles of Server and Client Keys in Secure File Transfers - Part 2]]
+<<Server-Client-Keys-Part 2>>This is a continuation of Part 1. To preserve
+confidentiality in secure file transfers, public keys are given to end users
+while the private key is kept inside the managed file transfer server.
+
+When a user wants to do a secure file transfer, he simply encrypts his
+plaintext file using the public key in his possession. Because the file is
+encrypted, it is kept safe from prying eyes during transmission and the
+confidentiality of its contents is preserved. As soon as the encrypted file
+reaches the managed file transfer server, the server decrypts it using the
+public key's corresponding private key.
+
+So how does a user get a hold of the public key? Sometimes, a public key is
+sent by the server to the user's file transfer client at the start of a secure
+file transfer. For example, at the start of an FTPS session, the server sends a
+digital certificate that already contains a public key.
+
+{{{subheading(Public keys and private keys for authentication)}}}
+
+Public keys and private keys aren't only used for encryption. Because a
+particular private key and its corresponding public key are related, the public
+key can be used to verify that a certain private key is in fact its
+partner. This explains why they are also often used in authenticating clients
+at the start of a secure file transfer session.
+
+For example, in setting up SFTP, private keys are generated and then are each
+assigned to authorized end users. If the system is applied correctly, no two
+end users would have the same private key and each user would keep his/her own
+private key private. Also, the private keys' corresponding public keys would be
+kept in the server.
+
+So when a user logs in by submitting his private key to the server for
+verification, the server can verify the user's identity by using the private
+key's corresponding public key.
+
+*** Nailing down the difference between server keys and client keys
+After all that discussion about private keys, public keys, confidentiality and
+authentication, we're finally ready to differentiate server keys and client
+keys.
+
+{{{subheading(How server keys are used)}}}
+
+Whenever you generate a server key via the JSCAPE MFT Server's Key Manager,
+you're actually creating a public/private key pair that would later on be used
+primarily for encrypting files in secure file transfer protocols like SFTP,
+FTPS, or HTTPS. In other words, they would be used by your server to preserve
+the confidentiality of your file transfers.
+
+As mentioned earlier, the public key of this particular key pair is normally
+sent (sometimes as part of a digital certificate) to the client at the start of
+a secure file transfer session. The client then uses that public key to encrypt
+whatever file it sends to the server.
+
+*Note*: In some cases, server keys can also be used for server authentication
+(as in the case of HTTPS) or both server authentication and client
+authentication (as in the case of AS2).
+
+{{{subheading(How client keys are used)}}}
+
+On the other hand, whenever you generate a client key via the JSCAPE MFT
+Server's Key Manager, the resulting public/private key pairs would be used for
+authentication purposes.
+
+In the course of generating a client key, you would be asked to export that
+client key's private key.  It is that private key which you would send to an
+end user and, in turn, which the end user would load up to his file transfer
+client to do say [[SFTP public key authentication][SFTP public key authentication]] (see screenshot in Part 1).
+
+*** Summary
+Whenever you generate either a server key or a client key, you are actually
+creating a key pair consisting of a private key and a public key. However, the
+pair that's created when you generate a server key is mainly used for
+encrypting the session (with a few instances wherein they're used for
+authentication), while the pair that's created when you generate a client key
+is used for authenticating clients.
+
+** [[https://www.jscape.com/blog/setting-up-sftp-public-key-authentication-command-line][Setting Up SFTP Public Key Authentication On The Command Line]]
+<<SFTP public key authentication>> SFTP provides an alternative method for
+client authentication. It's called SFTP public key authentication. This method
+allows users to login to your SFTP service without entering a password and is
+often employed for automated file transfers. In this post, we'll walk you
+through the process of setting up this kind of authentication on the command
+line. It's really easier to do this on a GUI-based interface but if you simply
+love doing things on the terminal, this post is for you.
+
+*Note*: SFTP (through SSH) is usually installed on Linux distros, so we'll be
+using Linux for both the (SFTP) server and client machines in this tutorial.
+
+** [[https://www.jscape.com/blog/bid/104856/5-Big-Business-Benefits-of-Using-SSO-Single-Sign-On][Single Sign On]]
+Although it's been around for quite a while, Single Sign-On or SSO has just
+started gaining widespread adoption. But it's spreading real fast. In fact, if
+you surf the Web everyday, I bet you've seen many websites inviting you to
+login using one of these ...
+
+[[file:./resources/sso-examples.png]]
+
+Never tried clicking any of those buttons? There's really nothing to it. If you
+have absolutely no idea what SSO is, here's a good introductory article that
+should get you warmed up on this awesome technology:
+- [[https://www.jscape.com/blog/bid/104558/SSO-Single-Sign-On-Simplified][SSO (Single Sign-On) Simplified]]
+
+
+So why are organizations adopting SSO? And more importantly, why would you want
+to implement it in your business? Here are five reasons:
+
+** [[https://www.jscape.com/blog/bid/104558/SSO-Single-Sign-On-Simplified][SSO (Single Sign-On) Simplified]]
+There was a time when the average computer user had to enter login credentials
+only once per day - likely to simply gain access into the Windows
+environment. But in this cloud-computing/mobile device age, unless you've
+activated the "stay signed in" option (assuming it's available), you'd probably
+have to login to 5 or even 20 different Web sites or online applications per
+day.
+
+Many people already find it hard to remember a single username/password pair,
+let alone five or more. To work around this difficulty, some individuals use
+the same login credentials for all the sites or applications they need access
+to. But in doing so, they create a serious vulnerability. If a malicious
+individual gets hold of those credentials, he could potentially gain access to
+multiple applications.
+
+That's why some organizations have started implementing SSO or Single Sign-On.
+
+[[file:./resources/sso-google.png]]
+
+* LEGAL---Electronic Signatures
+** [[https://www.govinfo.gov/content/pkg/PLAW-106publ229/pdf/PLAW-106publ229.pdf][ELECTRONIC SIGNATURES IN GLOBAL AND NATIONAL COMMERCE ACT]]
+- PUBLIC LAW 106–229—JUNE 30, 2000
+- 114 STAT. 464
+- To facilitate the use of electronic records and signatures in interstate or
+  foreign commerce.
 
 * Listings
 :PROPERTIES:
