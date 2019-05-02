@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.2.13.<2019-05-01 Wed 16:36>
+#+macro:version 0.2.14.<2019-05-01 Wed 23:00>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1042,7 +1042,7 @@ app.get("/resource", (req, res) => {
 app.get("/resource/secret", jwtCheck, (req, res) => {
     res
     .status(200)
-    .send("Secret resource; you must be logged in to see this.");
+    .send("Secret resource; you should be logged in to see this.");
 });
 
 #+end_src
@@ -1460,17 +1460,12 @@ const logoutBtn = document.querySelector("#logoutBtn");
 
 <<headlineBtn.addEventListener>>
 
-secretBtn.addEventListener("click", (event) => {
+<<secretBtn.addEventListener>>
 
-});
+<<loginBtn.addEventListener>>
 
-logoutBtn.addEventListener("click", (event) => {
+<<logoutBtn.addEventListener>>
 
-});
-
-loginBtn.addEventListener("click", (event) => {
-
-});
 #+end_src
 **** Connect the Front End to the API Server
 #+CINDEX:api server
@@ -1545,13 +1540,14 @@ the jumbotron with the data from our response.
 
 #+name:headlineBtn.addEventListener
 #+begin_src js -n
-headlineBtn.addEventListener("click", () => {
-	fetch(`${API_URL}/resource`).then(resp => {
-		return resp.text() ;
-	}).then(data => {
-		UIUpdate.alertBox(data);
-	});
-});
+  headlineBtn.addEventListener("click", () => {
+          fetch(`${API_URL}/resource`).then(resp => {
+              UIUpdate.updateCat(resp.status);
+              return resp.text();
+          }).then(data => {
+              UIUpdate.alertBox(data);
+          });
+  });
 #+end_src
 
 {{{subheading(Test the PUBLIC Button)}}}
@@ -1568,13 +1564,14 @@ here, we will do a very similar code.  We start by doing a ~fetch~ to the
 and we update our jumbotron the same way we did for the public button.
 
 #+begin_src js -n
-secretBtn.addEventListener("click", (event) => {
-	fetch(`${API_URL}/resource/secret`,.then(resp => {
-		return resp.text();
-	}).then(data => {
-		UIUpdate.alertBox(data);
-	});
-});
+  secretBtn.addEventListener("click", (event) => {
+          fetch(`${API_URL}/resource/secret`).then(resp => {
+              UIUpdate.updateCat(resp.status);
+              return resp.text();
+          }).then(data => {
+              UIUpdate.alertBox(data);
+          });
+  });
 #+end_src
 
 {{{subheading(Test the PRIVATE Button)}}}
@@ -1591,16 +1588,15 @@ let's update our =httpCat= with the response that we get from the server.
 Before we return the parse body of our response, we can use the
 =UIUpdate.updateCat= method with the =resp.status= code.
 
-#+name:secretBtn.addEventListener
 #+begin_src js
-secretBtn.addEventListener("click", (event) => {
-	fetch(`${API_URL}/resource/secret`,.then(resp => {
-        UIUpdate.updateCat(resp.status);
-		return resp.text();
-	}).then(data => {
-		UIUpdate.alertBox(data);
-	});
-});
+  secretBtn.addEventListener("click", (event) => {
+          fetch(`${API_URL}/resource/secret`).then(resp => {
+              UIUpdate.updateCat(resp.status);
+              return resp.text();
+          }).then(data => {
+              UIUpdate.alertBox(data);
+          });
+  });
 #+end_src
 
 #+CINDEX:401 error code
@@ -1614,8 +1610,8 @@ code for an =unauthorized access=.
 #+CINDEX:@code{LOGIN} button
 #+CINDEX:authorization server
 03:00 Before we can pass in a token with our request, we will need to
-authenticate.  Let's go the =login= button click event listener and do a =POST=
-request to our authorization server.
+authenticate.  Let's go to the =login= button click event listener and do a
+=POST= request to our authorization server.
 
 #+CINDEX:Content-Type
 #+CINDEX:application/json
@@ -1623,9 +1619,9 @@ request to our authorization server.
 #+CINDEX:headers, request
 #+CINDEX:accept header
 03:12 In here, we will do a request to the =${AUTH_URL}/login= endpoint.  We
-will also specify a few options to our request.  First, this is not a =GET=, so
-we will need to add method =POST=; then we need to specify the headers to tell
-our server that we are sending =Content-Type:= "application/json".
+will also specify a few options with our request.  First, this is not a =GET=,
+so we will need to add method =POST=; then we need to specify the headers to
+tell our server that we are sending =Content-Type:"application/json"=.
 
 #+CINDEX:@code{UIUpdate} helper object
 03:31 We need to specify that we are ~accepting~ a response type of
@@ -1652,30 +1648,30 @@ logged in, so we can use the ~UIUpdate.loggedIn~ method to update our UI.
 
 #+name:loginBtn.addEventListener
 #+begin_src js -n
-loginBtn.addEventListener("click", (event) => {
-	fetch(`${AUTH_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        "accept": "application/json",
-      },
-      body: JSON.stringify(UIUpdate.getUsernamePassword())
-    }).then(resp => {
-    	UIUpdate.updateCat(resp.status);
-    	if (resp.status == 200) {
-    		return resp.json();
-    	} else {
-    		return resp.text();
-    	}
-	}).then(data => {
-		if (data.access_token) {
-			ACCESS_TOKEN = data.access_token;
-			data = `Access Token: ${data.access_token}`;
-			UIUpdate.loggedIn();
-		}
-		UIUpdate.alertBox(data);
-	});
-});
+  loginBtn.addEventListener("click", (event) => {
+      fetch(`${AUTH_URL}/login`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "accept": "application/json",
+          },
+          body: JSON.stringify(UIUpdate.getUsernamePassword())
+      }).then(resp => {
+          UIUpdate.updateCat(resp.status);
+          if (resp.status == 200) {
+              return resp.json();
+          } else {
+              return resp.text();
+          }
+      }).then(data => {
+          if (data.access_token) {
+              ACCESS_TOKEN = data.access_token;
+              data = `Access Token: ${data.access_token}`;
+              UIUpdate.loggedIn();
+          }
+          UIUpdate.alertBox(data);
+      });
+  });
 #+end_src
 
 **** Test the Authentication Login
