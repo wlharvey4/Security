@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.8.<2019-05-03 Fri 13:18>
+#+macro:version 0.3.9.<2019-05-03 Fri 14:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -5679,6 +5679,154 @@ publication):
 
 - refresh token ::
                    token used to refresh the access token when it expires
+
+** Article---The Beginner’s Guide to OAuth Dancing
+:PROPERTIES:
+:url:      https://medium.com/typeforms-engineering-blog/the-beginners-guide-to-oauth-dancing-4b8f3666de10
+:date:     Jun 19, 2018
+:author:   Anabella Spinelli
+:END:
+Let’s start with the basics: OAuth stands for Open Authorization. It’s a
+process through which an application or website can access private data from
+another website.
+
+This other website usually works only as a trusted identity provider. It gives
+the requesting app some basic information about you so that they can create a
+profile. This way, you don’t have to fill in a boring sign-up form and deal
+with yet another password.
+
+You’ve already used this at least a gazillion times, in fact you use it every
+time you clicked in “Log in with Facebook / Google / GitHub / etc.” You are
+shown a consent screen displaying which information from your (let’s say)
+Facebook profile you’re allowing that-hot-new-app.com to read (and sometimes,
+write!). After that, since that-hot-new-app.com trusts the identity provided by
+Facebook, they can create a profile for you on their database.
+
+The communication between that-hot-new-app.com and Facebook usually ends
+here. This is why your profile picture won’t change all across the Internet if
+you change it on Facebook. They just never go back to Facebook and ask for
+updated data.
+
+*** When marimba rhythms start to play
+There’s another purpose for building this kind of mechanism, one with way more
+potential: using the provider as a service provider. This means communicating
+with it regularly to supply enhanced features for your users. A nice example of
+this is Relive, a service that connects with different sports tracking apps to
+create Earth view videos of your run or ride. Every time you finish an
+activity, Relive prompts you offering to create a video from it. If you say
+yes, they’ll process it and notify you when it’s ready for social media
+bragging… I mean sharing.
+
+There’s really no technical difference between these two usages. That’s why you
+should be cautious about where you log in with your social media or
+Google/Gmail account (let’s call it YourFavoriteIdentityProvider).
+
+But don’t be afraid, just bear in mind that you’re authorizing your account to
+provide that-hot-new-app.com with that information detailed in the consent
+screen, potentially in a recurrent basis. Be aware of the permissions you
+grant, and make sure you know how to disable them whenever you don’t feel
+trusting anymore. For instance, if you are using your Google account for
+accessing that-hot-new-app.com but don’t want to allow that anymore, just go to
+https://myaccount.google.com/security#connectedapps and disable their
+access. All the main identity providers offer control over this.
+
+*** All right, but how do you dance the OAuth?
+Before you land on that-hot-new-app.com and even click on “Log in with
+YourFavoriteIdentityProvider”, someone, probably a developer, has to create an
+application on the provider’s site. This is a way of registering
+that-hot-new-app.com, so that later the provider knows who’s asking for private
+data.
+
+In this step, the developer will set up some information about the application:
+
+- the application’s name
+- the application’s website and most importantly:
+- a redirect URI. The provider will use this to tell the requesting app that
+  the user said yes 💍the application’s name the application’s website
+
+
+Once the app is registered, the provider will give that-hot-new-app.com a
+clientId and a clientSecret which will be used in the communications between
+them. They work sort of like a username and password for the application.
+
+Apart from that, the developer would have to find out what kind of data does
+the provider give access to, and how it’s segmented. These “segments” are known
+as scopes and they define access rights, usually separated in read/write
+categories. So for example, that-hot-new-app.com can request for "profile:read"
+and "contacts:read" scopes. This means they can read whatever the provider
+assigns to the "profile" and "contacts"” segments. Other things won’t be
+visible, for instance, your posts or what content you like.
+
+Well, just to make things simple for now on, let’s say that
+that-hot-new-app.com is a website that integrates with Typeform. You definitely
+want in on that, and quick, so on their website you click on “Log in with
+Typeform” to get right into the action. What’s next?
+
+Here’s a nice diagram to use as a map for the whole thing. It may look a bit
+complicated but don’t worry, we’ll examine each step up next.
+
+[[file:./resources/oauth_dance-50.png]]
+
+*** Authorize---the first step in the OAuth dance
+So, you take the initiative and click on “Connect with Typeform”. Here,
+that-hot-new-app.com (THNA from now on, ’cause I’m getting tired of writing
+dash-separated words) will redirect you to Typeform’s authorize endpoint
+(=/oauth/authorize=) and provide:
+
+- their clientId (remember, that’s THNA’s username)
+
+- their desired scopes (or access rights)
+
+- and their redirect URI again (Typeform already knows it, but we send it again
+  as an extra layer of security)
+
+
+That URL will look something like this:
+: https://api.typeform.com/oauth/authorize?
+: client_id=yourClientId&
+: scope=accounts:read+forms:read+results:read
+
+Typeform will use this information to generate a consent screen where you can
+review what sort of things you’re authorizing THNA to see and do.
+
+Once you have thoroughly read what you’re consenting to and happily click on
+“Allow”, Typeform send a temporary code to the redirect URI, like so:
+: https://that-hot-new-app.com/auth/redirect?code=xxxXXXxxxXXXxxx
+
+*** Token---it takes 2 to tangOAuth
+All this back and forth feels like someone’s taking you for a tango spin,
+right?
+
+The second step of the OAuth dance is when THNA receives that code, and
+exchanges it for an OAuth Token.
+
+So THNA takes that code and sends it back again to Typeform, along with the
+redirect URI (yes, again!), and the client secret (that’s the app’s password!).
+
+As reward for a dance well danced, THNA will get a shiny OAuth Token ✨ which
+it can use to interact with Typeform on behalf of the user, that is… you!
+
+*** Stay with me, sway with me
+From now on, in every request THNA makes to Typeform on your behalf they’ll
+have to include an Authorization header with that access token. With it,
+Typeform (or any other provider) can identify:
+
+- who’s asking for the data (in this case, THNA)
+
+- who’s the data about (you!)
+
+- and also make sure they have the correct authorization to access that data
+  (only what you consented to).
+
+*** Ready for the dance floor
+So now that you know all the steps and spins of the OAuth dancing technique you
+should be ready to create your own choreographies, I mean, integrations, and
+make the Internet an even greater place.
+
+If you have an idea to integrate with Typeform but you don’t really know where
+to start, make sure you don’t miss our upcoming tutorial for setting up a
+Node.js app using Typeform’s PassportJS strategy for authentication (or grab a
+free Node.js Typeform integration boilerplate [[https://github.com/anabellaspinelli/typeform-oauth-boilerplate][here]]!)
 
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
