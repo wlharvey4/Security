@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.2.<2019-05-03 Fri 09:12>
+#+macro:version 0.3.3.<2019-05-03 Fri 09:54>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2601,6 +2601,454 @@ Additionally, the
 - [[https://cloud.google.com/functions/][Google Cloud Functions]]
 
   to deploy a custom OAuth 2.0 authorization service to the cloud.
+
+** Article---Building a Basic Authorization Server using Authorization Code Flow
+:PROPERTIES:
+:url:      https://medium.com/@ratrosy/building-a-basic-authorization-server-using-authorization-code-flow-c06866859fb1
+:author:   Ratros Y.
+:date:     May 25, 2018
+:END:
+This document is part of the Understanding OAuth2 and Building a Basic
+Authorization Server of Your Own guide. It discusses in detail how
+Authorization Code flow works.
+
+*** Before you begin
+The sample code in this document uses Python 3 and the [[http://flask.pocoo.org/][flask]] framework. It is
+for demonstration purposes only. The code is designed to demonstrate the
+authorization process in an easy-to-understand manner; it does not necessarily
+represent the best practices in development.
+
+**** Setting up your environment
+1. Install the latest version of Python 3. See [[https://cloud.google.com/python/setup][Setting Up a Python Development
+   Environment]] for instructions.
+
+2. Install the following Python packages:
+   - flask,
+   - pyopenssl
+   - cryptography
+   - pyjwt
+
+   : pip install --upgrade flask pyopenssl cryptography pyjwt
+
+3. Generate a private/public key pair (~private.pem~ and ~public.pem~):
+
+   - Install the latest version of ~openssl~:
+
+     | OS                    | Instructions                                           |
+     |-----------------------+--------------------------------------------------------|
+     | Linux (Debian/Ubuntu) | =sudo apt-get install openssl=                         |
+     | macOS                 | (with Homebrew package manager) =brew install openssl= |
+     | Windows               | See [[https://wiki.openssl.org/index.php/Binaries][here]] for instructions.                             |
+     |-----------------------+--------------------------------------------------------|
+
+   - Prepare the private key: =openssl genrsa -out private.pem 2048=. Do not
+     specify a passphrase.
+
+   - Prepare the public key: =openssl rsa -in private.pem -pubout -outform PEM
+     -out public.pem=
+
+**** Downloading the code
+Download the source code [[https://github.com/michaelawyu/auth-server-sample][here]].
+
+The sample includes the following files:
+
+| Path                                         | Notes                                                                                              |
+|----------------------------------------------+----------------------------------------------------------------------------------------------------|
+| =client/AC_client.py=                        | A client web application using the Authorization Code flow to access a list of users.              |
+| =client/public.pem=                          | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =client/templates/AC_login.html=             | An HTML template for preparing the login page.                                                     |
+| =client/templates/users.html=                | An HTML template for preparing the results of user queries.                                        |
+| =auth_server/AC_auth_server.py=              | An authorization server responsible for issuing access tokens in the Authorization Code flow.      |
+| =auth_server/private.pem=                    | A private key for generating access tokens. You should replace this key file with one of your own. |
+| =auth_server/auth.py=                        | Includes method(s) for generating access tokens and more.                                          |
+| =auth_server/templates/AC_grant_access.html= | An HTML template for preparing the access request page.                                            |
+| =API_server/API_server.py=                   | A simple API server offering access to a list of users.                                            |
+| =API_server/public.pem=                      | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =API_server/auth.py=                         | Includes method(s) for verifying access tokens and more.                                           |
+|----------------------------------------------+----------------------------------------------------------------------------------------------------|
+
+**** Running the code
+Run the code separately as follows:
+
+#+begin_example
+python AC_client.py
+python AC_auth_server.py
+python API_server.py
+#+end_example
+
+Visit the client at http://127.0.0.1:5000. The authorization server listens at
+=127.0.0.1:5001= and the API server is available at =127.0.0.1:5002=.
+
+*** How the Authorization Code flow works
+
+**** Redirecting users to the sign-in page provided by the authorization server
+The flows starts with users visiting the path =/login=. The following code in
+=client/AC_client.py= presents a simple page at =/login= showing a button
+prompting users to sign in with the authorization server:
+
+#+begin_src python
+@app.route('/login')
+def login():
+  # Presents the login page
+  return render_template('AC_login.html', 
+                         dest = AUTH_PATH,
+                         client_id = CLIENT_ID,
+                         redirect_url = REDIRECT_URL)
+#+end_src
+
+Parameters =dest=, =response_type=, =client_id= and =redirect_url= are passed
+to build the full redirect URL. When the page is ready, pressing the buttons
+will redirect users to:
+: http://localhost:5001/auth?response_type=code&client_id=sample-client-id&redirect_url=http://localhost:5000/callback
+
+The value of =response_type=, =code=, indicates the initialization of the
+authorization code flow. Since the authorization server in this sample only
+supports one flow, the value is not used; however, if you plan to build an
+authorization server supporting multiple flows, use this value to determine
+which flow to initiate. Additionally, =client_id= uniquely identifies the
+client, and =redirect_url= is where the authorization code is sent.
+
+The =auth= method of the authorization server accepts these parameters, and
+renders a page describing what the client is requesting access to:
+
+#+begin_src python
+@app.route('/auth')
+def auth():
+  # Describe the access request of the client and ask user for approval
+  client_id = request.args.get('client_id')
+  redirect_url = request.args.get('redirect_url')
+
+  if None in [ client_id, redirect_url ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })
+
+  return render_template('AC_grant_access.html',
+                         client_id = client_id,
+                         redirect_url = redirect_url)
+#+end_src
+
+If users are OK with the requirements, they can sign in with their
+credentials. Sensitive information, such as the user credentials, is handled
+solely by the authorization server, thus protects the users (resource
+owners). Note that in this step the authorization server also verifies if the
+request from the client (redirect URL) matches its claims during the
+registration.
+
+**** Returning an authorization code
+The authorization server processes the credentials user provided with the
+signin method; if the credentials are all correct, this method generates an
+authorization code and redirects user back to the client with the code
+attached:
+
+#+begin_src python
+@app.route('/signin', methods = ['POST'])
+def signin():
+  # Issues authorization code
+  username = request.form.get('username')
+  password = request.form.get('password')
+  client_id = request.form.get('client_id')
+  redirect_url = request.form.get('redirect_url')
+
+  if None in [ username, password, client_id, redirect_url ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })
+
+  if not authenticate_user_credentials(username, password):
+    return json.dumps({
+      'error': 'access_denied'
+    }), 401
+
+  authorization_code = generate_authorization_code(client_id, redirect_url)
+
+  url = process_redirect_url(redirect_url, authorization_code)
+
+  return redirect(url, code = 303)
+#+end_src
+
+Authorization code is generated with the =generate_authorization_code= method:
+
+#+begin_src python
+def generate_authorization_code(client_id, redirect_url):
+  #f = Fernet(KEY)
+  authorization_code = f.encrypt(json.dumps({
+    "client_id": client_id,
+    "redirect_url": redirect_url,
+  }).encode())
+
+  authorization_code = base64.b64encode(authorization_code, b'-_').decode().replace('=', '')
+
+  expiration_date = time.time() + CODE_LIFE_SPAN
+
+  authorization_codes[authorization_code] = {
+    "client_id": client_id,
+    "redirect_url": redirect_url,
+    "exp": expiration_date
+  }
+
+  return authorization_code
+#+end_src
+
+For authorization codes, this sample encrypts a JSON string containing the
+fields =client_id=, and =redirect_url= with Fernet, a symmetric encryption
+method. It is also OK to produce authorization codes of other formats, as long
+as it fits the following criteria:
+
+- Expires after a period of time (10 minutes, for instance)
+- Bounds to =client_id= and =redirect_url=
+
+
+Additionally, one authorization code can only be used once, which implies that
+you need to keep a record of authorization codes issued. The code snippet above
+stores them, along with their respective expiration dates, in memory with a
+dictionary, to keep the sample as simple as possible; in your implementation,
+however, you should switch to other data storage solutions, such as [[https://memcached.org/][memcached]]
+or [[https://redis.io/][Redis]].
+
+After the authorization code is generated, users are redirected back to the
+client with the code embedded in the request.
+
+**** Exchanging the authorization code for an access token
+The client receives the authorization code at the callback/ path. The code is
+then sent back to the authorization server, along with =client_id=,
+=client_secret= and =redirect_url=, in exchange for the access token:
+
+#+begin_src python
+@app.route('/callback')
+def callback():
+  # Accepts the authorization code and exchanges it for access token
+  authorization_code = request.args.get('authorization_code')
+
+  if not authorization_code:
+    return json.dumps({
+      'error': 'No authorization code is received.'
+    }), 500
+
+  r = requests.post(TOKEN_PATH, data = {
+    "grant_type": "authorization_code",
+    "authorization_code": authorization_code,
+    "client_id" : CLIENT_ID,
+    "client_secret" : CLIENT_SECRET,
+    "redirect_url": REDIRECT_URL
+  })
+
+  if r.status_code != 200:
+    return json.dumps({
+      'error': 'The authorization server returns an error: \n{}'.format(
+        r.text)
+    }), 500
+
+  access_token = json.loads(r.text).get('access_token')
+
+  response = make_response(redirect(url_for('main')))
+  response.set_cookie('access_token', access_token)
+  return response
+#+end_src
+
+For simplicity reasons, at the end of the method the access token is written to
+the cookie when it is returned by the authorization server. In real world,
+however, most developers prefer storing access token in [[https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API][HTML Web Storage]] (for
+web applications) or local storage (for mobile applications) instead. It is
+worth pointing out that saving access tokens to cookies does not make OAuth 2.0
+flows a variant of cookie-based authorization: tokens, though reside in
+cookies, are never transferred via cookies; furthermore, components in the flow
+can still verify the token independently without having to consult a data
+source.
+
+**** Validating the credentials and return an access token
+The =exchange_for_token= method of the authorization server
+(=auth_server/AC_auth_server.py=) listens for incoming authorization codes,
+validates them and replies with an access token:
+
+#+begin_src python
+@app.route('/token', methods = ['POST'])
+def exchange_for_token():
+  # Issues access token
+  authorization_code = request.form.get('authorization_code')
+  client_id = request.form.get('client_id')
+  client_secret = request.form.get('client_secret')
+  redirect_url = request.form.get('redirect_url')
+
+  if None in [ authorization_code, client_id, client_secret, redirect_url ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not authenticate_client(client_id, client_secret):
+    return json.dumps({
+      "error": "invalid_client"
+    }), 400
+
+  if not verify_authorization_code(authorization_code, client_id, redirect_url):
+    return json.dumps({
+      "error": "access_denied"
+    }), 400
+
+  access_token = generate_access_token()
+
+  return json.dumps({
+    "access_token": access_token.decode(),
+    "token_type": "JWT",
+    "expires_in": JWT_LIFE_SPAN
+  })
+#+end_src
+
+=authenticate_client= method, as its name implies, checks if =client_id= and
+=client_secret= match. =verify_authorization_code= method, on the other hand,
+confirms that the authorization code is valid. The former method is dummy in
+the sample; it always returns True. You should replace them with verification
+logic of your own. The latter method, however, is defined in
+=auth_server/auth.py=:
+
+#+begin_src python
+def verify_authorization_code(authorization_code, client_id, redirect_url):
+  #f = Fernet(KEY)
+  record = authorization_codes.get(authorization_code)
+  if not record:
+    return False
+
+  client_id_in_record = record.get('client_id')
+  redirect_url_in_record = record.get('redirect_url')
+  exp = record.get('exp')
+
+  if client_id != client_id_in_record or \
+     redirect_url != redirect_url_in_record:
+    return False
+
+  if exp < time.time():
+    return False
+
+  del authorization_codes[authorization_code]
+
+  return True
+#+end_src
+
+Additionally, =generate_access_token= method is defined as follows:
+
+#+begin_src python
+def generate_access_token():
+  payload = {
+    "iss": ISSUER,
+    "exp": time.time() + LIFE_SPAN,
+  }
+
+  access_token = jwt.encode(payload, private_key, algorithm = 'RS256')
+
+  return access_token.decode()
+#+end_src
+
+This sample uses ~pyjwt~ package to generate JWTs. =iss= is the issuer of this
+access token (=sample-auth-server=). =exp= is the expiration date of the access
+token, which is set to 1800 seconds (=JWT_LIFE_SPAN=) . Every access token in this
+sample is encrypted by a private key and can be decrypted by the corresponding
+public key; in other words, every one can check the validity of your access
+tokens, yet no one else can issue access tokens on your behalf, as long as the
+private key is kept private.
+
+**** Using the access token to access resources
+After the access token is received and written to the cookie, the client can
+use it to access the API server:
+
+#+begin_src python
+@app.route('/')
+def main():
+  # Retrieves a list of users
+  access_token = request.cookies.get('access_token')
+
+  r = requests.get(RES_PATH, headers = {
+    'Authorization': 'Bearer {}'.format(access_token)
+  })
+
+  if r.status_code != 200:
+    return json.dumps({
+      'error': 'The resource server returns an error: \n{}'.format(
+        r.text)
+    }), 500
+
+  users = json.loads(r.text).get('results')
+
+  return render_template('users.html', users = users)
+#+end_src
+
+As said earlier, instead of being embedded in the cookie, the access token is
+transferred as a part of the Authorization header of the HTTP request.
+
+The =get_user= method from =API_server/API_server.py= extracts the access token
+from the header and verifies it with the =verify_access_token= method:
+
+#+begin_src python
+def verify_access_token(access_token):
+  try:
+    decoded_token = jwt.decode(access_token.encode(), public_key,
+                               issuer = ISSUER,
+                               algorithm = 'RS256')
+  except (jwt.exceptions.InvalidTokenError,
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.InvalidIssuerError,
+          jwt.exceptions.ExpiredSignatureError):
+    return False
+
+  return True
+#+end_src
+
+We use the ~pyjwt~ package to verify JWTs as well. It checks the signature of
+the JWT and makes sure that values of the =iss= and =exp= fields are
+valid. Custom fields (if any) are included in the decoded token and can be
+manually verified.
+
+*** Important notes
+- For simplicity reasons, this sample uses HTTP connection. In your
+  implementation though, you should always use HTTPS. The commented out code in
+  the sample,
+
+  #+begin_example
+  #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+  #context.load_cert_chain(‘domain.crt’, ‘domain.key’)
+  #app.run(port = 5000, debug = True, ssl_context = context)
+  #+end_example
+
+  allows applications to serve contents via HTTPS with a private key and a
+  self-signed certificate when running locally. It is likely that your browser
+  will issue a warning using this approach though, as, obviously, self-signed
+  certificates cannot be trusted.
+
+- OAuth2 requires that clients register with the authorization server before
+  using the authorization flow. Registration process itself is not considered a
+  part of the OAuth 2.0 flow and is up to developers to design and implement
+  it. This sample makes the following assumptions:
+
+  1. The client has registered with the authorization server.
+
+  2. The client has received its client ID and client secret provided by the
+     authorization server.
+
+- Access tokens in this sample only contains information regarding its issuer
+  and expiration date. Depending on your use case, it might be necessary to
+  pose more restrictions. Common fields to implement in the access token
+  include audience (destinations where access token can reach) and scopes
+  (level of access that the token grants).
+
+- When an error occurred, as you can see from the code, OAuth2 regulated that
+  authorization server should respond with =HTTP 400 Bad Request= (unless
+  specified otherwise) with the following parameters: =error=,
+  =error_description= (optional) and =error_uri= (optional). See the
+  specification for more information regarding error messages.
+
+- This sample uses client ID and client secret to verify clients and transfers
+  them in the body of HTTP requests. OAuth2 specification does not have a set
+  method for client verifications though, you may switch to a different
+  approach in your authorization flow.
 
 ** Article---Understanding OAuth2 and Deploying a Basic OAuth2 Authorization Service to Cloud Functions
 This tutorial explains the basics of OAuth 2.0 and how to deploy an OAuth2
