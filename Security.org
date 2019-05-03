@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.5.<2019-05-03 Fri 10:42>
+#+macro:version 0.3.6.<2019-05-03 Fri 11:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3049,6 +3049,502 @@ manually verified.
   them in the body of HTTP requests. OAuth2 specification does not have a set
   method for client verifications though, you may switch to a different
   approach in your authorization flow.
+
+** Article---Building a Basic Authorization Server using Authorization Code Flow (PKCE)
+:PROPERTIES:
+:cite:     https://medium.com/@ratrosy/building-a-basic-authorization-server-using-authorization-code-flow-pkce-3155e843466
+:author:   Ratros Y.
+:date:     May 25, 2018
+:END:
+This document is part of the Understanding OAuth2 and Building a Basic
+Authorization Server of Your Own guide. It discusses in detail how
+Authorization Code flow works.
+
+*** Before you begin
+The sample code in this document uses Python 3 and the flask framework. It is
+for demonstration purposes only. The code is designed to demonstrate the
+authorization process in an easy-to-understand manner; it does not necessarily
+represent the best practices in development.
+
+**** Setting up your environment
+
+**** Downloading the code
+Download the source code [[https://github.com/michaelawyu/auth-server-sample][here]].
+
+The sample includes the following files:
+
+| Path                                 | Notes                                                                                              |
+|--------------------------------------+----------------------------------------------------------------------------------------------------|
+| =auth_server/AC_PKCE_auth_server.py= | An authorization server responsible for issuing access tokens in the Authorization Code flow.      |
+| =auth_server/private.pem=            | A private key for generating access tokens. You should replace this key file with one of your own. |
+| =auth_server/auth.py=                | Includes method(s) for generating access tokens and more.                                          |
+| =auth_server/templates/auth.py=      | An HTML template for preparing the access request page.                                            |
+| =API_server/API_server.py=           | A simple API server offering access to a list of users.                                            |
+| =API_server/public.pem=              | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =API_server/auth.py=                 | Includes method(s) for verifying access tokens and more.                                           |
+|--------------------------------------+----------------------------------------------------------------------------------------------------|
+
+**** Running the code
+Run the code separately as follows:
+
+#+begin_example
+python AC_auth_server.py
+python API_server.py
+#+end_example
+
+The authorization server listens at =127.0.0.1:5001= and the API server is
+available at =127.0.0.1:5002=.
+
+*** How the Authorization Code flow with PKCE works
+
+**** Redirecting users to the sign-in page provided by the authorization server
+The flow starts with a mobile app prompting users to sign in with the
+authorization server. The app then generates a code verifier, which should be a
+cryptographically strong random string using only alphanumeric characters, dash
+(=-=), dot (=.=), underscore (=_=) and tilde (=~=). Its length should be no
+less than 43 characters and no more than 128 characters.
+
+Android developers can use the ~java.security.SecureRandom~ class to prepare the
+code verifier:
+
+#+begin_src java
+SecureRandom random = new SecureRandom();
+byte bytes[] = new byte[64];
+random.nextBytes(bytes);
+String codeVerifier = Base64.encodeToString(random, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+#+end_src
+
+Note that in the end the random string is encoded in =Base64URL= so that it
+includes only the permissible characters.
+
+iOS developers can use the [[https://developer.apple.com/documentation/security/1399291-secrandomcopybytes][SecRandomCopyBytes]] method in the [[https://developer.apple.com/documentation/security/][Security Framework]]
+to prepare the code verifier (Swift):
+
+#+begin_src c
+var buffer = [UInt8](repeating: 0, count: 64)
+_ = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
+let codeVerifier = Data(bytes: buffer).base64EncodedString()
+                                      .replacingOccurrences(of: "+", with: "-")
+                                      .replacingOccurrences(of: "/", with: "-")
+                                      .replacingOccurrences(of: "=", with: "-")
+                                      .trimmingCharacters(in: .whitespaces)
+#+end_src
+
+Note that in the end the random string is encoded in Base64 with unsupported
+characters replaced.
+
+Next, prepare the code verifier’s corresponding code challenge. Code challenge
+is merely the SHA-256 hashed value of the code verifier, which should also be
+Base64URL encoded.
+
+Android developers can use the java.security.MessageDigest class to prepare the
+code challenge:
+
+#+begin_src java
+byte[] codeVerifierBytes = codeVerifier.getBytes(“US-ASCII”);
+MessageDigest md = MessageDigest.getInstance("SHA-256");
+md.update(codeVerifierBytes);
+byte[] codeChallengeBytes = md.digest();
+String codeChallenge = Base64.encodeToString(codeChallengeBytes, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+#+end_src
+
+iOS developers need to add the CommonCrypto library to your bridging header
+first before running the code below. You can also use third-party pure Swift
+libraries to prepare code challenages, such as [[https://github.com/krzyzanowskim/CryptoSwift][CryptoSwift]].
+
+#+begin_src c
+let codeVerifierBytes = codeVerifier.data(using: .ascii)!
+var buffer = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+codeVerifierBytes.withUnsafeBytes {
+  _ = CC_SHA256($0, CC_LONG(codeVerifierBytes.count), &buffer)
+}
+let codeChallengeBytes = Data(bytes: buffer)
+let codeChallenge = codeChallengeBytes.base64EncodedString()
+                                      .replacingOccurrences(of: "+", with: "-")
+                                      .replacingOccurrences(of: "/", with: "_")
+                                      .replacingOccurrences(of: "=", with: "")
+                                      .trimmingCharacters(in: .whitespaces)
+#+end_src
+
+Save the code verifier and the code challenge somewhere safe. Prompt users to
+sign in with another platform, then open the browser in the environment (Chrome
+for Android, Safari for iOS, etc.) and redirect users to the authorization
+server. Pass the following parameters in the query string: =response_type=,
+=client_id=, =code_challenge=, =code_challenge_method= and =redirect_url=.
+
+The value of =response_type=, =code=, indicates the initialization of the
+authorization code flow. Since the authorization server in this sample only
+supports one flow, the value is not used; however, if you plan to build an
+authorization server supporting multiple flows, refer to this value to
+determine which flow to initiate.
+
+=code_challenge= is the value you just prepared. In this sample it is generated
+using =SHA-256= algorithm, thus you should use =S256= as the value of
+=code_challenge_method=. PKCE specification allows two possible values for
+=code_challenge_method=, =S256= and =plain=, the latter of which should only be
+used when =SHA256= is not supported on target devices. Authorization server in
+this sample only supports =SHA256=, thus the value of =code_challenge_method= is
+not used; however, if you plan to support the plain method as well, refer to
+this value to determine how the code challenge should be verified.
+
+Additionally, =client_id= uniquely identifies the client, and =redirect_url= is
+where the authorization code is sent. Set up Android App Link (for Android) or
+Apple URL Scheme (for iOS) so that the redirection can be intercepted by your
+app.
+
+In the end, the final URL should look like:
+
+#+begin_example
+http://[YOUR_AUTH_SERVER_ADDRESS]/auth?
+response_type=code&
+client_id=sample-client-id&
+code_challenge=xyz&
+code_challenge_method=S256&
+redirect_url=[YOUR_APP_URL]/callback
+#+end_example
+
+The =auth= method of the authorization server accepts these parameters, and
+renders a page describing what the client is requesting access to:
+
+#+begin_src python
+@app.route('/auth')
+def auth():
+  # Describe the access request of the client and ask user for approval
+  client_id = request.args.get('client_id')
+  redirect_url = request.args.get('redirect_url')
+  code_challenge = request.args.get('code_challenge')
+
+  if None in [ client_id, redirect_url, code_challenge ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })
+
+  return render_template('AC_PKCE_grant_access.html',
+                         client_id = client_id,
+                         redirect_url = redirect_url,
+                         code_challenge = code_challenge)
+#+end_src
+
+If users are OK with the requirements, they can sign in with their
+credentials. Sensitive information, such as the user credentials, is handled
+solely by the authorization server, thus protects the users (resource owners)
+from possible identity theft. Note that in this step the authorization server
+also verifies if the request from the client (redirect URL) matches its claims
+during the registration.
+
+You do not need to start an Android or iOS project to try this sample out
+though. Instead, you can prepare a code verifier and its corresponding code
+challenge in Python and visit the authorization server directly in your
+browser:
+
+- Prepare the code verifier and the code challenge:
+
+  #+begin_src python
+  import base64
+  import hashlib
+  import secrets
+
+  random = secrets.token_bytes(64)
+  code_verifier = base64.b64encode(random, b'-_').decode().replace('=', '')
+
+  m = hashlib.sha256()
+  m.update(code_verifier.encode())
+  d = m.digest()
+  code_challenge = base64.b64encode(d, b'-_').decode().replace('=', '')
+  #+end_src
+
+  Write down the value of =code_verifier= and =code_challenge=.
+
+- Open a new browser window and visit the address below:
+
+  #+begin_example
+  https://127.0.0.1:5001/auth?
+  response_type=code&
+  client_id=sample-acpkce-client&
+  redirect_url=https://www.google.com&
+  code_challenge=[CODE_CHALLENGE]&
+  code_challenge_method=S256
+  #+end_example
+
+  Replace =[CODE_CHALLENGE]= with the value of your own. You should see a page
+  asking you to sign to grant =sample-acpkece-client= access. Sign in with any
+  username and password. You will be redirected to google.com. The address
+  looks like:
+  : https://www.google.com/?authorization_code=[YOUR_AUTHORIZATION_CODE]
+
+  Write down the value of =authorization_code=.
+
+**** Returning an authorization code
+The authorization server processes the credentials user provided with the
+=signin= method; if the credentials are all correct, this method generates an
+authorization code and redirects user back to the client with the code
+attached:
+
+#+begin_src python
+@app.route('/signin', methods = ['POST'])
+def signin():
+  # Issues authorization code
+  username = request.form.get('username')
+  password = request.form.get('password')
+  client_id = request.form.get('client_id')
+  redirect_url = request.form.get('redirect_url')
+  code_challenge = request.form.get('code_challenge')
+
+  if None in [username, password, client_id, redirect_url, code_challenge]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })
+
+  if not authenticate_user_credentials(username, password):
+    return json.dumps({
+      'error': 'access_denied'
+    }), 401
+
+  authorization_code = generate_authorization_code(client_id, redirect_url,
+                                                   code_challenge)
+
+  url = process_redirect_url(redirect_url, authorization_code)
+
+  return redirect(url, code = 303)
+#+end_src
+
+Authorization code is generated with the =generate_authorization_code= method:
+
+#+begin_src python
+def generate_authorization_code(client_id, redirect_url, code_challenge):
+  #f = Fernet(KEY)
+  authorization_code = f.encrypt(json.dumps({
+    "client_id": client_id,
+    "redirect_url": redirect_url,
+  }).encode())
+
+  authorization_code = base64.b64encode(authorization_code, b'-_').decode().replace('=', '')
+
+  expiration_date = time.time() + CODE_LIFE_SPAN
+
+  authorization_codes[authorization_code] = {
+    "client_id": client_id,
+    "redirect_url": redirect_url,
+    "exp": expiration_date,
+    "code_challenge": code_challenge
+  }
+
+  return authorization_code
+#+end_src
+
+For authorization codes, this sample encrypts a JSON string containing the
+fields =client_id=, and =redirect_url= with Fernet, a symmetric encryption method. It
+is also OK to produce authorization codes of other formats, as long as it fits
+the following criteria:
+
+- Expires after a period of time (10 minutes, for instance)
+
+- Bounds to =client_id= and =redirect_url=
+
+
+Additionally, one authorization code can only be used once, which implies that
+you need to keep a record of authorization codes issued. The code snippet above
+stores them, along with their respective expiration dates, in memory with a
+dictionary, in order to keep the sample as simple as possible; in your
+implementation, however, you should switch to other data storage solutions,
+such as [[https://memcached.org/][memcached]] or [[https://redis.io/][Redis]].
+
+**** Exchanging the authorization code for an access token
+After your app successfully receives an authorization code, immediately send it
+back to authorization server, together with your client ID, redirect URL and
+code verifier, in exchange for an access token.
+
+You can use ~cURL~ to simulate such a call:
+
+#+begin_example
+curl -d "grant_type=authorization_code&
+client_id=sample-acpkce-client&
+authorization_code=[AUTHORIZATION_CODE]&
+code_verfier=[CODE_VERIFIER]&
+redirect_url=https://www.google.com"
+-X POST 'https://127.0.0.1:5001/token'
+#+end_example
+
+Replace =[AUTHORIZATION_CODE]= and =[CODE_VERIFIER]= with values of your
+own. Note that this request includes parameters =grant_type=, =client_id=,
+=code_verifier=, =authorization_code= and =redirect_url=.
+
+Write down the returned value of =access_token=.
+
+**** Validating the credentials and return an access token
+The =exchange_for_token= method of the authorization server
+(=auth_server/AC_PKCE_auth_server.py=) listens for incoming authorization
+codes, validates them and replies with an access token:
+
+#+begin_src python
+@app.route('/token', methods = ['POST'])
+def exchange_for_token():
+  # Issues access token
+  authorization_code = request.form.get('authorization_code')
+  client_id = request.form.get('client_id')
+  code_verifier = request.form.get('code_verifier')
+  redirect_url = request.form.get('redirect_url')
+
+  if None in [ authorization_code, client_id, code_verifier, redirect_url ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_authorization_code(authorization_code, client_id, redirect_url,
+                                   code_verifier):
+    return json.dumps({
+      "error": "access_denied"
+    }), 400
+
+  access_token = generate_access_token()
+  return json.dumps({
+    "access_token": access_token,
+    "token_type": "JWT",
+    "expires_in": JWT_LIFE_SPAN
+  })
+#+end_src
+
+The =verify_authorization_code= method confirms that the authorization code is
+valid:
+
+#+begin_src python
+def verify_authorization_code(authorization_code, client_id, redirect_url,
+                              code_verifier):
+  #f = Fernet(KEY)
+  record = authorization_codes.get(authorization_code)
+  if not record:
+    return False
+
+  client_id_in_record = record.get('client_id')
+  redirect_url_in_record = record.get('redirect_url')
+  exp = record.get('exp')
+  code_challenge_in_record = record.get('code_challenge')
+
+  if client_id != client_id_in_record or \
+     redirect_url != redirect_url_in_record:
+    return False
+
+  if exp < time.time():
+    return False
+
+  code_challenge = generate_code_challenge(code_verifier)
+  if code_challenge != code_challenge_in_record:
+    return False
+
+  del authorization_codes[authorization_code]
+
+  return True
+#+end_src
+
+Note that the code takes the code verifier, generates the corresponding code
+challenge and matches it against the one passed by the client earlier.
+
+Additionally, =generate_access_token= method is defined as follows:
+
+#+begin_src python
+def generate_access_token():
+  payload = {
+    "iss": ISSUER,
+    "exp": time.time() + LIFE_SPAN,
+  }
+
+  access_token = jwt.encode(payload, private_key, algorithm = 'RS256')
+
+  return access_token.decode()
+#+end_src
+
+This sample uses ~pyjwt~ package to generate JWTs. =iss= is the issuer of this
+access token (=sample-auth-server=). =exp= is the expiration date of the access
+token, which is set to 1800 seconds (=JWT_LIFE_SPAN=) after issuing. Every access
+token in this sample is encrypted by a private key and can be decrypted by the
+corresponding public key; in other words, every one can check the validity of
+your access tokens, yet no one else can issue access tokens on your behalf, as
+long as the private key is kept private.
+
+**** Using the access token to access resources
+After the access token is received and written to the cookie, the client can
+use it to access the API server. Access token should be transferred as a part
+of the Authorization header of the HTTP request. The header looks like:
+: authorization: Bearer YOUR_ACCESS_TOKEN
+
+You can use ~cURL~ to create the same request:
+: curl --header "Authorization: Bearer [YOUR_ACCESS_TOKEN]" http://127.0.0.1:5002/users
+
+Replace =[YOUR_ACCESS_TOKEN]= with the value you wrote down earlier. You should
+see a list of users in the output.
+
+The =get_user= method from =API_server/API_server.py= extracts the access token
+from the header and verifies it with the =verify_access_token= method:
+
+#+begin_src python
+def verify_access_token(access_token):
+  try:
+    decoded_token = jwt.decode(access_token.encode(), public_key,
+                               issuer = ISSUER,
+                               algorithm = 'RS256')
+  except (jwt.exceptions.InvalidTokenError,
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.InvalidIssuerError,
+          jwt.exceptions.ExpiredSignatureError):
+    return False
+
+  return True
+#+end_src
+
+We use the ~pyjwt~ package to verify JWTs as well. It checks the signature of the
+JWT and makes sure that values of =iss= and =exp= are valid. Custom fields (if any)
+are included in the decoded token and can be manually verified.
+
+*** Important notes
+- For simplicity reasons, this sample uses HTTP connection. In your
+  implementation though, you should always use HTTPS connection. The commented
+  out code in the sample,
+
+  #+begin_example
+  #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+  #context.load_cert_chain(‘domain.crt’, ‘domain.key’)
+  #app.run(port = 5000, debug = True, ssl_context = context)
+  #+end_example
+
+  allows applications to serve contents via HTTPS with a private key and a
+  self-signed certificate when running locally. It is likely that your browser
+  will issue a warning using this approach though, as, obviously, self-signed
+  certificates cannot be trusted.
+
+- OAuth2 requires that clients register with the authorization server before
+  using the authorization flow. Registration process itself is not considered a
+  part of the OAuth 2.0 flow and is up to developers to design and implement
+  it. This sample makes the following assumptions:
+
+  1. The client has registered with the authorization server.
+
+  2. During registration, the client specified which resource servers it plans
+     to access, what scopes it needs and the redirect URL it uses.
+
+  3. The client has received its client ID provided by the authorization
+     server.
+
+- Access tokens in this sample only contains information regarding its issuer
+  and expiration date. Depending on your use case, it might be necessary to
+  pose more restrictions. Common fields to implement in the access token
+  include audience (destinations where access token can reach) and scopes
+  (level of access that the token grants).
+
+- OAuth2 regulated that authorization server should respond with =HTTP 400 Bad
+  Request= (unless specified otherwise) with the following parameters: =error=,
+  =error_description= (optional) and =error_uri= (optional). See the
+  specification for more information regarding error messages.
+
 
 ** Article---Building a Basic Authorization Server with Implicit Flow
 :PROPERTIES:
