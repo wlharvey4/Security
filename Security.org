@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.6.<2019-05-03 Fri 11:18>
+#+macro:version 0.3.7.<2019-05-03 Fri 11:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3545,7 +3545,6 @@ are included in the decoded token and can be manually verified.
   =error_description= (optional) and =error_uri= (optional). See the
   specification for more information regarding error messages.
 
-
 ** Article---Building a Basic Authorization Server with Implicit Flow
 :PROPERTIES:
 :url:      https://medium.com/@ratrosy/building-a-basic-authorization-server-with-implicit-flow-3f474eb2a306
@@ -4049,6 +4048,220 @@ manually verified.
   method for client verifications though, you may switch to a different
   approach in your authorization flow.
 
+** Article---Building a Basic Authorization Server using Client Credentials Flow
+:PROPERTIES:
+:url:      https://medium.com/@ratrosy/building-a-basic-authorization-server-using-client-credentials-flow-db353d6debdf
+:author:   Ratros Y.
+:date:     May 25, 2018
+:END:
+This document is part of the Understanding OAuth2 and Building a Basic
+Authorization Server of Your Own guide. It discusses in detail how Client
+Credentials flow works.
+
+*** Before you begin
+The sample code in this document uses Python 3 and the flask framework. It is
+for demonstration purposes only. The code is designed to demonstrate the
+authorization process in an easy-to-understand manner; it does not necessarily
+represent the best practices in development.
+
+**** Setting up your environment
+
+**** Downloading the code
+Download the source code [[https://github.com/michaelawyu/auth-server-sample][here]].
+
+The sample includes the following files:
+
+| Path                            | Notes                                                                                              |
+|---------------------------------+----------------------------------------------------------------------------------------------------|
+| =auth_server/CC_auth_server.py= | An authorization server responsible for issuing access tokens in the Client Credentials flow.      |
+| =auth_server/private.pem=       | A private key for generating access tokens. You should replace this key file with one of your own. |
+| =auth_server/auth.py=           | Includes method(s) for generating access tokens and more.                                          |
+| =API_server/API_server.py=      | A simple API server offering access to a list of users.                                            |
+| =API_server/public.pem=         | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =API_server/auth.py=            | Includes method(s) for verifying access tokens and more.                                           |
+|---------------------------------+----------------------------------------------------------------------------------------------------|
+
+**** Running the code
+Run the code separately as follows:
+
+#+begin_example
+python CC_auth_server.py
+python API_server.py
+#+end_example
+
+The authorization server listens at 127.0.0.1:5001 and the API server is
+available at 127.0.0.1:5002.
+
+*** How the Client Credentials flow works
+
+**** Sending the credentials to authorization server
+To request an access token, the client must pass its identification, the client
+ID and the client secret, to the authorization server. It should send a HTTP
+request to the authorization server with the following fields in the body:
+=grant_type=, =client_id= and =client_secret=.
+
+=grant_type= is a required field in OAuth 2.0, and its value,
+=client_credentials=, indicates the initialization of the Client Credentials
+flow. Since the authorization server in this sample only supports one flow, the
+value is not used; however, if you plan to build an authorization server
+supporting multiple flows, use this value to determine which flow to
+initiate. The other fields, =client_id= and =client_secret=, as specified
+earlier, uniquely identifies the client.
+
+You do not need to develop a background service to try this sample out
+though. Instead, you can use ~cURL~ to send the same request:
+
+#+begin_example
+curl -d "grant_type=client_credentials&
+client_id=sample-cc-client&
+client_secret=sample-client-secret"
+-X POST 'https://127.0.0.1:5001'
+#+end_example
+
+The output should look like:
+
+#+begin_src js
+{"access_token":"[YOUR_ACCESS_TOKEN]",
+ "token_type":"JWT",
+ "expires_in":1800}
+#+end_src
+
+Write down the returned access token.
+
+**** Validating the credentials and return an access token
+The =auth= method of the authorization server (=auth_server/CC_auth_server.py=)
+listens for incoming client credentials, validates them and replies with an
+access token:
+
+#+begin_src python
+@app.route('/auth', methods = ['POST'])
+def auth():
+  # Issues access token
+  client_id = request.form.get('client_id')
+  client_secret = request.form.get('client_secret')
+
+  if None in [client_id, client_secret]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not authenticate_client(client_id, client_secret):
+    return json.dumps({
+      "error": "invalid_client"
+    }), 400
+
+  access_token = generate_access_token()
+  return json.dumps({
+    "access_token": access_token,
+    "token_type": "JWT",
+    "expires_in": LIFE_SPAN
+  })
+#+end_src
+
+The =authenticate_client= method, confirms that the client is registered with the
+authorization server. It is a dummy method in the sample and always returns
+=True=. You should replace it with verification logic of your own.
+
+The method for building access tokens, =generate_access_token=, is defined as
+follows:
+
+#+begin_src python
+def generate_access_token():
+  payload = {
+    "iss": ISSUER,
+    "exp": time.time() + LIFE_SPAN,
+  }
+
+  access_token = jwt.encode(payload, private_key, algorithm = 'RS256')
+
+  return access_token.decode()
+#+end_src
+
+This sample uses the ~pyjwt~ package to generate JWTs. =iss= is the issuer of
+this access token (=sample-auth-server=); =exp= is the expiration date of the
+access token, which is set to 1800 seconds (=LIFE_SPAN=) . Every access token
+in this sample is encrypted by a private key (=auth_server/private.pem=) and
+can be decrypted by its corresponding public key (=client/public.pem= and
+=API_server/public.pem=); in other words, every one can check the validity of
+your access tokens, yet no one else can issue access tokens on your behalf, as
+long as the private key is kept private.
+
+**** Using the access token to access resources
+After the access token is received and written to the cookie, the client can
+then use it to access the API server. The access token should be transferred in
+the header of the HTTP request. The header looks like:
+: Authorization: Bearer [YOUR_ACCESS_TOKEN]
+
+You can use ~cURL~ to create the same request:
+: curl --header "Authorization: Bearer [YOUR_ACCESS_TOKEN]" http://127.0.0.1:5002/users
+
+Replace =[YOUR_ACCESS_TOKEN]= with the value you wrote down earlier. You should
+see a list of users in the output.
+
+The =get_user= method from =API_server/API_server.py= extracts the access token
+from the header and verifies it with the =verify_access_token= method:
+
+#+begin_src python
+def verify_access_token(access_token):
+  try:
+    decoded_token = jwt.decode(access_token.encode(), public_key,
+                               issuer = ISSUER,
+                               algorithm = 'RS256')
+  except (jwt.exceptions.InvalidTokenError,
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.InvalidIssuerError,
+          jwt.exceptions.ExpiredSignatureError):
+    return False
+
+  return True
+#+end_src
+
+We use the ~pyjwt~ package to verify JWTs as well. It checks the signature of the
+JWT and makes sure that values of iss and exp are valid. Custom fields (if any)
+are included in the decoded token and can be manually verified.
+
+*** Important Notes
+- For simplicity reasons, servers in this sample uses HTTP connection. In your
+  implementation though, you should always use HTTPS. The following commented
+  out code in the sample,
+
+  #+begin_example
+  #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+  #context.load_cert_chain(‘domain.crt’, ‘domain.key’)
+  #app.run(port = 5000, debug = True, ssl_context = context)
+  #+end_example
+
+  allows the server to serve contents via HTTPS with a private key and a
+  self-signed certificate when running locally. It is likely that your browser
+  will issue a warning using this approach though, as, obviously, self-signed
+  certificates cannot be easily trusted.
+
+- OAuth2 requires that clients register with the authorization server before
+  using the authorization flow. Registration process itself is not considered a
+  part of the OAuth 2.0 flow and is up to developers to design and implement
+  it. This sample makes the following assumptions:
+
+  1. The client has registered with the authorization server.
+
+  2. The client has received its client ID and client secret provided by the
+     authorization server.
+
+- Access tokens in this sample only contains information regarding its issuer
+  and expiration date. Depending on your use case, it might be necessary to
+  pose more restrictions. Common fields to implement in the access token
+  include audience (destinations where access token can arrive at) and scopes
+  (level of access that the token grants).
+
+- When an error occurred, as you can see from the code, OAuth2 regulated that
+  authorization server should respond with =HTTP 400 Bad Request= (unless
+  specified otherwise) with the following parameters: =error=,
+  =error_description= (optional) and =error_uri= (optional). See the
+  specification for more information regarding error messages.
+
+- This sample uses client ID and client secret to verify clients and transfers
+  them in the body of HTTP requests. OAuth2 specification does not have a set
+  method for client verifications though, you may use a different approach in
+  your authorization flow.
 
 ** Article---Understanding OAuth2 and Deploying a Basic OAuth2 Authorization Service to Cloud Functions
 This tutorial explains the basics of OAuth 2.0 and how to deploy an OAuth2
@@ -4382,10 +4595,11 @@ You can always view the details of deployed functions via [[https://console.clou
 
    The output should look like:
 
-   #+begin_example
+   #+begin_src js
    {"access_token":"[YOUR_ACCESS_TOKEN]",
-    "token_type”:"JWT","expires_in":1800000}
-   #+end_example
+    "token_type”:"JWT",
+    "expires_in":1800000}
+   #+end_src
 
    The =access_token= attribute in the returned JSON file is the issued access
    token.
