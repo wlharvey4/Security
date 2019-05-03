@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.7.<2019-05-03 Fri 11:36>
+#+macro:version 0.3.8.<2019-05-03 Fri 13:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -5547,6 +5547,138 @@ command-line to delete a project]].
 **** Deleting the Functions
 Go to the [[https://console.cloud.google.com/functions][Cloud Functions Overview]] page. Select the functions you would like to
 remove and click =Delete=.
+
+** Article---eBay REST API OAuth2-Plain English Edition
+:PROPERTIES:
+:url:      https://medium.com/@abeflansburg/ebay-rest-api-oauth2-plain-english-edition-1d102a9f719c
+:author:   Abe Flansburg
+:date:     Sep 25, 2018
+:END:
+eBay offers two methods for obtaining User Tokens which an app would use to
+authenticate calls. Let me outline both methods and provide some basic examples
+with JS — keep in mind I typically develop a separate backend with Node.JS and
+my "front-end" is React, however most of the tools I use have a vanilla JS
+equivalent.
+
+*** Client credentials grant
+This is, admittedly, the easiest to implement, albeit least desirable, method
+as it allows access to a very limited number of scopes within the eBay
+API. This is assumably because it is less secure and has fewer "legs". I won’t
+go into too much detail, but with this request the =client_id= and
+=client_secret= are Base64 encoded and passed in the header of a POST request,
+while the request body contains the grant type of =client_credentials=, the
+RuName-value (retrieved from the developer portal) and the required scope. As I
+mentioned before, the available scopes are very, very limited for this type of
+authentication.
+
+*** Authorization code grant
+The authorization code grant provides authentication for a much broader scope
+within the eBay REST API and is 3-legged in its implementation. Here are the
+steps---in (hopefully) plain English (so I can validate the title for this
+publication):
+
+1. Your app redirects the user to a page (hosted by eBay) where they login with
+   their account credentials. Note: This URI also contains your =client_id= and
+   the API scopes you plan to work with and is provided in the eBay dev portal
+   labeled /Your branded eBay Production Sign In (OAuth)/
+
+   #+begin_example
+   https://auth.ebay.com/oauth2/authorize?
+   client_id=TestAcct-0123-4567–890d-a1bcde23456&
+   response_type=code&
+   redirect_uri=Test_Account-TestAcct-0123-4-dxluzra&
+   scope=https://api.ebay.com/oauth/api_scope%20
+   https://api.ebay.com/oauth/api_scope/sell.marketing.readonly%20
+   https://api.ebay.com/oauth/api_scope/sell.marketing
+   #+end_example
+
+2. eBay redirects the user back to your application to a URI you have provided
+   beforehand with an authorization code appended.
+
+   #+begin_example
+   https://localhost:3000?code=<authentication code>
+   #+end_example
+
+3. Your application parses the authorization code from the URI and uses it to
+   make a POST call to the eBay API for an access token. (Don’t forget to
+   Base64 encode your =client_id= and =client_secret=. With Node.js, I use the
+   ~btoa~ npm package along with ~qs~ to compose my request using ~fetch~.
+
+   #+begin_src js
+   fetch(‘https://api.ebay.com/identity/v1/oauth2/token', {
+     method: ‘post’,
+     headers: {
+     ‘Content-Type’: ‘application/x-www-form-urlencoded’,
+     ‘Authorization’: ‘Basic ‘ + btoa(`${clientId}:${clientSecret}`)
+     },
+     body: qs.stringify({
+     grant_type: “authorization_code”,
+     // parsed from redirect URI after returning from eBay,
+     code: authCode,
+     // this is set in your dev account, also called RuName
+     redirect_uri: ‘Test_Account-TestAcc-0123–4-abcdefg’
+     })
+    })
+    .then(response => response.json())
+    .catch(err => console.log(err));
+   #+end_src
+
+4. eBay returns the access token which is used to make subsequent calls to the
+   eBay API. A refresh token and associated expiry time (in seconds) is
+   returned in this response.
+
+   #+begin_src js
+   {
+       "access_token": "v^1.1#i^1#p^3#r^1...XzMjRV4xMjg0",
+       "expires_in": 7200,
+       "refresh_token": "v^1.1#i^1#p^3#r^1...zYjRV4xMjg0",
+       "refresh_token_expires_in": 47304000,
+       "token_type": "User Access Token"
+    }
+   #+end_src
+
+5. Use the refresh token to refresh the access token when it expires---you know
+   when to do this when your call to the API returns a status code of =401= and
+   the following body:
+
+   #+begin_src js
+   {
+       “errors”:[
+       {
+          “errorId”:1001,
+          “domain”:”OAuth”,
+          “category”:”REQUEST”,
+          “message”:”Invalid access token”,
+          “longMessage”:”Invalid access token. Check the value of the Authorization HTTP request header.”
+       }
+       ]
+   }
+   #+end_src
+
+*** Terms to Understand:
+- =client_id= ::
+
+                 Called App ID in the "Key Sets" of the developer portal
+
+- =client_secret= ::
+
+     Called Cert ID in the "Key Sets" section of the dev portal
+
+- =RuName= ::
+
+              Redirect URL name
+              : Test_Account-TestAcc-0123–4-abcdefg
+
+- authorization code ::
+
+     code used to request access token
+
+- access token ::
+
+                  token used to authenticate requests to the eBay API
+
+- refresh token ::
+                   token used to refresh the access token when it expires
 
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
