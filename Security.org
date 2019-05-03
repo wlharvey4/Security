@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.4.<2019-05-03 Fri 10:18>
+#+macro:version 0.3.5.<2019-05-03 Fri 10:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3277,6 +3277,282 @@ the JWT and makes sure that values of =iss= and =exp= are valid. Custom fields
   Request= (unless specified otherwise) with the following parameters: =error=,
   =error_description= (optional) and =error_uri= (optional). See the specification
   for more information regarding error messages.
+
+** Article---Building a Basic Authorization Server Using Resource Owner Password Credentials Flow
+:PROPERTIES:
+:cite:     https://medium.com/@ratrosy/building-a-basic-authorization-server-using-resource-owner-password-credentials-flow-a666d06900fb
+:date:     May 25, 2018
+:author:   Ratros Y.
+:END:
+This document is part of the Understanding OAuth2 and Building a Basic
+Authorization Server of Your Own guide. It discusses in detail how Resource
+Owner Password Credentials flow works.
+*** Before you begin
+The sample code in this document uses Python 3 and the flask framework. It is
+for demonstration purposes only. The code is designed to demonstrate the
+authorization process in an easy-to-understand manner; it does not necessarily
+represent the best practices in development.
+
+**** Setting up your environment
+**** Downloading the code
+Download the source code [[https://github.com/michaelawyu/auth-server-sample][here]].
+
+The sample includes the following files:
+
+| Path                               | Notes                                                                                              |
+|------------------------------------+----------------------------------------------------------------------------------------------------|
+| =client/ROPC_client.py=            | A client web application using the ROPC flow to access a list of users.                            |
+| =client/public.pem=                | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =client/templates/ROPC_login.html= | An HTML template for preparing the login page.                                                     |
+| =client/templates/users.html=      | An HTML template for preparing the results of user queries.                                        |
+| =auth_server/ROPC_auth_server.py=  | An authorization server responsible for issuing access tokens in the ROPC flow.                    |
+| =auth_server/private.pem=          | A private key for generating access tokens. You should replace this key file with one of your own. |
+| =auth_server/auth.py=              | Includes method(s) for generating access tokens.                                                   |
+| =API_server/API_server.py=         | A simple API server offering access to a list of users.                                            |
+| =API_server/public.pem=            | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =API_server/auth.py=               | Includes method(s) for verifying access tokens and more.                                           |
+|------------------------------------+----------------------------------------------------------------------------------------------------|
+
+**** Running the code
+Run the code as follows:
+
+#+begin_example
+python ROPC_client.py
+python ROPC_auth_server.py
+python API_server.py
+#+end_example
+
+Visit the client at http://127.0.0.1:5000. The authorization server listens at
+=127.0.0.1:5001= and the API server is available at =127.0.0.1:5002=.
+
+*** How the Resource Owner Password Credentials flow works
+
+**** Prompting users to enter credentials
+The flows starts with users visiting the path =/login=. The following code in
+=client/ROPC_client.py= presents a page at the =/login= path where users can
+enter their credentials:
+
+#+begin_src python
+@app.route('/login')
+def login():
+  # Presents the login page
+  return render_template('ROPC_login.html')
+#+end_src
+
+**** Sending the credentials to authorization server
+The login page is configured to send the credentials to the path
+=/request_token= upon submission. Code below collects the credentials, and POST
+them to the authorization server:
+
+#+begin_src python
+@app.route('/request_token', methods = ['POST'])
+def request_token():
+  # Requests access token from the authorization server
+  username = request.form.get('username')
+  password = request.form.get('password')
+  r = requests.post(AUTH_PATH, data = {
+    'grant_type': 'password',
+    'username': username,
+    'password': password,
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+  })
+
+  if r.status_code != 200:
+    return json.dumps({
+      'error': 'The authorization server returns an error: \n{}'.format(
+        r.text)
+    }), 500
+
+  contents = json.loads(r.text)
+  access_token = contents.get('access_token')
+
+  # Writes access token to the cookie
+  response = make_response(redirect(url_for('main')))
+  response.set_cookie('access_token', access_token)
+
+  return response
+#+end_src
+
+Along with the credentials (=username= and =password=) goes the fields
+=grant_type=, =client_id= and =client_secret=.
+
+=grant_type= is required by OAuth 2.0, whose value, =password=, indicates the
+initialization of the Resource Owner Password Credentials flow. Since the
+authorization server in this sample only supports one flow, the value is not
+used; however, if you plan to build an authorization server supporting multiple
+flows, use this value to determine which flow to initiate. The other fields,
+=client_id= and =client_secret=, as specified earlier, uniquely identify the
+client.
+
+For simplicity reasons, at the end of the method the access token is written to
+the cookie when it is returned by the authorization server. In real world,
+however, many developers prefer storing access token in [[https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API][HTML Web Storage]] (for
+web applications) or local storage (for mobile applications) instead. It is
+worth pointing out that saving access tokens to cookies does not make OAuth 2.0
+flows a variant of cookie-based authorization: tokens, though now reside in
+cookies, are never transferred via cookies.
+
+**** Validating the credentials and return an access token
+The =auth= method of the authorization server
+(=auth_server/ROPC_auth_server.py=) listens for incoming user credentials,
+validates them and replies with an access token:
+
+#+begin_src python
+@app.route('/auth', methods = ['POST'])
+def auth():
+  # Issues access token
+  username = request.form.get('username')
+  password = request.form.get('password')
+  client_id = request.form.get('client_id')
+  client_secret = request.form.get('client_secret')
+
+  if None in [username, password, client_id, client_secret]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not authenticate_user_credentials(username, password):
+    return json.dumps({
+      "error": "access_denied"
+    }), 401
+
+  if not authenticate_client(client_id, client_secret):
+    return json.dumps({
+      "error": "invalid_client"
+    }), 400
+
+  access_token = generate_access_token()
+  return json.dumps({
+    "access_token": access_token,
+    "token_type": "JWT",
+    "expires_in": LIFE_SPAN
+  })
+#+end_src
+
+=authenticate_user_credentials= method, as its name implies, checks if the
+username and the password match. =authenticate_client= method, on the other
+hand, confirms if the client is registered with the authorization server. Both
+methods are dummy methods in the sample; they always return =True=. You should
+replace them with verification logic of your own.
+
+The method for building access tokens, =generate_access_token=, is defined as
+follows:
+
+#+begin_src python
+def generate_access_token():
+  payload = {
+    "iss": ISSUER,
+    "exp": time.time() + LIFE_SPAN,
+  }
+
+  access_token = jwt.encode(payload, private_key, algorithm = 'RS256')
+
+  return access_token.decode()
+#+end_src
+
+This sample uses the ~pyjwt~ package to generate JWTs. =iss= is the issuer of
+this access token (=sample-auth-server=); =exp= is the expiration date of the
+access token, which is set to 1800 seconds (=LIFE_SPAN=) . Every access token
+in this sample is encrypted by a private key (=auth_server/private.pem=) and
+can be decrypted by its corresponding public key (=client/public.pem= and
+=API_server/public.pem=); in other words, every one can check the validity of
+your access tokens, yet no one else can issue access tokens on your behalf, as
+long as the private key is kept private.
+
+**** Using the access token to access resources
+After the access token is received and written to the cookie, the client can
+then use it to access the API server:
+
+#+begin_src python
+@app.route('/')
+def main():
+  # Retrieves a list of users
+  access_token = request.cookies.get('access_token')
+  r = requests.get(RES_PATH, headers = {
+    'Authorization': 'Bearer {}'.format(access_token)
+  })
+
+  if r.status_code != 200:
+    return json.dumps({
+      'error': 'The resource server returns an error: \n{}'.format(
+        r.text)
+    }), 500
+
+  contents = json.loads(r.text)
+  users = contents.get('results')
+  return render_template('users.html', users = users)
+#+end_src
+
+As said earlier, instead of being embedded in the cookie, the access token is
+transferred as a part of the Authorization header of the HTTP request.
+
+The =get_user= method from =API_server/API_server.py= extracts the access token
+from the header and verifies it with the =verify_access_token= method:
+
+#+begin_src python
+def verify_access_token(access_token):
+  try:
+    decoded_token = jwt.decode(access_token.encode(), public_key,
+                               issuer = ISSUER,
+                               algorithm = 'RS256')
+  except (jwt.exceptions.InvalidTokenError,
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.InvalidIssuerError,
+          jwt.exceptions.ExpiredSignatureError):
+    return False
+
+  return True
+#+end_src
+
+We use the ~pyjwt~ package to verify JWTs as well. It checks the signature of
+the JWT and makes sure that values of the =iss= and =exp= fields are
+valid. Custom fields (if any) are included in the decoded token and can be
+manually verified.
+
+*** Important Notes
+- For simplicity reasons, servers in this sample uses HTTP connection. In your
+  implementation though, you should always use HTTPS. The following commented
+  out code in the sample,
+
+  #+begin_example
+  #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+  #context.load_cert_chain(‘domain.crt’, ‘domain.key’)
+  #app.run(port = 5000, debug = True, ssl_context = context)
+  #+end_example
+
+  allows the server to serve contents via HTTPS with a private key and a
+  self-signed certificate when running locally. It is likely that your browser
+  will issue a warning using this approach though, as, obviously, self-signed
+  certificates cannot be easily trusted.
+
+- OAuth2 requires that clients register with the authorization server before
+  using the authorization flow. Registration process itself is not considered a
+  part of the OAuth 2.0 flow and is up to developers themselves to design and
+  implement it. This sample makes the following assumptions:
+
+  1. The client has registered with the authorization server.
+
+  2. The client has received its client ID and client secret provided by the
+     authorization server.
+
+- Access tokens in this sample only contains information regarding its issuer
+  and expiration date. Depending on your use case, it might be necessary to
+  pose more restrictions. Common fields to implement in the access token
+  include =audience= (destinations where access token can reach) and =scopes=
+  (level of access that the token grants).
+
+- When an error occurred, OAuth2 regulated that authorization server should
+  respond with =HTTP 400 Bad Request= (unless specified otherwise) with the
+  following parameters: =error=, =error_description= (optional) and =error_uri=
+  (optional). See the specification for more information regarding error
+  messages.
+
+- This sample uses client ID and client secret to verify clients and transfers
+  them in the body of HTTP requests. OAuth2 specification does not have a set
+  method for client verifications though, you may switch to a different
+  approach in your authorization flow.
+
 
 ** Article---Understanding OAuth2 and Deploying a Basic OAuth2 Authorization Service to Cloud Functions
 This tutorial explains the basics of OAuth 2.0 and how to deploy an OAuth2
