@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.3.<2019-05-03 Fri 09:54>
+#+macro:version 0.3.4.<2019-05-03 Fri 10:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3049,6 +3049,234 @@ manually verified.
   them in the body of HTTP requests. OAuth2 specification does not have a set
   method for client verifications though, you may switch to a different
   approach in your authorization flow.
+
+** Article---Building a Basic Authorization Server with Implicit Flow
+:PROPERTIES:
+:url:      https://medium.com/@ratrosy/building-a-basic-authorization-server-with-implicit-flow-3f474eb2a306
+:date:     May 25, 2018
+:author:   Ratros Y.
+:END:
+This document is part of the Understanding OAuth2 and Building a Basic
+Authorization Server of Your Own guide. It discusses in detail how
+Authorization Code flow works.
+
+*** Before you begin
+The sample code in this document uses Python 3 and the flask framework. It is
+for demonstration purposes only. The code is designed to demonstrate the
+authorization process in an easy-to-understand manner; it does not necessarily
+represent the best practices in development.
+
+**** Setting up your environment
+
+**** Downloading the code
+
+| Path                                               | Notes                                                                                              |
+|----------------------------------------------------+----------------------------------------------------------------------------------------------------|
+| =auth_server/Implicit_auth_server.py=              | An authorization server responsible for issuing access tokens in the Implicit flow.                |
+| =auth_server/private.pem=                          | A private key for generating access tokens. You should replace this key file with one of your own. |
+| =auth_server/auth.py=                              | Includes method(s) for generating access tokens and more.                                          |
+| =auth_server/templates/Implicit_grant_access.html= | An HTML template for preparing the access request page.                                            |
+| =API_server/API_server.py=                         | A simple API server offering access to a list of users.                                            |
+| =API_server/public.pem=                            | A public key for verifying access tokens. You should replace this key file with one of your own.   |
+| =API_server/auth.py=                               | Includes method(s) for verifying access tokens and more.                                           |
+|----------------------------------------------------+----------------------------------------------------------------------------------------------------|
+
+**** Running the code
+Run the code separately as follows:
+
+#+begin_example
+python Implicit_auth_server.py
+python API_server.py
+#+end_example
+
+The authorization server listens at 127.0.0.1:5001 and the API server is
+available at 127.0.0.1:5002.
+
+*** How the Implicit flow works
+
+**** Redirecting users to the sign-in page provided by the authorization server
+The flow starts with a single-page Javascript web app prompting users to sign
+in with the authorization server. If the user agrees, the client opens a new
+window in browser and redirect users to the authorization server. The following
+parameters are passed along: =response_type=, =client_id= and
+=redirect_url=. In other words, the redirect URL looks like this:
+
+: http://[YOUR_AUTH_SERVER]/auth?response_type=token&client_id=sample-client-id&redirect_url=[YOUR_APP_URL]
+
+The value of =response_type=, token, indicates the initialization of the
+Implicit flow. Since the authorization server in this sample only supports one
+flow, the value is not used; however, if you plan to build an authorization
+server supporting multiple flows, use this value to determine which flow to
+initiate. Additionally, =client_id= uniquely identifies the client, and
+=redirect_url= is where the authorization code is sent.
+
+The =auth= method of the authorization server accepts the parameters in the
+query string, and renders a page asking users for approval:
+
+#+begin_src python
+@app.route('/auth')
+def auth():
+  # Describe the access request of the client and ask user for approval
+  client_id = request.args.get('client_id')
+  redirect_url = request.args.get('redirect_url')
+
+  if None in [ client_id, redirect_url ]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })
+
+  return render_template('Implicit_grant_access.html',
+                         client_id = client_id,
+                         redirect_url = redirect_url)
+#+end_src
+
+If users are fine with the requirements, they can sign in with their
+credentials. Sensitive information, such as the user credentials, is handled
+solely by the authorization server, thus protects the users (resource
+owners). Note that in this step the authorization server also verifies if the
+request from the client (redirect URL) matches its claims during the
+registration.
+
+You do not need to develop a single-page Javascript app to try this sample out
+though. Instead, open a new browser window and type in the address below:
+: https://127.0.0.1:5001/auth?response_type=token&client_id=sample-implicit-client&redirect_url=https://www.google.com
+
+You should see a page asking you to sign in to grant sample-implicit-client
+access. Sign in with any username and password, and you will be redirected to
+google.com. The address looks like:
+: https://www.google.com/?access_token=[YOUR_ACCESS_TOKEN]&token_type=JWT&expires_in=1800
+
+Write down the value of =access_token=.
+
+**** Returning an access token
+The authorization server processes the credentials user provided with the
+=signin= method; if the credentials are all correct, it issues an access
+token. Authorization code is not used in Implicit flow due to the fact that in
+single-page Javascript web apps, users have access to the values being
+processed behind the scenes by the browser, rendering authorization codes
+meaningless.
+
+#+begin_src python
+@app.route('/signin', methods = ['POST'])
+def signin():
+  # Issues authorization code
+  username = request.form.get('username')
+  password = request.form.get('password')
+  client_id = request.form.get('client_id')
+  redirect_url = request.form.get('redirect_url')
+
+  if None in [username, password, client_id, redirect_url]:
+    return json.dumps({
+      "error": "invalid_request"
+    }), 400
+
+  if not verify_client_info(client_id, redirect_url):
+    return json.dumps({
+      "error": "invalid_client"
+    })  
+
+  if not authenticate_user_credentials(username, password):
+    return json.dumps({
+      'error': 'access_denied'
+    }), 401
+
+  access_token = generate_access_token()
+
+  print(process_redirect_url(redirect_url, {"1":"2"}))
+
+  return redirect(process_redirect_url(redirect_url, {
+    'access_token': access_token,
+    'token_type': 'JWT',
+    'expires_in': JWT_LIFE_SPAN
+    }), code = 303)
+#+end_src
+
+This sample uses ~pyjwt~ package to generate JWTs. =iss= is the issuer of this
+access token (=sample-auth-server=). =exp= is the expiration date of the access
+token, which is set to 1800 seconds (=JWT_LIFE_SPAN=) after issuing. Every
+access token in this sample is encrypted by a private key and can be decrypted
+by the corresponding public key; in other words, every one can check the
+validity of your access tokens, yet no one else can issue access tokens on your
+behalf, as long as the private key is kept private.
+
+**** Using the access token to access resources
+After the access token is received and written to the cookie, the client can
+use it to access the API server. Access token should be transferred as a part
+of the Authorization header of the HTTP request. The header looks like:
+: authorization: Bearer YOUR_ACCESS_TOKEN
+
+You can use ~cURL~ to create the same request:
+: curl --header "Authorization: Bearer [YOUR_ACCESS_TOKEN]" http://127.0.0.1:5002/users
+
+Replace =[YOUR_ACCESS_TOKEN]= with the value you wrote down earlier. You should see
+a list of users in the output.
+
+The =get_user= method from =API_server/API_server.py= extracts the access token from
+the header and verifies it with the =verify_access_token= method:
+
+#+begin_src python
+def verify_access_token(access_token):
+  try:
+    decoded_token = jwt.decode(access_token.encode(), public_key,
+                               issuer = ISSUER,
+                               algorithm = 'RS256')
+  except (jwt.exceptions.InvalidTokenError,
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.InvalidIssuerError,
+          jwt.exceptions.ExpiredSignatureError):
+    return False
+
+  return True
+#+end_src
+
+We use the ~pyjwt~ package to verify JWTs as well. It checks the signature of
+the JWT and makes sure that values of =iss= and =exp= are valid. Custom fields
+(if any) are included in the decoded token and can be manually verified.
+
+*** Important notes
+- For simplicity reasons, this sample uses HTTP connection. In your
+  implementation though, you should always use HTTPS connection. The commented
+  out code in the sample,
+
+  #+begin_example
+  #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+  #context.load_cert_chain(‘domain.crt’, ‘domain.key’)
+  #app.run(port = 5000, debug = True, ssl_context = context)
+  #+end_example
+
+  allows applications to serve contents via HTTPS with a private key and a
+  self-signed certificate when running locally. It is likely that your browser
+  will issue a warning using this approach though, as, obviously, self-signed
+  certificates cannot be trusted.
+
+- OAuth2 requires that clients register with the authorization server before
+  using the authorization flow. Registration process itself is not considered a
+  part of the OAuth 2.0 flow and is up to developers to design and implement
+  it. This sample makes the following assumptions:
+
+  1. The client has registered with the authorization server.
+
+  2. During registration, the client specified which resource servers it plans
+     to access, what scopes it needs and the redirect URL it uses.
+
+  3. The client has received its client ID provided by the authorization
+     server.
+
+- Access tokens in this sample only contains information regarding its issuer
+  and expiration date. Depending on your use case, it might be necessary to add
+  more checks. Common fields to implement in the access token include audience
+  (destinations where access token can reach) and scopes (level of access the
+  token grants).
+
+- OAuth2 regulated that authorization server should respond with =HTTP 400 Bad
+  Request= (unless specified otherwise) with the following parameters: =error=,
+  =error_description= (optional) and =error_uri= (optional). See the specification
+  for more information regarding error messages.
 
 ** Article---Understanding OAuth2 and Deploying a Basic OAuth2 Authorization Service to Cloud Functions
 This tutorial explains the basics of OAuth 2.0 and how to deploy an OAuth2
