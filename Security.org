@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:April 14, 2019
-#+macro:version 0.3.9.<2019-05-03 Fri 14:18>
+#+macro:version 0.3.10.<2019-05-03 Fri 15:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2318,6 +2318,12 @@ be any JSON type.  Both token types offer cryptographic protection of their
 content: SWTs with HMAC SHA-256 and JWTs with a choice of algorithms, including
 signature, MAC, and encryption algorithms.
 
+*** JSON Web Signature
+- http://tools.ietf.org/html/draft-ietf-jose-json-web-signature-20
+
+*** JSON Web Encryption
+- http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-20
+
 * MACs and HMACs
 [[*%5B%5Bhttps://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers%5D%5BWhat Is HMAC And How Does It Secure File Transfers?%5D%5D][What Is HMAC And How Does It Secure File Transfers?]]
 
@@ -2330,12 +2336,16 @@ signature, MAC, and encryption algorithms.
   the HTTP service, or by allowing the third-party application to obtain access
   on its own behalf.  This specification replaces and obsoletes the OAuth 1.0
   protocol described in RFC 5849.
+
+- [[http://tools.ietf.org/html/rfc6750][RFC 6750]] OAuth 2.0 Bearer token
+
 - [[https://tools.ietf.org/html/rfc8252][RFC 8252]] OAuth 2.0 for Native Apps
 
   OAuth 2.0 authorization requests from native apps should only be made through
   external user-agents, primarily the user's browser.  This specification
   details the security and usability reasons why this is the case and how
   native apps and authorization servers can implement this best practice.
+
 - https://www.oauth.com
 - https://oauth.net
 - https://www.okta.com
@@ -5828,6 +5838,225 @@ to start, make sure you don’t miss our upcoming tutorial for setting up a
 Node.js app using Typeform’s PassportJS strategy for authentication (or grab a
 free Node.js Typeform integration boilerplate [[https://github.com/anabellaspinelli/typeform-oauth-boilerplate][here]]!)
 
+* OpenID Connect
+- https://openid.net/connect/
+- [[http://tools.ietf.org/html/rfc6749][RFC 6749]]
+
+
+{{{heading((Identity, Authentication) + OAuth 2.0 = OpenID Connect)}}}
+
+OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0
+protocol. It allows Clients to verify the identity of the End-User based on the
+authentication performed by an Authorization Server, as well as to obtain basic
+profile information about the End-User in an interoperable and REST-like
+manner.  OpenID Connect allows clients of all types, including Web-based,
+mobile, and JavaScript clients, to request and receive information about
+authenticated sessions and end-users.
+
+OpenID Connect is an interoperable authentication protocol based on the OAuth
+2.0 family of specifications. It uses straightforward REST/JSON message flows
+with a design goal of "making simple things simple and complicated things
+possible". It’s uniquely easy for developers to integrate, compared to any
+preceding Identity protocol.
+
+OpenID Connect lets developers authenticate their users across websites and
+apps without having to own and manage password files. For the app builder, it
+provides a secure verifiable, answer to the question: "What is the identity of
+the person currently using the browser or native app that is connected to me?"
+
+OpenID Connect allows for clients of all types, including browser-based
+JavaScript and native mobile apps, to launch sign-in flows and receive
+verifiable assertions about the identity of signed-in users.
+
+{{{heading(What problem does OpenID Connect solve?)}}}
+
+It lets app and site developers authenticate users without taking on the
+responsibility of storing and managing passwords in the face of an Internet
+that is well-populated with people trying to compromise your users’ accounts
+for their own gain.
+
+{{{heading(What does authentication mean?)}}}
+
+The process of establishing and communicating that the person operating a
+browser or native app is who they claim to be.
+
+{{{heading(Are there live production deployments of OpenID Connect?)}}}
+
+Yes. Some examples include Google, Gakunin (Japanese Universities Network),
+Microsoft, Ping Identity, Nikkei Newspaper, Tokyu Corporation, mixi, Yahoo!
+Japan and Softbank. There are also mature deployments underway by Working Group
+participant organizations, such as Deutsche Telecom, AOL, and Salesforce.
+
+For an example of OpenID Connect at work, look at [[https://developers.google.com/+/features/sign-in][Google+ Sign-In]], Google’s
+flagship social-identity offering, which is entirely based on OpenID Connect.
+
+[[https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html][Creating OpenID Connect (OIDC) Identity Providers]]
+
+[[https://aws.amazon.com/cognito/][Amazon Cognito]] Let Amazon Cognito handle authentication
+
+[[https://aws.amazon.com/blogs/security/introducing-aws-single-sign-on/][Introducing AWS Single Sign-On]]
+
+[[https://aws.amazon.com/blogs/security/building-an-app-using-amazon-cognito-and-an-openid-connect-identity-provider/][Building an App Using Amazon Cognito and an OpenID Connect Identity Provider]]
+AWS now supports OpenID Connect (OIDC)
+
+[[https://aws.amazon.com/blogs/aws/openid-connect-support/][OpenID Connect Support for Amazon Cognito]] Cognito takes the ID token that you
+obtain from the OIDC identity provider and uses it to manufacture unique
+Cognito IDs for each person who uses your app.
+** Article---OpenID Connect Authorization Code Flow with AWS Cognito
+:PROPERTIES:
+:url:      https://medium.com/@robert.broeckelmann/openid-connect-authorization-code-flow-with-aws-cognito-246997abd11a
+:author:   Robert Broeckelmann
+:date:     Oct 26, 2018
+:END:
+AWS Cognito is a relatively new player in the identity space. It doesn’t
+support the full OAuth2 or OpenID Connect specs, but, does support most of what
+I would generally consider the important parts. This post will be the first in
+a series about AWS services in the Identity and API Management spaces and how
+they can be used together in common patterns that we’ve explored with other
+technology stacks. In this post, we’ll do an AWS Cognito configuration overview
+for an OpenID Connect application.
+*** Overview
+*** Assumptions
+*** Cognito Setup
+*** Create Application Definition
+*** Important URLs for User Pool
+*** Test With The OIDC + OAuth2 Debugger
+*** See The User In Cognito
+*** User Authentication
+*** Summary
+In this post, we looked at the AWS Cognito setup for an OpenID Connect client
+application and demonstrated it working with OAuth2 + OIDC Debugger.
+
+In subsequent posts, we’ll look at:
+
+- AWS Cognito out-of-the-box native user registration and login.
+- Demonstrate federated user registration and login with social login providers
+  (Facebook, Google+), SAML2, and OpenID Connect.
+- How to use access tokens issued from AWS Cognito with the AWS API Gateway.
+** Article---Authentication with AWS Amplify and Android--3rd Party OIDC Providers
+:PROPERTIES:
+:url:      https://itnext.io/authentication-with-aws-amplify-and-andro-3rd-party-oidc-providers-df4beaf4110d
+:author:   Adrian Hall
+:date:     Oct 15, 2018
+:END:
+This will be an in-depth series on authentication with AWS Amplify. Here are
+the topics I am going to cover, and I will update each blog with the links as I
+complete the articles.
+
+- The basics — a username/password system.
+  : https://medium.com/@FizzyInTheHall/authentication-with-aws-amplify-and-android-the-basics-34f55ddf3759
+
+- Customizing the UI.
+  : https://itnext.io/authentication-with-aws-amplify-and-android-customizing-the-ui-2c36e888b200
+
+- Authenticating with Facebook.
+  : https://itnext.io/authentication-with-aws-amplify-facebook-login-878ce4df6e82
+
+- Authenticating with Google.
+  : https://itnext.io/authentication-with-aws-amplify-google-login-878aaf11f2d4
+
+- Using third-party authentication providers.
+
+- Using Time-based One-time passwords (TOTP).
+  : Using Time-based One-time passwords (TOTP)
+
+- Using Biometric authentication.
+  : https://itnext.io/authentication-with-aws-amplify-and-android-integrating-biometrics-924f36c7b9c1
+
+- Doing fraud protection and analytics.
+  : https://itnext.io/authentication-with-aws-amplify-and-android-fraud-protection-and-analytics-55761ad5c708
+
+
+In the last two articles, I’ve covered Facebook and Google — probably the most
+important authentication providers that there are out there and for which there
+is specific support in Amazon Cognito. However, that is not always the
+case. You might want to authenticate against Salesforce, GitHub, or other
+OpenID Connect (OIDC) providers — providers that aren’t directly supported by
+Amazon Cognito. In fact, you could [[https://www.scottbrady91.com/OpenID-Connect/Getting-Started-with-oidc-provider][write your own OIDC provider]], although I
+would not recommend it. Use a service!
+
+So, what’s involved?
+
+1. Set up authentication with the provider of choice.
+
+2. Configure Amazon Cognito to federate with the provider.
+
+3. When you receive an authentication token from the provider, pass it to the
+   Amazon Cognito identity pool for federation.
+
+
+Sound familiar? It’s exactly the same as the process we used for Facebook and
+Google.
+
+In this article, I’m going to set up Auth0 as an authentication source. Auth0
+is an OIDC compliant authentication provider that aggregates other providers
+(like Google and Facebook). It’s main advantage for this purpose, however, is
+that it is very developer friendly.
+
+*** Step 1---Set up authentication with the provider of choice
+All authentication providers require you to register with them. This is the
+process:
+
+- Go to [[https://auth0.com/][auth0.com]] and click on the Login button to authenticate.
+
+- If this is your first time, you’ll be asked to register through a simple and
+  short process. Eventually, you will land on your dashboard.
+
+- Click New Application
+
+- Give your application a name, select the Native button, then click Create.
+
+- Click Settings. Make a note of the Domain and Client ID. You will need these
+  later.
+
+- Add the following string to the Allowed Callback URLs, then click Save
+  Changes:
+  : https://DOMAIN.auth0.com/android/PACKAGE/callback
+
+
+Here DOMAIN is the Domain of your application (you just made a note of it) and
+PACKAGE is the root package for your app. You can find PACKAGE as the
+android.applicationId within the app-level build.gradle or the package
+parameter on the application node within the AndroidManifest.xml file.
+
+Yes, Auth0 is truly that quick and easy to set up. In many respects, it’s much
+easier to get started than Google or Facebook, since they’ve done most of the
+work for you. Now, let’s get started on the client side. Open up your project
+in Android Studio.
+
+Add the following strings to your strings.xml file:
+
+#+begin_example
+<!-- Auth0 SDK -->
+<string name="com_auth0_client_id">CLIENT-ID</string>
+<string name="com_auth0_domain">DOMAIN.auth0.com</string>
+#+end_example
+
+The Client ID and Domain are from the Settings page for your application from
+the Auth0 console.
+
+Next ...
+
+*** Step 2---Configure Amazon Cognito identity pools
+The AWS Amplify CLI provides a simplified process for configuring the back end
+if you are using one of the supported paths. Generic OIDC providers is
+definitely off the beaten path, so how do we configure Amazon Cognito to use an
+OIDC provider when it’s not supported?
+
+...
+
+*** Step 3---Federate with the Identity Pool
+Given that we are using the same process as for both the Facebook and Google
+authentication providers, this should be familiar now. First...
+
+*** Common Errors
+
+*** Wrap Up
+This is the last of the primary authentication methods that we will cover. In
+the next article, I’m going to cover TOTP (Time-based one-time passwords) for
+Amazon Cognito user pools, including configuration and usage.
+
+Until then, you can find the code for this article [[https://gitlab.com/adrianhall/aws-mobile-android-kotlin-photos/tree/auth0-auth][on my repository]].
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
