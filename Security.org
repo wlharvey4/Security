@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.11.<2019-05-03 Fri 18:42>
+#+macro:version 0.3.12.<2019-05-04 Sat 07:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1780,28 +1780,47 @@ lessons.
 thing we'll need to do is to go to the [[https://auth0.com/][auth0.com]] website and create a free
 account.
 
+[[file:./resources/auth0.com-25.png]]
+
 00:09 The sign-up process is fairly straightforward.  You can use an email and
 password or you can use any of the social connections here.  This free account
 will give you access to most of the Auth0 API for up to 7,000 users, which is
 more than enough for the purpose of this lesson.
 
+[[file:./resources/auth0-signup-25.png]]
+
+[[file:./resources/auth0-signed-up-25.png]]
+
 00:24 Once you're signed up, you can log into your account, and you will land
 on this dashboard.  This shows you your active users and the number of logins
 in the last few days.
 
-{{{heading(Auth0 API Section)}}}
+[[file:./resources/auth0-dashboard-25.png]]
+
+{{{subheading(Create New User)}}}
+
+Create a new tenant "sandbox" to avoid using the root account name that was
+auto-assigned, which is just a random set of letters.
+
+[[file:./resources/auth0-create-tenant-25.png]]
+
+{{{heading(Auth0 Create New API)}}}
 
 #+CINDEX:API section, Auth0
 00:34 From here, we'll want to go to the API section to create a new
 entry.  This is what will be used to protect our API.
 
-{{{subheading(Auth0 API Name and Identifier)}}}
+[[file:./resources/auth0-create-api-35.png]]
+
+{{{subheading(Auth0 Create API Name and Identifier)}}}
 
 #+CINDEX:identifier
-00:42 You can pick anything for the name.  Let's just use =egghead-demo=.  For
-the identifier, you can use anything, but it is recommended that you use the
-URL of your application.  In this case, we don't have a URL, so we'll just use
-=egghead-demo= as well.
+00:42 You can pick anything for the =name=.  Let's just use =egghead-demo=.
+For the =identifier=, you can use anything, but it is recommended that you use
+the URL of your application.  In this case, we don't have a URL, so we'll just
+use =egghead-demo= as well.
+
+[[file:./resources/auth0-api-create-35.png]]
 
 {{{subheading(Auth0 API Signing Algorithm)}}}
 
@@ -1816,6 +1835,8 @@ this is what we used in the previous lesson.
 Once you have this, you click on =create=, and the modal is closed, and you get
 redirected to the quick start page.
 
+[[file:./resources/auth0-api-quick-start-35.png]]
+
 #+CINDEX:middleware, Auth0
 01:11 If you look at this page, you get code examples on how to implement this
 with your API.  As you can see, it uses the same middleware as we currently use,
@@ -1823,12 +1844,12 @@ the main difference being the settings for the middleware itself.
 
 {{{subheading(Middleware Options)}}}
 
-#+CINDEX:secret key
+#+CINDEX:secret
 #+CINDEX:audience
 #+CINDEX:issuer
-01:24 We will have a secret key, but we also check who is the token meant for,
-the audience, and who created this token, the issuer.  Those are additional
-checks that will make your API even more secure.
+01:24 We will have a =secret= key, but we also check who is the token meant
+for, the =audience=, and who created this token, the =issuer=.  Those are
+additional checks that will make your API even more secure.
 
 Let's now go back at our code editor and open ~api.js~.
 
