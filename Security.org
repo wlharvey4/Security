@@ -1,8 +1,8 @@
 # -*- mode:org; fill-column:79; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:April 14, 2019
-#+macro:version 0.3.10.<2019-05-03 Fri 15:18>
+#+date:May 3, 2019
+#+macro:version 0.3.11.<2019-05-03 Fri 18:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1764,10 +1764,18 @@ authorization token found" error message again.
 data from an API using a JSON web token.
 
 *** Lesson 8---Authenticate Users in a Single Page Application with Auth0
+#+CINDEX:Auth0
+#+CINDEX:custom authentication server, replace with Auth0
 In this lesson, we take the previous API and front-end and we convert them to
 use Auth0 to replace our custom authentication server built in the previous
 lessons.
 
+**** Setting Up Auth0
+
+{{{heading(Create Account at Auth0)}}}
+
+#+CINDEX:@url{https://auth0.com}
+#+CINDEX:Auth0, create account
 00:00 Since this lesson is aimed at using Auth0 for authentication, the first
 thing we'll need to do is to go to the [[https://auth0.com/][auth0.com]] website and create a free
 account.
@@ -1781,24 +1789,43 @@ more than enough for the purpose of this lesson.
 on this dashboard.  This shows you your active users and the number of logins
 in the last few days.
 
+{{{heading(Auth0 API Section)}}}
+
+#+CINDEX:API section, Auth0
 00:34 From here, we'll want to go to the API section to create a new
 entry.  This is what will be used to protect our API.
 
+{{{subheading(Auth0 API Name and Identifier)}}}
+
+#+CINDEX:identifier
 00:42 You can pick anything for the name.  Let's just use =egghead-demo=.  For
 the identifier, you can use anything, but it is recommended that you use the
 URL of your application.  In this case, we don't have a URL, so we'll just use
 =egghead-demo= as well.
 
+{{{subheading(Auth0 API Signing Algorithm)}}}
+
+#+CINDEX:signing algorithm
+#+CINDEX:HS256
 00:58 Finally, you will want to use =HS256= for the signing algorithm, because
 this is what we used in the previous lesson.
 
+{{{subheading(Auth0 Quick Start Page)}}}
+
+#+CINDEX:quick start page
 Once you have this, you click on =create=, and the modal is closed, and you get
 redirected to the quick start page.
 
+#+CINDEX:middleware, Auth0
 01:11 If you look at this page, you get code examples on how to implement this
 with your API.  As you can see, it uses the same middleware as we currently use,
 the main difference being the settings for the middleware itself.
 
+{{{subheading(Middleware Options)}}}
+
+#+CINDEX:secret key
+#+CINDEX:audience
+#+CINDEX:issuer
 01:24 We will have a secret key, but we also check who is the token meant for,
 the audience, and who created this token, the issuer.  Those are additional
 checks that will make your API even more secure.
@@ -1806,10 +1833,13 @@ checks that will make your API even more secure.
 Let's now go back at our code editor and open ~api.js~.
 
 01:41 You can simply change the settings of the middleware by pasting the
-values you copied from the Auth0 website.  Note that those values will need to
-be the ones from your Auth0 account.  If you try to copy the values that I just
-pasted in, this won't work for you.
+values you copied from the Auth0 website.
 
+*Note*: that those values will need to be the ones from your Auth0 account.  If
+you try to copy the values that I just pasted in, this won't work for you.
+
+#+CINDEX:@code{api.js}
+#+name:auth0-jwtCheck
 #+begin_src js -n
 const jwtCheck = expressjwt({
   secret: 't2ABNgm7aB8YrMrnsutSB0bPNtLZbC7P',
@@ -1818,38 +1848,56 @@ const jwtCheck = expressjwt({
 });
 #+end_src
 
+#+CINDEX:API server, start
 01:56 We can now head to our terminal window and start our API server by
 running ~node api~.  Your server is now running on port 8888.
 
+**** Setting Up the Front End for Token from Auth0
+#+CINDEX:token
 If you try this now, nothing will work.  Your front end also needs to get a
 token from Auth0.  Let's get back to our code and do those changes.
 
+#+CINDEX:@code{auth.js}, delete
 02:13 Because we won't be using our authorization server anymore, we can go
 ahead and remove the ~auth.js~ file from this folder altogether.
 
+{{{heading(Update ~index.hmtl~ Code for Auth0)}}}
+
+#+CINDEX:@code{index.html}
 It's now time to edit our ~index.html~ page to use Auth0's authentication server
 instead of ours.
 
+{{{subheading(Remove Login Modal)}}}
+
+#+CINDEX:login modal, remove
+#+CINDEX:login screen, Auth0
 02:28 The first thing that we'll want to do is to remove the login modal.  We
 will be using Auth0's login screen, so let's go to line 21 and remove those
 data tags that were used to open the modal.
 
+#+CINDEX:@code{loginBtn}
 02:40 We can also rename this button to be =loginBtn= instead.
 
 Since we won't be using the modal anymore, we can go down here and delete all
 of the markup for our login modal.
 
+{{{subheading(Add Auth0 Library from CDN)}}}
+
+#+CINDEX:CDN, Autho0
 02:55 We will use Auth0's library, which we will get from their CDN.  We can
 add a script tag.  The source will be =https://cdn.auth0.com/js/auth0/=, the
 version number, which is =9.5.1=, the latest at this moment, and finally
 =/auth0.min.js=.
 : <script src="https://cdn.auth0.com/js/auth0/9.5.1/auth0.min.js"></script>
 
-03:21 Our ~index.html~ file is not ready, but to finish the UI changes, we will
-need to go to the ~ui-update.js~ file and do a few minor changes in
-there.  Instead of showing and hiding the login modal button, we will do that on
-the =loginBtn=.  Let's change line 5 to use =loginBtn=, and same thing on
-line 11.  We're almost done.
+**** Setting Up ~ui-update.js~
+#+CINDEX:@code{ui-update.js}
+#+CINDEX:@code{loginBtn}
+03:21 Our ~index.html~ file is now ready, but to finish the UI changes, we will
+need to go to the ~ui-update.js~ file and do a few minor changes in there.
+Instead of showing and hiding the login modal button, we will do that on the
+=loginBtn=.  Let's change line 5 to use =loginBtn=, and same thing on line 11.
+We're almost done.
 
 : ui-update.js
 : ------------
@@ -1868,11 +1916,16 @@ UIUpdate.loggedOut = function() {
 };
 #+end_src
 
+**** Setting Up ~index.js~ to Use Auth0 Authentication Server
+#+CINDEX:@code{index.js}
+#+CINDEX:@code{webAuth} object
 03:44 Let's open our ~index.js~ file to change our code to use Auth0's
 authentication server instead of the one we built.  In here, we will need to
 use Auth0's =webAuth= object.  First, we need to get the settings for this
 object.  Let's go back to Auth0's website and go into the =Applications=
 section.
+
+{{{heading(Create New Auth0 Application)}}}
 
 04:03 In here, we choose to create a new application.  We can name it whatever,
 but we will use =egghead-demo= for consistency.  This application is of type
@@ -1883,9 +1936,14 @@ various quick starts.  In here, you can find for most major JavaScript
 frameworks, but we are going to use plain vanilla JavaScript here.
 
 04:30 If you scroll down, you will find a section which has all of your
-settings for your application.  Once again, make sure that you copy those from
-your Auth0 account, and not those from this video.  Let's copy that and go back
-to our code.
+settings for your application.
+
+*Note*: Once again, make sure that you copy those from your Auth0 account, and
+not those from this video.
+
+Let's copy that and go back to our code.
+
+{{{heading(Create a ~webAuth~ Object)}}}
 
 04:44 Now we can create a =webAuth= object using a new =auth0.WebAuth=, and we
 can paste the settings we got from the quick start.
@@ -1904,10 +1962,14 @@ let webAuth = new auth0.WebAuth({
 });
 #+end_src
 
+{{{heading(Do Not Use OpenID Connect Features)}}}
+
+#+CINDEX:OpenID Connect
 04:52 If you use Auth0's application with a default setting, it is =OpenID
 Connect-enabled=, which is outside the scope of this lesson.  We will need to
 tweak the settings of this application in order to be able to use it.
 
+#+CINDEX:callback url
 05:04 Going back to Auth0 and into the settings of our application, the first
 thing that we will need to change is the Callback URL.
 
@@ -1915,19 +1977,159 @@ This is the page where users are redirected after they're logged in on
 Auth0.  You can go to your application, get the URL from there, and simply paste
 it in the settings.
 
+#+CINDEX:OIDC conformant application
+#+CINDEX:HS256
+#+CINDEX:JWT signature
 05:22 We will also need to go all the way down to the =Advanced= settings.  This
 is not an OIDC conformant application, so we can uncheck this.  We can change
 our JWT signature to also use =HS256=.  We're good.  Just save this, and we can
 head back to our code editor.
 
+#+CINDEX:issuer of token
+#+CINDEX:tenant
+#+CINDEX:clientID
 05:42 We need to tweak our settings just a little bit here.  Our domain is the
 issuer of the token.  It's what is referred to as =tenant= in Auth0's website.  The
 =clientID= is found in your settings.  This should be good.
 
+#+CINDEX:responseType
+#+CINDEX:id_token
+#+CINDEX:audience
+#+CINDEX:scope
 05:54 In =responseType=, we won't need the =id_token=, so we can remove
 this.  The =audience= is the API that we want to connect to.  Let's change this to
 =egghead-demo=.  Finally, the scope is irrelevant in this case, so we can simply
 remove this.
+
+#+CINDEX:redirectUri
+06:10 The =redirectUri= is where your user will be redirected afterwards. This
+URL has to be in your application settings in the allowed callback URL section,
+which we already took care of.
+
+: index.js
+: --------
+
+#+CINDEX:webAuth object
+#+name:webAuth-object
+#+begin_src js
+let webAuth = new auth0.WebAuth({
+  domain: 'joel-1.auth0.com',
+  clientID: '8vXPduLlATyDg69DF13J7JY4xN2vveOG',
+  responseType: 'token',
+  audience: 'egghead-demo',
+  scope: '',
+  redirectUri: window.location.href
+});
+#+end_src
+
+**** Setup Logic for Login Button
+#+CINDEX:login button
+Let's now change the logic behind our login button.
+
+#+CINDEX:@code{webAuth.authorize} method
+06:25 Right now, we had to get all of that info from the modal and post that to
+our authentication server, but we won't need any of this now. Let's just remove
+all of this and use =webAuth= with the =authorize= method instead. Save this,
+and you should be good to go.
+
+#+name:loginBtn-addEventListener
+#+begin_src js
+loginBtn.addEventListener("click", (event) => {
+	webAuth.authorize();
+});
+#+end_src
+
+**** Setup Private Access
+06:40 If we go to our app and refresh it, and you try the public button, it
+should return you the data from our public endpoint. If you tried a private
+one, you should be getting an error message, which is normal, since we haven't
+logged in, yet.
+
+{{{heading(Login using Auth0)}}}
+
+#+CINDEX:login button
+#+CINDEX:redirect to Auth0 login
+06:53 Let's do that right away and click on the =login= button. You can see
+that we are redirected to the Auth0 login screen. You now have some social
+sign-ons, you have a =sign-up= page, you have a =forgot password= page. All of
+that for free just by using Auth0. I'll go ahead and log in with Google.
+
+#+CINDEX:consent UI screen
+07:13 Now you get the consent UI screen asking you if you want to share the
+information with the application.
+
+Let's go ahead and accept that, and we are sent back to our website.
+
+07:23 As you can see, as part of my URL, now has a hash followed by an access
+token.
+
+{{{subheading(Parse the Hash for the Access Token)}}}
+
+#+CINDEX:parse hash
+#+CINDEX:access token, extract from hash
+Now if I try my =Public= button, it still works, but if I use a =Private=
+button, I'm still getting the "No authorization token was found," error
+message. That's because we need to parse our hash and extract the access token
+from there, and store it so that it can be used by our fetch call.
+
+#+CINDEX:@code{parseHash} function
+#+CINDEX:@code{webAuth.parseHash} method
+07:43 Thankfully, there is a method in the Auth0 library to help us with
+that. Let's create a ~parseHash~ function here. This function will call
+~webAuth.parseHash~ method, which takes a callback as an argument.
+
+#+CINDEX:@code{authResult}
+#+CINDEX:@code{accessToken}
+07:56 This callback has an =error=, and =authResult= arguments. Let's look at
+the happy path and check if we have an =authResult= and an =accessToken=.
+
+#+CINDEX:@code{ACCESS_TOKEN}
+#+CINDEX:@code{accessToken} variable
+08:04 We can remove the hash part of the URL. We can also store our
+=ACCESS_TOKEN= in our =accessToken= variable.
+
+#+CINDEX:@code{UIUpdate} helper
+08:12 Finally, let's use our =UIUpdate= helper to indicate that we are
+loggedIn. This function will need to run at some point. Let's
+=addEventListener= to our window object for "DOMContentLoaded", and run this
+function then.
+
+#+name:parseHash
+#+begin_src js
+const parseHash = () => {
+    webAuth.parseHash(function(err, authResult) {
+        if (authResult && authResult.accessToken) {
+            window.location.hash = '';
+            ACCESS_TOKEN = authResult.accessToken;
+            UIUpdate.loggedIn();
+        }
+    });
+};
+
+window.addEventListener("DOMContentLoaded", parseHash);
+#+end_src
+
+**** Test the Auth0 Application
+08:28 Let's go back to our application now and refresh this. We can try
+=Public= and =Private=, and we are getting the expected result. Let's go ahead
+and =Login=.
+
+08:38 I'll login with Google again. You'll notice that I haven't been asked for
+my consent again, as I had given it previously and it remembers this.
+
+08:48 Now I'm redirected back to the application, our URL is clean, it doesn't
+have hash in it anymore, and we have our access token right here. If you copied
+this token, you can go to the jwt.io website and paste it there.
+
+09:01 This will decode the token for you and show you all of the details of
+this JWT. You can see that it's an HS256 encoded token. You also have a bunch
+of stuff like the issuer -- so who created this token -- you have your user ID,
+and the audience, which is who this token is meant for. You also have your
+issued at and an expiry time-stamps, which can be very useful.
+
+09:26 Now that you have this token, you can click on the =Private= button and
+you see the response from your secured endpoint in your API. That's how you
+make a real secure application with Auth0.
 
 ** Reference
 *** RFC 7797
@@ -6057,6 +6259,111 @@ the next article, I’m going to cover TOTP (Time-based one-time passwords) for
 Amazon Cognito user pools, including configuration and usage.
 
 Until then, you can find the code for this article [[https://gitlab.com/adrianhall/aws-mobile-android-kotlin-photos/tree/auth0-auth][on my repository]].
+** Article---Building a Custom UI for Authentication with AWS Amplify
+:PROPERTIES:
+:url:      https://itnext.io/building-a-custom-ui-for-authentication-with-aws-amplify-fa13bdbd4d1d
+:date:     Mar 29, 2018
+:author:   Adrian Hall
+:END:
+In my [[*Article---Implement Authentication in a React Native App with AWS Amplify][last post]], I introduced the basic form of authentication, hooked onto a
+button and using the default UI. The default UI does not include any
+branding. When you are creating your own app, you will want to use your
+backgrounds, colors, fonts and logos. You will want to create your own
+=Authenticator= component that deals with this for you. Fortunately, AWS
+Amplify makes this simple.
+
+Authentication follows a state diagram. You start unauthenticated and sitting
+at the sign-in screen. As you perform authentication operations (sign-in,
+submit-mfa, sign-up, confirm-signup, etc.), you transition from one state to
+another, gathering and mutating the authentication data and communicating with
+Amazon Cognito along the way. The =Authenticator= component is a state
+management system that displays the right component based on the state and
+allows the underlying component to sign-in:
+
+#+begin_src js
+import React from 'react';
+import ForgotPassword from './ForgotPassword';
+import SignUp from './SignUp';
+import SignIn from './SignIn';
+
+class Authenticator extends React.Component {
+  static defaultProps = {
+    initialState: 'default',
+    initialData: {},
+    onAuthenticated: (authData) => { console.log(`onAuthenticated(${JSON.stringify(authData, null, 2)}`); }
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      authState: this.props.initialState,
+      authData: this.props.initialData,
+    };
+  }
+
+  onAuthStateChange(newState, newData) {
+    const data = Object.assign({}, this.state.authData, newData);
+    this.setState({ authState: newState, authData: data });
+    if (newState === 'authenticated') {
+      this.props.onAuthenticated(data);
+    }
+  }
+
+  render() {
+    const props = {
+      authData: this.state.authData,
+      authState: this.state.authState,
+      onAuthStateChange: (s,d) => this.onAuthStateChange(s,d)
+    };
+
+    switch (this.state.authState) {
+      case 'forgotPassword':
+        return <ForgotPassword {...props}/>;
+      case 'signUp':
+        return <SignUp {...props} />;
+      case 'signIn':
+      default:
+        return <SignIn {...props} />;
+    };
+  }
+}
+
+export default Authenticator;
+#+end_src
+
+In this particular component (which models the requirements of user pools in
+Amazon Cognito), we need to model three different screens — =SignIn=, =SignUp=
+and =ForgotPassword=. Each one is passed the current state and the current
+authentication data blob (which is made up of return values from Amazon
+Cognito).
+
+*** The SignUp component
+
+*** The SignIn Component
+
+*** Other things you can do
+
+Wherever your needs take you, you can implement it with the AWS Amplify
+library. Learn more about the [[https://aws.github.io/aws-amplify][AWS Amplify library on GitHub]]. You can find the
+example code I use here in my [[https://github.com/adrianhall/blog-code/tree/master/awsmobilecognitocustomui][my GitHub repository]].
+
+** Article---Implement Authentication in a React Native App with AWS Amplify
+:PROPERTIES:
+:url:      https://medium.com/@FizzyInTheHall/implement-authentication-in-a-react-native-app-with-aws-amplify-313b8326339a
+:date:     Mar 27, 2018
+:author:   Adrian Hall
+:END:
+Todays blog is on mobile authentication. If there is one topic that comes up
+over and over, it’s how to ensure that only my users can access their
+data. Security and Data Privacy are hugely important topics, and rightly
+so. How do I do this easily?
+
+Fortunately, [[https://aws.amazon.com/mobile][AWS Mobile]] has been hard at work on making this simple, so let’s
+get right to it with setting up a backend. If you have an AWS account (they are
+free — you only pay for your consumption, not for having an account), then you
+can set up the awsmobile CLI to make configuring things easy. I’m going to
+assume you have already set up the [[https://facebook.github.io/react-native/docs/getting-started.html][React Native CLI]] on your system and
+installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
