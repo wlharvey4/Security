@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.12.<2019-05-04 Sat 07:42>
+#+macro:version 0.3.13.<2019-05-04 Sat 08:48>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1851,6 +1851,7 @@ the main difference being the settings for the middleware itself.
 for, the =audience=, and who created this token, the =issuer=.  Those are
 additional checks that will make your API even more secure.
 
+**** Update ~api.js~ With Auth0 Options
 Let's now go back at our code editor and open ~api.js~.
 
 01:41 You can simply change the settings of the middleware by pasting the
@@ -1863,20 +1864,71 @@ you try to copy the values that I just pasted in, this won't work for you.
 #+name:auth0-jwtCheck
 #+begin_src js -n
 const jwtCheck = expressjwt({
-  secret: 't2ABNgm7aB8YrMrnsutSB0bPNtLZbC7P',
-  audience: 'secure-spa-auth0',
-  issuer: "https://joel-1.auth0.com/"
+  secret: "7zEaiA557eeLRSDgYJdjqpEeS0lPtQRG",
+  audience: "egghead-demo",
+  issuer: "https://pinecone062-sandbox.auth0.com/"
 });
 #+end_src
 
+{{{heading(Create Lesson8 Makefile Rule)}}}
+
+#+begin_src sh :tangle egghead-jwt-auth/Makefile
+.phony : lesson8
+lesson8 : FORCE
+	yarn run httpster -d lesson8 -p 5000 &
+	export API_PORT=3333;node lesson8/api.js &
+#+end_src
+
+{{{heading(Test the Setup)}}}
+
 #+CINDEX:API server, start
 01:56 We can now head to our terminal window and start our API server by
-running ~node api~.  Your server is now running on port 8888.
+running ~node api~ via the ~make~ rule from the root directory
+(~egghead-jwt-auth~):
+: make lesson8
+
+Your server is now running on port 3333.
+
+***** File ~api.js~ for Lesson 8
+
+Everything is the same except for the ~express-jwt~ options:
+
+#+name:auth0-api.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson8/api.js :mkdirp yes :noweb yes
+<<require-express>>
+<<require-body-parser>>
+<<require-cors>>
+<<require-expressjwt>>
+
+/* Auth0 express-jwt options */
+<<auth0-jwtCheck>>
+
+<<app-express>>
+<<app-use-body-parser>>
+<<app-use-cors>>
+
+<<public-resource-route>>
+<<private-resource-route>>
+<<catchall-route>>
+
+<<api-port>>
+<<app-listen-api-port>>
+#+end_src
+
 
 **** Setting Up the Front End for Token from Auth0
 #+CINDEX:token
 If you try this now, nothing will work.  Your front end also needs to get a
-token from Auth0.  Let's get back to our code and do those changes.
+token from Auth0.[fn::This is because the default setup for Auth0 is to require
+authentication for all endpoints.  This error could probably be eliminated by
+changing the Auth0 settings to be line with the demo premise that there is a
+=PUBLIC= route.]
+
+[[file:./resources/auth0-need-token-40.png]]
+
+Let's get back to our code and do those changes.
+
+{{{heading(Delete Authorization Server ~auth.js~)}}}
 
 #+CINDEX:@code{auth.js}, delete
 02:13 Because we won't be using our authorization server anymore, we can go
@@ -2151,6 +2203,40 @@ issued at and an expiry time-stamps, which can be very useful.
 09:26 Now that you have this token, you can click on the =Private= button and
 you see the response from your secured endpoint in your API. That's how you
 make a real secure application with Auth0.
+
+**** Lesson 8 Code
+
+***** Lesson 8 ~index.html~
+#+name:auth0-index.html
+#+begin_src html -n :tangle egghead-jwt-auth/lesson8/index.html :noweb yes
+<<index.html>>
+#+end_src
+
+***** Lesson 8 ~index.js~
+#+name:auth0-index.js
+#+begin_src js -n :noweb yes :tangle egghead-jwt-auth/lesson8/index.js
+/* To run this file on a server, we are using httpster.
+Type `httpster index.html -p 5000` in your console to start the server. */
+
+<<api-url>>
+<<auth-url>>
+
+<<access-token>>
+
+const headlineBtn = document.querySelector("#headline");
+const secretBtn = document.querySelector("#secret");
+const loginBtn = document.querySelector("#loginBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
+
+<<headlineBtn.addEventListener>>
+
+<<secretBtn.addEventListener>>
+
+<<loginBtn.addEventListener>>
+
+<<logoutBtn.addEventListener>>
+
+#+end_src
 
 ** Reference
 *** RFC 7797
