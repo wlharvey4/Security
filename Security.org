@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.14.<2019-05-04 Sat 09:36>
+#+macro:version 0.3.15.<2019-05-04 Sat 16:30>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1226,6 +1226,7 @@ data from the secure endpoint in the API.
         <<container>>
         <<modal>>
         <<cdn-scripts>>
+
         <<app-scripts>>
 
     </body>
@@ -1257,26 +1258,71 @@ data from the secure endpoint in the API.
 #+end_src
 
 #+name:navbar
-#+begin_src html
+#+begin_src html :noweb yes
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Secure your SPA</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+    <<navbar-a>>
+    <<navbar-toggler>>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active" data-route="#">
-                <a class="nav-link" href="#">Home</a>
-            </li>
-        </ul>
-        <form class="form-inline">
-            <button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#loginModal" type="button" id="loginModalBtn">Login</button>&nbsp;
-            <button class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
-        </form>
-    </div>
+    <<navbar-collapse>>
 </nav>
 
+#+end_src
+
+#+name:navbar-a
+#+begin_src html
+<a class="navbar-brand" href="#">Secure your SPA</a>
+#+end_src
+
+#+name:navbar-toggler
+#+begin_src html
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+#+end_src
+
+#+name:navbar-collapse
+#+begin_src html :noweb yes
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <<navbar-collapse--nav>>
+    <<navbar-collapse--form>>
+</div>
+#+end_src
+
+#+name:navbar-collapse--nav
+#+begin_src html
+<ul class="navbar-nav mr-auto">
+    <li class="nav-item active" data-route="#">
+        <a class="nav-link" href="#">Home</a>
+    </li>
+</ul>
+#+end_src
+
+#+begin_comment
+For Lesson 8, change the modal-login-button to remove the data-toggle and data-target
+Create something like <<login-button>> instead
+#+end_comment
+
+#+name:navbar-collapse--form
+#+begin_src html :noweb yes
+<form class="form-inline">
+    <<modal-login-button>>
+    <<logout-button>>
+</form>
+#+end_src
+
+#+begin_comment
+Remove the data-toggle and data-target for Lesson 8
+#+end_comment
+
+<<modal-login-button>>
+#+name:modal-login-button
+#+begin_src html
+<button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#loginModal" type="button" id="loginModalBtn">Login</button>&nbsp;
+#+end_src
+
+#+name:logout-button
+#+begin_src html
+<button class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
 #+end_src
 
 #+name:mainPage
@@ -1373,7 +1419,6 @@ data from the secure endpoint in the API.
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
 #+end_src
 
 #+name:app-scripts
@@ -1974,25 +2019,25 @@ Everything is the same except for the ~express-jwt~ options:
 <<app-listen-api-port>>
 #+end_src
 
-**** Setting Up the Front End for Token from Auth0
+**** Setting Up the Front End ~index.html~ for a Token from Auth0
 #+CINDEX:token
 If you try this now, nothing will work.  Your front end also needs to get a
 token from Auth0.[fn::This is because the default setup for Auth0 is to require
-authentication for all endpoints.  This error could probably be eliminated by
-changing the Auth0 settings to be line with the demo premise that there is a
-=PUBLIC= route.]
+authentication for all endpoints.  This error for all routes could probably be
+eliminated by changing the Auth0 settings to be line with the demo premise that
+there is a =PUBLIC= route.]
 
 [[file:./resources/auth0-need-token-40.png]]
 
 Let's get back to our code and do those changes.
 
-{{{heading(Delete Authorization Server ~auth.js~)}}}
+***** Delete Authorization Server ~auth.js~
 
 #+CINDEX:@code{auth.js}, delete
 02:13 Because we won't be using our authorization server anymore, we can go
 ahead and remove the ~auth.js~ file from this folder altogether.
 
-{{{heading(Update ~index.html~ Code for Auth0)}}}
+***** Update ~index.html~ Code for Auth0
 
 #+CINDEX:@code{index.html}
 It's now time to edit our ~index.html~ page to use Auth0's authentication server
@@ -2006,8 +2051,53 @@ instead of ours.
 will be using Auth0's login screen, so let's go to line 21 and remove those
 data tags that were used to open the modal.
 
+#+name:auth0-container
+#+begin_src html :noweb yes :exports none
+<div class="container container-fluid">
+    <<auth0-navbar>>
+    <<mainPage>>
+    <<secret-unauthorized-Pages>>
+</div>
+
+#+end_src
+
+#+name:auth0-navbar
+#+begin_src html :noweb yes :exports none
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <<navbar-a>>
+    <<navbar-toggler>>
+
+    <<auth0-navbar-collapse>>
+</nav>
+
+#+end_src
+
+#+name:auth0-navbar-collapse
+#+begin_src html :noweb yes :exports none
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <<navbar-collapse--nav>>
+    <<auth0-navbar-collapse--form>>
+</div>
+#+end_src
+
+#+name:auth0-navbar-collapse--form
+#+begin_src html :noweb yes :exports none
+<form class="form-inline">
+    <<auth0-login-button>>
+    <<logout-button>>
+</form>
+#+end_src
+
+The =data-toggle= and =data-target= are removed from the =form= element
+([[modal-login-button][modal login button]] in Lesson 7).
+
 #+CINDEX:@code{loginBtn}
-02:40 We can also rename this button to be =loginBtn= instead.
+02:40 We can also rename this button to be =loginBtn= instead of =loginModalBtn=.
+
+#+name:auth0-login-button
+#+begin_src html
+<button class="btn btn-outline-success my-2 my-sm-0" type="button" id="loginBtn">Login</button>&nbsp;
+#+end_src
 
 Since we won't be using the modal anymore, we can go down here and delete all
 of the markup for our login modal.
@@ -2019,7 +2109,33 @@ of the markup for our login modal.
 add a script tag.  The source will be =https://cdn.auth0.com/js/auth0/=, the
 version number, which is =9.5.1=, the latest at this moment, and finally
 =/auth0.min.js=.
-: <script src="https://cdn.auth0.com/js/auth0/9.5.1/auth0.min.js"></script>
+
+#+name:auth0-cdn-script
+#+begin_src html
+<script src="https://cdn.auth0.com/js/auth0/9.5.1/auth0.min.js"></script>
+#+end_src
+
+***** Lesson 8 ~index.html~
+#+name:auth0-index.html
+#+begin_src html -n :tangle egghead-jwt-auth/lesson8/index.html :noweb yes
+<html>
+    <head>
+
+        <<link-stylesheet>>
+
+    </head>
+
+    <body>
+
+        <<auth0-container>>
+        <<cdn-scripts>>
+        <<auth0-cdn-script>>
+
+        <<app-scripts>>
+
+    </body>
+</html>
+#+end_src
 
 **** Setting Up ~ui-update.js~
 #+CINDEX:@code{ui-update.js}
@@ -2074,7 +2190,7 @@ not those from this video.
 
 Let's copy that and go back to our code.
 
-{{{heading(Create a ~webAuth~ Object)}}}
+{{{heading(Create a @code{webAuth} Object)}}}
 
 04:44 Now we can create a =webAuth= object using a new =auth0.WebAuth=, and we
 can paste the settings we got from the quick start.
@@ -2151,6 +2267,32 @@ let webAuth = new auth0.WebAuth({
   scope: '',
   redirectUri: window.location.href
 });
+#+end_src
+
+***** Lesson 8 ~index.js~
+#+name:auth0-index.js
+#+begin_src js -n :noweb yes :tangle egghead-jwt-auth/lesson8/index.js
+/* To run this file on a server, we are using httpster.
+Type `httpster index.html -p 5000` in your console to start the server. */
+
+<<api-url>>
+<<auth-url>>
+
+<<access-token>>
+
+const headlineBtn = document.querySelector("#headline");
+const secretBtn = document.querySelector("#secret");
+const loginBtn = document.querySelector("#loginBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
+
+<<headlineBtn.addEventListener>>
+
+<<secretBtn.addEventListener>>
+
+<<loginBtn.addEventListener>>
+
+<<logoutBtn.addEventListener>>
+
 #+end_src
 
 **** Setup Logic for Login Button
@@ -2260,42 +2402,7 @@ issued at and an expiry time-stamps, which can be very useful.
 
 09:26 Now that you have this token, you can click on the =Private= button and
 you see the response from your secured endpoint in your API. That's how you
-make a real secure application with Auth0.
-
-**** Lesson 8 Code
-
-***** Lesson 8 ~index.html~
-#+name:auth0-index.html
-#+begin_src html -n :tangle egghead-jwt-auth/lesson8/index.html :noweb yes
-<<index.html>>
-#+end_src
-
-***** Lesson 8 ~index.js~
-#+name:auth0-index.js
-#+begin_src js -n :noweb yes :tangle egghead-jwt-auth/lesson8/index.js
-/* To run this file on a server, we are using httpster.
-Type `httpster index.html -p 5000` in your console to start the server. */
-
-<<api-url>>
-<<auth-url>>
-
-<<access-token>>
-
-const headlineBtn = document.querySelector("#headline");
-const secretBtn = document.querySelector("#secret");
-const loginBtn = document.querySelector("#loginBtn");
-const logoutBtn = document.querySelector("#logoutBtn");
-
-<<headlineBtn.addEventListener>>
-
-<<secretBtn.addEventListener>>
-
-<<loginBtn.addEventListener>>
-
-<<logoutBtn.addEventListener>>
-
-#+end_src
-
+make a real secure application with 
 ** Reference
 *** RFC 7797
 - https://tools.ietf.org/html/rfc7519
