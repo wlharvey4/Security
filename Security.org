@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.13.<2019-05-04 Sat 08:48>
+#+macro:version 0.3.14.<2019-05-04 Sat 09:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1210,79 +1210,131 @@ our tokens to the API.  Should the token be valid, we will have access to the
 data from the secure endpoint in the API.
 
 **** The Single Page Application
+{{{heading(File ~index.html~)}}}
+
 #+name:index.html
-#+begin_src html -n :tangle egghead-jwt-auth/lesson7/index.html :mkdirp yes
+#+begin_src html -n :tangle egghead-jwt-auth/lesson7/index.html :mkdirp yes :noweb tangle
 <html>
-<head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
+    <head>
 
-<body>
+        <<link-stylesheet>>
+
+    </head>
+
+    <body>
+
+        <<container>>
+        <<modal>>
+        <<cdn-scripts>>
+        <<app-scripts>>
+
+    </body>
+</html>
+#+end_src
+
+{{{subheading(Section ~<head>~)}}}
+
+#+name:link-stylesheet
+#+begin_src html
+<link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous">
+#+end_src
+
+{{{subheading(Section ~<body>~)}}}
+
+{{{subheading(Container)}}}
+
+#+name:container
+#+begin_src html :noweb yes
 <div class="container container-fluid">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Secure your SPA</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active" data-route="#">
-                    <a class="nav-link" href="#">Home</a>
-                </li>
-            </ul>
-            <form class="form-inline">
-                <button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#loginModal" type="button" id="loginModalBtn">Login</button>&nbsp;
-                <button class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
-            </form>
-        </div>
-    </nav>
-
-    <span id="mainPage">
-
-        <div class="row">
-            <div class="col-1"></div>
-            <div class="col-10 text-center">
-                <p>Welcome to the headline generator application.  Click on the buttons to get a headline</p>
-            </div>
-            <div class="col-1"></div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 text-center">
-                <button class="btn btn-lg btn-primary" id="headline">Public</button>&nbsp;
-                <button class="btn btn-lg btn-secondary" id="secret">Private</button>
-            </div>
-        </div>
-
-        <div class="row">&nbsp;</div>
-
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-8">
-                <div class="alert alert-dark" style="overflow-wrap: break-word">
-                    Test the API
-                </div>
-            </div>
-            <div class="col-2"></div>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-4 text-center">
-                <img src="http://http.cat/200" id="httpcat" width="350px"/>
-            </div>
-        </div>
-    </span>
-
-    <span id="secretPage" class="d-none">
-        This is a secret area!
-    </span>
-
-    <span id="unauthorizedPage" class="d-none">
-        You are not authorized to see this page.
-    </span>
+    <<navbar>>
+    <<mainPage>>
+    <<secret-unauthorized-Pages>>
 </div>
 
+#+end_src
+
+#+name:navbar
+#+begin_src html
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Secure your SPA</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active" data-route="#">
+                <a class="nav-link" href="#">Home</a>
+            </li>
+        </ul>
+        <form class="form-inline">
+            <button class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#loginModal" type="button" id="loginModalBtn">Login</button>&nbsp;
+            <button class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
+        </form>
+    </div>
+</nav>
+
+#+end_src
+
+#+name:mainPage
+#+begin_src html
+<span id="mainPage">
+
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col-10 text-center">
+            <p>Welcome to the headline generator application.  Click on the buttons to get a headline</p>
+        </div>
+        <div class="col-1"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <button class="btn btn-lg btn-primary" id="headline">Public</button>&nbsp;
+            <button class="btn btn-lg btn-secondary" id="secret">Private</button>
+        </div>
+    </div>
+
+    <div class="row">&nbsp;</div>
+
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-8">
+            <div class="alert alert-dark" style="overflow-wrap: break-word">
+                Test the API
+            </div>
+        </div>
+        <div class="col-2"></div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-4 text-center">
+            <img src="http://http.cat/200" id="httpcat" width="350px"/>
+        </div>
+    </div>
+</span>
+
+#+end_src
+
+#+name:secret-unauthorized-Pages
+#+begin_src html
+<span id="secretPage" class="d-none">
+    This is a secret area!
+</span>
+
+<span id="unauthorizedPage" class="d-none">
+    You are not authorized to see this page.
+</span>
+
+#+end_src
+
+{{{subheading(Modal)}}}
+
+#+name:modal
+#+begin_src html
 <div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -1312,15 +1364,22 @@ data from the secure endpoint in the API.
     </div>
 </div>
 
+#+end_src
 
+{{{subheading(Scripts)}}}
+
+#+name:cdn-scripts
+#+begin_src html
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+#+end_src
+
+#+name:app-scripts
+#+begin_src html
 <script src="./ui-update.js"></script>
 <script src="./index.js"></script>
-</body>
-</html>
 #+end_src
 
 **** The Helper Functions in UI-Update
@@ -1915,7 +1974,6 @@ Everything is the same except for the ~express-jwt~ options:
 <<app-listen-api-port>>
 #+end_src
 
-
 **** Setting Up the Front End for Token from Auth0
 #+CINDEX:token
 If you try this now, nothing will work.  Your front end also needs to get a
@@ -1934,7 +1992,7 @@ Let's get back to our code and do those changes.
 02:13 Because we won't be using our authorization server anymore, we can go
 ahead and remove the ~auth.js~ file from this folder altogether.
 
-{{{heading(Update ~index.hmtl~ Code for Auth0)}}}
+{{{heading(Update ~index.html~ Code for Auth0)}}}
 
 #+CINDEX:@code{index.html}
 It's now time to edit our ~index.html~ page to use Auth0's authentication server
