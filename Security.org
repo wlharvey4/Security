@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.15.<2019-05-04 Sat 16:30>
+#+macro:version 0.3.16.<2019-05-05 Sun 07:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1428,22 +1428,27 @@ Remove the data-toggle and data-target for Lesson 8
 #+end_src
 
 **** The Helper Functions in UI-Update
-#+name:ui-update.js
-#+begin_src js -n :tangle egghead-jwt-auth/lesson7/ui-update.js :mkdirp yes
-let UIUpdate = {};
-
+<<ui-update-buttons>>
+#+name:ui-update-loggedIn
+#+begin_src js :exports none
 UIUpdate.loggedIn = function(token) {
   UIUpdate.alertBox(`Just logged in<br>Token:<br>${localStorage.getItem("access_token")}`);
   loginModalBtn.classList.add("d-none");
   logoutBtn.classList.remove("d-none");
 };
+#+end_src
 
+#+name:ui-update-loggedOut
+#+begin_src js :exports none
 UIUpdate.loggedOut = function() {
   localStorage.removeItem("access_token");
   loginModalBtn.classList.remove("d-none");
   logoutBtn.classList.add("d-none");
 };
+#+end_src
 
+#+name:ui-update-helper-functions
+#+begin_src js :exports none
 UIUpdate.routeChange = function() {
   if (document.querySelector(".navbar-nav li.active")) {
     document.querySelector(".navbar-nav li.active").classList.remove("active");
@@ -1467,6 +1472,17 @@ UIUpdate.getUsernamePassword = function() {
     password: document.querySelector("#password").value
   }
 };
+#+end_src
+
+#+name:ui-update.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson7/ui-update.js :mkdirp yes :noweb yes
+let UIUpdate = {};
+
+<<ui-update-loggedIn>>
+
+<<ui-update-loggedOut>>
+
+<<ui-update-helper-functions>>
 
 window.addEventListener("hashchange", UIUpdate.routeChange);
 #+end_src
@@ -1955,7 +1971,7 @@ the main difference being the settings for the middleware itself.
 for, the =audience=, and who created this token, the =issuer=.  Those are
 additional checks that will make your API even more secure.
 
-**** Update ~api.js~ With Auth0 Options
+**** Updating ~api.js~ With Auth0 Options
 Let's now go back at our code editor and open ~api.js~.
 
 01:41 You can simply change the settings of the middleware by pasting the
@@ -2108,7 +2124,8 @@ of the markup for our login modal.
 02:55 We will use Auth0's library, which we will get from their CDN.  We can
 add a script tag.  The source will be =https://cdn.auth0.com/js/auth0/=, the
 version number, which is =9.5.1=, the latest at this moment, and finally
-=/auth0.min.js=.
+=/auth0.min.js=.[fn::Current version is =<script
+src="https://cdn.auth0.com/js/auth0/9.10/auth0.min.js"></script>=]
 
 #+name:auth0-cdn-script
 #+begin_src html
@@ -2142,25 +2159,38 @@ version number, which is =9.5.1=, the latest at this moment, and finally
 #+CINDEX:@code{loginBtn}
 03:21 Our ~index.html~ file is now ready, but to finish the UI changes, we will
 need to go to the ~ui-update.js~ file and do a few minor changes in there.
+
+***** Changes to ~ui-update~ loggedIn and loggedOut Buttons
 Instead of showing and hiding the login modal button, we will do that on the
 =loginBtn=.  Let's change line 5 to use =loginBtn=, and same thing on line 11.
-We're almost done.
+We're almost done.  ([[ui-update-buttons][Prior ui-update code]]).
 
-: ui-update.js
-: ------------
-
-#+begin_src js -n
+#+name:auth0-ui-update-loggedIn
+#+begin_src js
 UIUpdate.loggedIn = function(token) {
   UIUpdate.alertBox(`Just logged in<br>Token:<br>${ACCESS_TOKEN}`);
   loginBtn.classList.add("d-none");
   logoutBtn.classList.remove("d-none");
 };
+#+end_src
 
+#+name:auth0-ui-update-loggedOut
+#+begin_src js
 UIUpdate.loggedOut = function() {
   localStorage.removeItem("access_token");
   loginBtn.classList.remove("d-none");
   logoutBtn.classList.add("d-none");
 };
+#+end_src
+
+***** File ~ui-update.js~ for Auth0
+#+name:auth0-ui-update.js
+#+begin_src js -n :tangle egghead-jwt-auth/lesson8/ui-update.js :noweb yes
+<<auth0-ui-update-loggedIn>>
+
+<<auth0-ui-update-loggedOut>>
+
+<<ui-update-helper-functions>>
 #+end_src
 
 **** Setting Up ~index.js~ to Use Auth0 Authentication Server
