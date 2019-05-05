@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.16.<2019-05-05 Sun 07:12>
+#+macro:version 0.3.17.<2019-05-05 Sun 08:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -1766,6 +1766,7 @@ logged in, so we can use the ~UIUpdate.loggedIn~ method to update our UI.
 #+CINDEX:jumbotron
 04:43 Finally, we will update our jumbotron with our data variable.
 
+<<loginBtn>>
 #+name:loginBtn.addEventListener
 #+begin_src js -n
   loginBtn.addEventListener("click", (event) => {
@@ -2194,6 +2195,8 @@ UIUpdate.loggedOut = function() {
 #+end_src
 
 **** Setting Up ~index.js~ to Use Auth0 Authentication Server
+
+***** Create a New Auth0 Application
 #+CINDEX:@code{index.js}
 #+CINDEX:@code{webAuth} object
 03:44 Let's open our ~index.js~ file to change our code to use Auth0's
@@ -2202,15 +2205,21 @@ use Auth0's =webAuth= object.  First, we need to get the settings for this
 object.  Let's go back to Auth0's website and go into the =Applications=
 section.
 
+[[file:./resources/auth0-create-application-50.png]]
+
 {{{heading(Create New Auth0 Application)}}}
 
 04:03 In here, we choose to create a new application.  We can name it whatever,
 but we will use =egghead-demo= for consistency.  This application is of type
 =single-page application=, so we can select this and click on create.
 
+[[file:./resources/auth0-new-application-50.png]]
+
 04:17 Similar to when we created the API, we get a screen that suggests us
 various quick starts.  In here, you can find for most major JavaScript
 frameworks, but we are going to use plain vanilla JavaScript here.
+
+[[file:./resources/auth0-app-technologies-50.png]]
 
 04:30 If you scroll down, you will find a section which has all of your
 settings for your application.
@@ -2220,26 +2229,28 @@ not those from this video.
 
 Let's copy that and go back to our code.
 
-{{{heading(Create a @code{webAuth} Object)}}}
+[[file:./resources/auth0-app-settings-50.png]]
+
+***** Create a ~webAuth~ Object
 
 04:44 Now we can create a =webAuth= object using a new =auth0.WebAuth=, and we
-can paste the settings we got from the quick start.
+can paste the settings we got from the quick start.[fn::Quick start settings
+are missing the =audience= type.]]
 
-: index.js
-: --------
+: default webAuth settings
+: ------------------------
 
 #+begin_src js -n
 let webAuth = new auth0.WebAuth({
-  domain: 'joel-1.auth0.com',
-  clientID: '8vXPduLlATyDg69DF13J7JY4xN2vveOG',
+  domain: 'pinecone062-sandbox.auth0.com',
+  clientID: '1XIQVmd85gJXfbyz5tdsG6AQhJF09P45',
   responseType: 'token id_token',
-  audience: 'https://joel-sandbox.auth0.com/userinfo',
   scope: 'openid',
   redirectUri: window.location.href
 });
 #+end_src
 
-{{{heading(Do Not Use OpenID Connect Features)}}}
+***** Update Auth0 Application Settings
 
 #+CINDEX:OpenID Connect
 04:52 If you use Auth0's application with a default setting, it is =OpenID
@@ -2254,6 +2265,9 @@ This is the page where users are redirected after they're logged in on
 Auth0.  You can go to your application, get the URL from there, and simply paste
 it in the settings.
 
+[[file:./resources/auth0-callback-url-50.png]]
+
+***** Update App Advanced Settings
 #+CINDEX:OIDC conformant application
 #+CINDEX:HS256
 #+CINDEX:JWT signature
@@ -2262,51 +2276,75 @@ is not an OIDC conformant application, so we can uncheck this.  We can change
 our JWT signature to also use =HS256=.  We're good.  Just save this, and we can
 head back to our code editor.
 
+[[file:./resources/auth0-show-advanced-settings-50.png]]
+
+[[file:./resources/auth0-advanced-settings-40.png]]
+
+***** Further Auth0 Setting Tweaks
 #+CINDEX:issuer of token
 #+CINDEX:tenant
 #+CINDEX:clientID
-05:42 We need to tweak our settings just a little bit here.  Our domain is the
-issuer of the token.  It's what is referred to as =tenant= in Auth0's website.  The
-=clientID= is found in your settings.  This should be good.
+05:42 We need to tweak our settings just a little bit here.  Our =domain=
+(=domain: 'pinecone062-sandbox.auth0.com'=) is the issuer of the token.  It's
+what is referred to as =tenant= in Auth0's website.  The =clientID= (=clientID:
+'1XIQVmd85gJXfbyz5tdsG6AQhJF09P45'=) is found in your settings.  This should be
+good.
 
 #+CINDEX:responseType
 #+CINDEX:id_token
 #+CINDEX:audience
 #+CINDEX:scope
-05:54 In =responseType=, we won't need the =id_token=, so we can remove
-this.  The =audience= is the API that we want to connect to.  Let's change this to
-=egghead-demo=.  Finally, the scope is irrelevant in this case, so we can simply
-remove this.
+05:54 In =responseType= (=responseType: 'token id_token'=), we won't need the
+=id_token=, so we can remove this.  The =audience= is the API that we want to
+connect to.  Let's change this to =egghead-demo=.  Finally, the =scope=
+(=scope: 'openid'=) is irrelevant in this case, so we can simply remove this.
 
 #+CINDEX:redirectUri
-06:10 The =redirectUri= is where your user will be redirected afterwards. This
-URL has to be in your application settings in the allowed callback URL section,
-which we already took care of.
+06:10 The =redirectUri= (=redirectUri: window.location.href=) is where your
+user will be redirected afterwards. This URL has to be in your application
+settings in the allowed callback URL section, which we already took care of.
 
-: index.js
-: --------
+: index.js webAuth object
+: -----------------------
 
 #+CINDEX:webAuth object
-#+name:webAuth-object
+#+name:auth0-webAuth-object
 #+begin_src js
 let webAuth = new auth0.WebAuth({
-  domain: 'joel-1.auth0.com',
-  clientID: '8vXPduLlATyDg69DF13J7JY4xN2vveOG',
+  domain: 'pinecone062-sandbox.auth0.com',
+  clientID: '1XIQVmd85gJXfbyz5tdsG6AQhJF09P45',
   responseType: 'token',
-  audience: 'egghead-demo',
   scope: '',
   redirectUri: window.location.href
 });
 #+end_src
 
-***** Lesson 8 ~index.js~
+***** Setup Logic for Login Button
+#+CINDEX:login button
+Let's now change the logic behind our login button ([[loginBtn][loginBtn code]]).
+
+#+CINDEX:@code{webAuth.authorize} method
+06:25 Right now, we had to get all of that info from the modal and post that to
+our authentication server, but we won't need any of this now. Let's just remove
+all of this and use =webAuth= with the =authorize= method instead. Save this,
+and you should be good to go.
+
+#+name:auth0-loginBtn.addEventListener
+#+begin_src js
+loginBtn.addEventListener("click", (event) => {
+	webAuth.authorize();
+});
+#+end_src
+
+***** Lesson 8 ~index.js~ Code
 #+name:auth0-index.js
 #+begin_src js -n :noweb yes :tangle egghead-jwt-auth/lesson8/index.js
 /* To run this file on a server, we are using httpster.
 Type `httpster index.html -p 5000` in your console to start the server. */
 
 <<api-url>>
-<<auth-url>>
+
+<<auth0-webAuth-object>>
 
 <<access-token>>
 
@@ -2319,27 +2357,10 @@ const logoutBtn = document.querySelector("#logoutBtn");
 
 <<secretBtn.addEventListener>>
 
-<<loginBtn.addEventListener>>
+<<auth0-loginBtn.addEventListener>>
 
 <<logoutBtn.addEventListener>>
 
-#+end_src
-
-**** Setup Logic for Login Button
-#+CINDEX:login button
-Let's now change the logic behind our login button.
-
-#+CINDEX:@code{webAuth.authorize} method
-06:25 Right now, we had to get all of that info from the modal and post that to
-our authentication server, but we won't need any of this now. Let's just remove
-all of this and use =webAuth= with the =authorize= method instead. Save this,
-and you should be good to go.
-
-#+name:loginBtn-addEventListener
-#+begin_src js
-loginBtn.addEventListener("click", (event) => {
-	webAuth.authorize();
-});
 #+end_src
 
 **** Setup Private Access
