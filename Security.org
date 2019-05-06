@@ -1,8 +1,8 @@
 # -*- mode:org; fill-column:79; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 3, 2019
-#+macro:version 0.3.18.<2019-05-05 Sun 19:24>
+#+date:May 5, 2019
+#+macro:version 0.4.0.<2019-05-05 Sun 20:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2195,7 +2195,7 @@ let UIUpdate = {};
 
 <<ui-update-helper-functions>>
 
-window.addEventListener("hashchange", UIUpdate.routeChange);
+<<parseHash>>
 #+end_src
 
 **** Setting Up ~index.js~ to Use Auth0 Authentication Server
@@ -2318,6 +2318,7 @@ let webAuth = new auth0.WebAuth({
   domain: 'pinecone062-sandbox.auth0.com',
   clientID: '1XIQVmd85gJXfbyz5tdsG6AQhJF09P45',
   responseType: 'token',
+  audience: 'egghead-demo',
   scope: '',
   redirectUri: window.location.href
 });
@@ -2397,8 +2398,8 @@ token.
 #+CINDEX:access token, extract from hash
 Now if I try my =Public= button, it still works, but if I use a =Private=
 button, I'm still getting the "No authorization token was found," error
-message. That's because we need to parse our hash and extract the access token
-from there, and store it so that it can be used by our fetch call.
+message. That's because we need to ~parse~ our hash and extract the =access
+token= from there, and store it so that it can be used by our ~fetch~ call.
 
 #+CINDEX:@code{parseHash} function
 #+CINDEX:@code{webAuth.parseHash} method
@@ -2447,17 +2448,17 @@ my consent again, as I had given it previously and it remembers this.
 
 08:48 Now I'm redirected back to the application, our URL is clean, it doesn't
 have hash in it anymore, and we have our access token right here. If you copied
-this token, you can go to the jwt.io website and paste it there.
+this token, you can go to the ~jwt.io~ website and paste it there.
 
 09:01 This will decode the token for you and show you all of the details of
-this JWT. You can see that it's an HS256 encoded token. You also have a bunch
-of stuff like the issuer -- so who created this token -- you have your user ID,
-and the audience, which is who this token is meant for. You also have your
-issued at and an expiry time-stamps, which can be very useful.
+this JWT. You can see that it's an =HS256= encoded token. You also have a bunch
+of stuff like the =issuer= -- so who created this token -- you have your =user
+ID=, and the =audience=, which is who this token is meant for. You also have
+your =issued at= and an =expiry= time-stamps, which can be very useful.
 
 09:26 Now that you have this token, you can click on the =Private= button and
 you see the response from your secured endpoint in your API. That's how you
-make a real secure application with 
+make a real secure application with Auth0.
 ** Reference
 *** RFC 7797
 - https://tools.ietf.org/html/rfc7519
