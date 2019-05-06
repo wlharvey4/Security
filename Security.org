@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 3, 2019
-#+macro:version 0.3.17.<2019-05-05 Sun 08:42>
+#+macro:version 0.3.18.<2019-05-05 Sun 19:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2187,11 +2187,15 @@ UIUpdate.loggedOut = function() {
 ***** File ~ui-update.js~ for Auth0
 #+name:auth0-ui-update.js
 #+begin_src js -n :tangle egghead-jwt-auth/lesson8/ui-update.js :noweb yes
+let UIUpdate = {};
+
 <<auth0-ui-update-loggedIn>>
 
 <<auth0-ui-update-loggedOut>>
 
 <<ui-update-helper-functions>>
+
+window.addEventListener("hashchange", UIUpdate.routeChange);
 #+end_src
 
 **** Setting Up ~index.js~ to Use Auth0 Authentication Server
