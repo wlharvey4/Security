@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 5, 2019
-#+macro:version 0.4.0.<2019-05-05 Sun 20:18>
+#+macro:version 0.4.1.<2019-05-06 Mon 07:06>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -323,43 +323,73 @@ a proven solution.
 secure identity management and federated log in to your users.  Go ahead, watch
 this course, and learn how to build more secure applications right now.
 *** Lesson 0---Package Setup
+#+CINDEX:root directory @code{egghead-jwt-auth/}
+#+CINDEX:@code{yarn init}
 The course will be set up in a root directory ~egghead-jwt-auth~, with
-~lesson#~ directories for each lesson 1 through 8.  The following shell script
-checks for the existence of a ~package.json~ file in the root directory; if one
-is found, it simply prints a message.  If one is not found, then it initializes
-a new package using the ~yarn init~ command using default values.  The lessons
-will add and install prerequisites to this ~package.json~ file.
+~lesson#~ directories for each of the lessons 1 through 8.  The following shell
+script checks for the existence of a ~package.json~ file in the root directory
+~egghead-jwt-auth/~.  If one is found, it simply prints a message.  If one is
+not found, then it initializes a new package using the ~yarn init~ command
+using default values.  The lessons will add and install prerequisites to this
+~package.json~ file.
+
+{{{subheading(Tangle all Files)}}}
+
+#+CINDEX:tangle
+#+CINDEX:root directory
+Tangle (export into files) all source code first.  This shell script creates
+the root directory (~egghead-jwt-auth/~) and all ~lesson#/~ directories inside
+of the root directory and all source code from Lessons 1 through 8.
 
 #+NAME:tangle-files
-#+BEGIN_SRC emacs-lisp :results silent :exports results
+#+BEGIN_SRC emacs-lisp :results output :exports both
 (org-babel-tangle-file (buffer-file-name))
 #+END_SRC
 
+{{{subheading(Initialize @code{package.json})}}}
+
+#+CINDEX:@code{package.json} file, initialize
+#+CINDEX:@code{node_modules/} directory
+#+CINDEX:@code{index.js} main file
+#+CINDEX:@code{yarn init} command
+Check for the ~package.json~ file in the root directory and create a new
+package if one is not found.  Note that the =main= file is named ~index.js~ in
+~package.json~.  Each of the ~lesson#/~ directories has its own ~index.js~ file
+which will be called to run the code for that lesson.  All dependency files are
+installed into the ~ndoe_modules/~ directory located in the root directory.
+Only one ~node_modules/~ directory is created for all of the independent
+~lesson#/~ directories.
+
+#+caption:Package Initialization
 #+name:package-init
 #+begin_src sh :dir egghead-jwt-auth :results output :exports both
 [ -e package.json ] && \
   echo "package.json has already been created" || \
   yarn --yes init
+  echo;echo package.json; echo ------------
   cat package.json
+  echo;echo listing;echo -------
+  ls . lesson*
 #+end_src
-
-*** Lesson 1---Set Up a Web Server in Node.js Using Express
+*** Lesson 1---Set Up an API Web Server in Node.js Using Express
 #+CINDEX:Express web server
 #+CINDEX:web server, Express
 #+CINDEX:server, Express web
 #+CINDEX:404 error
-In this lesson, we build a very simple Express server.  This server will have a
-single route that displays the current date and time and a handler for =404=
-pages.
+In this lesson, we build a very simple API Express server.  This API server
+will have a single route that displays the current date and time and a handler
+for =404= "Not Found" pages.
 
 **** Setting Up A Little Express Server
 #+CINDEX:Express server, build
+#+CINDEX:@code{express} library
 00:00 To build your first Express server, the first thing you need to do is to
-~require express~.  In order for your code to be able to use it, you need to
-install it using ~yarn add express~:
+import the Node.js ~express~ library into your API server.  In order for your
+code to be able to use ~express~, you need to install it.  This program will be
+using ~yarn~ to install all Node.js dependencies:
 
 #+name:lesson1-package.json
-#+begin_src sh :dir egghead-jwt-auth :results output :exports results
+#+begin_src sh :dir egghead-jwt-auth :results output :exports both
 yarn add express
 #+end_src
 
