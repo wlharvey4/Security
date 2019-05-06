@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 5, 2019
-#+macro:version 0.4.1.<2019-05-06 Mon 07:06>
+#+macro:version 0.4.2.<2019-05-06 Mon 07:30>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -385,24 +385,21 @@ for =404= "Not Found" pages.
 #+CINDEX:@code{express} library
 00:00 To build your first Express server, the first thing you need to do is to
 import the Node.js ~express~ library into your API server.  In order for your
-code to be able to use ~express~, you need to install it.  This program will be
-using ~yarn~ to install all Node.js dependencies:
+code to be able to use ~express~, you need to install it.  This program uses
+~yarn~ to install all Node.js dependencies:
 
 #+name:lesson1-package.json
 #+begin_src sh :dir egghead-jwt-auth :results output :exports both
 yarn add express
-#+end_src
-
-: package.json
-: ------------
-
-#+begin_src sh :dir egghead-jwt-auth :results output :exports results
+echo;echo package.json;echo ------------
 cat package.json
 #+end_src
 
+#+CINDEX:@code{index.js}
 : index.js
 : --------
 
+#+CINDEX:@code{express} library
 #+name:require-express
 #+begin_src js -n
 const express = require("express");
@@ -410,19 +407,20 @@ const express = require("express");
 
 {{{heading(Setup Constants)}}}
 
-#+CINDEX:PORT, define
+#+CINDEX:@code{PORT}, define
+#+CINDEX:@code{API_PORT}, define
 00:16 We'll go back to our code.  We'll declare a new constant ~app~ which will
 use the ~express~ library that we've just included.  We'll also declare a new
-constant for the =PORT= number.  We'll use =8888= for now.
+constant for the =API_PORT= number.  We'll use =8888= for now.
 
 #+name:app-express
 #+begin_src js +n
 const app = express();
 #+end_src
 
-#+name:port-8888
+#+name:api-port-8888
 #+begin_src js +n
-const PORT = 8888;
+const API_PORT = 8888;
 #+end_src
 
 {{{heading(Setup Routes)}}}
@@ -436,7 +434,7 @@ const PORT = 8888;
 the name of the route.  In this case, we're using =status=, and it takes a
 callback which has a request and a response as parameters.
 
-#+name:status-route
+#+name:api-status-route
 #+begin_src js +n
 app.get("/status", (req, res) => {
     const localTime = (new Date()).toLocaleTimeString();
@@ -451,7 +449,7 @@ any route that wasn't defined already.  01:19 It also takes a callback with a
 request and response.  We can build our response here, and it will simply sense
 that as =404=, or 'page not found'.
 
-#+name:catchall-route
+#+name:api-catchall-route
 #+begin_src js +n
 app.get("*", (req, res) => {
     res.sendStatus(404);
@@ -469,8 +467,8 @@ the =PORT= number here.  You now have your first express server.
 
 #+name:app-listen
 #+begin_src js +n
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+app.listen(API_PORT, () => {
+    console.log(`Server is running on port ${API_PORT}.`);
 });
 #+end_src
 
@@ -478,7 +476,7 @@ app.listen(PORT, () => {
 
 This Makefile sets up some commands to run specific lessons.  Each lesson's
 server can be started by moving into the root directory (~egghead-jwt-auth/~)
-and typing:
+and running the ~make~ command with the lesson number (1-8):
 : make lesson# where =#= is one of 1..8.
 
 Thereafter, specific commands can be run from a different terminal, such as:
@@ -517,7 +515,7 @@ open-browser-random :
 
 #+END_SRC
 
-#+CINDEX:page not found error
+#+CINDEX:@code{Page Not Found} error
 02:02 Now if we go through our browser window, we can type in the
 ~localhost:8888~.  We'll get a 'page not found' because that route was not
 defined.
@@ -536,11 +534,11 @@ That's it.  You've got your first Express server up and running.
 #+begin_src js -n :tangle egghead-jwt-auth/lesson1/index.js :mkdirp yes :noweb yes
 <<require-express>>
 <<app-express>>
-<<port-8888>>
 
-<<status-route>>
-<<catchall-route>>
+<<api-status-route>>
+<<api-catchall-route>>
 
+<<api-port-8888>>
 <<app-listen>>
 #+end_src
 
@@ -586,8 +584,8 @@ reached.  If we go to =3000=, we're getting a =404= in this case.  If we go to
 <<app-express>>
 <<port-env-or-assign>>
 
-<<status-route>>
-<<catchall-route>>
+<<api-status-route>>
+<<api-catchall-route>>
 
 <<app-listen>>
 #+end_src
@@ -757,10 +755,10 @@ message.  That is how you parse a =POST= request and handle the =request= data.
 <<app-express>>
 <<app-use-body-parser>>
 
-<<status-route>>
+<<api-status-route>>
 <<post-route>>
 <<post-route-res>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<port-env-or-assign>>
 <<app-listen>>
@@ -969,10 +967,10 @@ this time.
 <<app-use-body-parser>>
 <<users-array>>
 
-<<status-route>>
+<<api-status-route>>
 <<authentication-login>>
 <<create-access-token>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<port-env-or-assign>>
 <<app-listen>>
@@ -1095,7 +1093,7 @@ in the next lesson.
 
 <<public-resource-route>>
 <<private-resource-route>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<port-env-or-assign>>
 <<app-listen>>
@@ -1228,7 +1226,7 @@ the content of this route.  Now, you have an API with a secured endpoint.
 
 <<public-resource-route>>
 <<private-resource-route>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<api-port>>
 <<app-listen-api-port>>
@@ -1532,7 +1530,7 @@ window.addEventListener("hashchange", UIUpdate.routeChange);
 
 <<authentication-login>>
 <<create-access-token>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<port-env-or-assign>>
 <<app-listen>>
@@ -1553,7 +1551,7 @@ window.addEventListener("hashchange", UIUpdate.routeChange);
 
 <<public-resource-route>>
 <<private-resource-route>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<api-port>>
 <<app-listen-api-port>>
@@ -2060,7 +2058,7 @@ Everything is the same except for the ~express-jwt~ options:
 
 <<public-resource-route>>
 <<private-resource-route>>
-<<catchall-route>>
+<<api-catchall-route>>
 
 <<api-port>>
 <<app-listen-api-port>>
