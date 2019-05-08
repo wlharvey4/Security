@@ -1,8 +1,8 @@
 # -*- mode:org; fill-column:79; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 5, 2019
-#+macro:version 0.4.2.<2019-05-06 Mon 07:30>
+#+date:May 8, 2019
+#+macro:version 0.5.0.<2019-05-08 Wed 07:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -6720,6 +6720,302 @@ free — you only pay for your consumption, not for having an account), then
 can set up the awsmobile CLI to make configuring things easy. I’m going to
 assume you have already set up the [[https://facebook.github.io/react-native/docs/getting-started.html][React Native CLI]] on your system and
 installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
+* Essentials of Cybersecurity
+:PROPERTIES:
+:source:   UWashingtonX
+:uri:      https://www.edx.org/professional-certificate/uwashingtonx-essentials-cybersecurity
+:END:
+Professional Certificate Program
+
+A series of career-oriented courses to develop in-demand skills.
+
+An introduction to the expanding world of cybersecurity and the opportunity to
+find your niche in this exciting, in-demand field.
+** About Essentials of Cybersecurity Program
+Are you  interested in working  in cybersecurity but  unsure if it's  the right
+career choice for you?
+
+This  professional certificate  program  will  introduce you  to  the field  of
+cybersecurity, as you  learn about its landscape, numerous  sectors and various
+roles, competencies and career pathways.
+
+You will learn  about the role of the Chief  Information Security Office (CISO)
+as you study the policies, procedures,  practices and technologies put in place
+to mitigate organizational and systems vulnerabilities to cyberattack.
+
+You  will also  learn about  the  type of  skills needed  from a  cybersecurity
+professional, outside of  technical proficiency. And lastly, you  will be given
+the opportunity to complete a self-assessment to determine which career path in
+cybersecurity is right for you.
+
+The goal of this program is to help you better understand cybersecurity and the
+opportunities within this  field as they apply to you.  The program is intended
+for learners  who wish to  identify their specific  optimal niche and  create a
+plan for entry into this exciting field.
+
+{{{heading(Job Outlook)}}}
+
+- Between 2014 and  2016, Information Security as  a skill has grown  to be the
+  top  most  in-demand skill  in  job  openings  where “Cybersecurity”  is  the
+  keyword.
+- Employment of information  security analysts is projected to  grow 18 percent
+  from 2014 to 2024, much faster than the average for all occupations. (Source:
+  Bureau of Labor and Statistics)
+- The mean real-time salary is $108,335. (Source: Burning Glass)
+
+
+#+attr_texinfo: :author David Shaw , Founder and CEO, Cybersecurity and Information Assurance Solutions (CBA)
+#+begin_quote
+"Our accomplished senior career military  veterans transitioning to the private
+sector are facing  significant challenges as they compete  for technology, high
+impact   jobs  with   institutionally   trained   and  educated   multinational
+resources.  Cyber  Business Analytics  (CBA  Inc.)  envisions EdX  programs  to
+produce the advanced skills and competitive  edge for the veteran heroes we are
+onboarding to successfully  engage a wide range of  cybersecurity solutions for
+critical infrastructure domains."
+#+end_quote
+
+{{{heading(What You'll Learn:)}}}
+
+- Describe  the  vast array  of  roles  and  sectors within  the  Cybersecurity
+  industry;
+- Explain the  relationship between management and  technology in cybersecurity
+  protection;
+- Identify appropriate types  of security controls to the  actions of different
+  and evolving threat actors;
+- Apply terminology and basic concepts of cybersecurity;
+- Assess own knowledge,  skill, and abilities toward identifying  a career path
+  in cybersecurity.
+** Courses in the Professional Certificate Program
+:PROPERTIES:
+:length:   Average 4 weeks per course
+:effort:   2-5 hours per week per course
+:number-of-courses: 4
+:subject:  Computer Science
+:price:    $349
+:END:
+- [[https://www.edx.org/course/introduction-to-cybersecurity][Introduction to Cybersecurity]]
+
+- [[https://www.edx.org/course/cybersecurity-the-cisos-view][Cybersecurity---The CISO's View]]
+
+- [[https://www.edx.org/course/building-a-cybersecurity-toolkit][Building a Cybersecurity Toolkit]]
+
+- [[https://www.edx.org/course/finding-your-cybersecurity-career-path][Finding Your Cybersecurity Career Path]]
+** Instructors in the Essentials of Cybersecurity Program
+*** Barbara Endicott-Popovsky
+- Director, Center  for Information  Assurance and Cybersecurity  University of
+  Washington
+
+Barbara  Endicott-Popovsky  is  the  director of  the  Center  for  Information
+Assurance  and  Cybersecurity.  She   also  teaches  cybersecurity  in  several
+University of  Washington programs.  Endicott-Popovsky is  a member  of several
+national committees  shaping cybersecurity  education. She earned  her doctoral
+degree from the  Center for Secure and Dependable Systems  in the Department of
+Computer Science at the University of Idaho.
+
+*** David Aucsmith
+- Senior  Principal  Research  Scientist,  Applied Physics  Lab  University  of
+  Washington
+
+David Aucsmith is  a Senior Principal Research Scientist -  Applied Physics Lab
+at  the University  of  Washington. He  has  worked in  a  variety of  security
+technology  areas  including  secure computer  systems,  secure  communications
+systems,  security architecture,  random  number  generation, cryptography  and
+cryptographic systems, steganography and  network intrusion detection. Aucsmith
+is a former officer in the U.S. Navy and has written extensively on cybercrime,
+cyber espionage  and cyber warfare.  He has  been a representative  to numerous
+international,  government and  academic organizations  including the  National
+Academy  advisory  board  on  Survivability  and  Lethality  Analysis  and  the
+Directorate Advisory Council  for the National Security  Directorate of Pacific
+Northwest National Labs. He is  co-chairman of the FBI's Information Technology
+Study Group,  a member of  the President's Task  Force on National  Defense and
+Computer  Technology  and  a  member  of the  Department  of  Defense's  Global
+Information Grid Senior Industry Review  Group. Aucsmith was also U.S. industry
+representative   to  the   G8  Committee   on  Organized,   Transnational,  and
+Technological Crime where he participated directly  in the G8 summits in Paris,
+Berlin and Tokyo.
+
+** Cybersecurity---The CISO's View
+:PROPERTIES:
+:source:   UWashingtonX
+:course:   CYB002x
+:uri:      https://courses.edx.org/courses/course-v1:UWashingtonX+CYB002x+2T2019/course/
+:start-date: May 8, 2018
+:series:   Essentials of Cybersecurity
+:END:
+*** Welcome---CYB002X-The CISO'S View
+**** About the Course---The CISO'S VIEW
+We are pleased to  welcome you to The CISO's View.  This is  the second of four
+self-paced courses that make up our certificate series on {{{cite(Essentials of
+Cybersecurity).  The  other courses  in this  series open  in the  next several
+months.  Course  3 will open Sept.  10.  Course 4  will open Oct. 30.   You may
+take the courses in any order.
+**** Earn a Verified Certificate
+If you  have chosen  to become  a [[https://www.edx.org/course/cybersecurity-cisos-view-uwashingtonx-cyb002x][Verified Certificate  student]], and  achieve a
+passing grade  of at least  70%, you will  earn a Verified  Certificate.  These
+verified certificates indicate that you have successfully completed the course,
+but will not include a specific grade.  Many students add their certificates to
+their resumé, CV, or LinkedIn profile to demonstrate mastery of a given subject
+area to  potential employers.  Certificates  are delivered online  through your
+dashboard  on  edx.org.  We  urge  you  to  consider the  Verified  Certificate
+option - you  have limited time to become a  Verified Certificate student.  See
+the edX FAQ for more details on certificates.  If you are not yet enrolled as a
+verified learned, we encourage  you to sign up.  As a  verified learner you are
+issued  a   certificate  of   completion  after  successfully   fulfilling  the
+coursework.
+*** Syllabus for CYB002X The CISO'S View
+                            CYB002X The CISO’s View
+                                   Syllabus
+
+                 {{{heading(Course Description)}}}
+
+                 This course focuses on operationalizing cybersecurity in an
+                 organization, taking the view from the leadership perspective
+                 through the lenses of four prominent Chief (or Corporate)
+                 Internet Security Officers, or CISOs. Throughout, you will be
+                 asked to consider a systems thinking approach - a process that
+                 involves inductive rather than deductive (linear) reasoning
+                 and which considers interdependence and unintended
+                 consequences. You'll be asked to take this approach in some
+                 thinking problems throughout the course.  In one-one
+                 interviews with CISOs in this course, you will take a look at
+                 what experienced leaders consider their indispensable
+                 resources; and the role of the CISO in four main sectors -
+                 Industry, Government, Military, and Academia. Readings and
+                 viewings will augment your knowledge of systems approaches in
+                 relationship to sector-specific threats and challenges.
+                 Cybersecurity must be seen in context! Systems thinking and
+                 the advice of those with long experience in positions of
+                 leadership can help you gain this important perspective as you
+                 think about a career in this complicated field.
+
+                 {{{heading(Course Objectives)}}}
+
+                 After successfully completing this course, the learner will be
+                 able to:
+                     -   Compare and contrast the four sectors of cybersecurity
+                       with a focus on their rules, regulations, tools
+                       (technologies), and primary cybersecurity concerns;
+                     -   Analyze the role of the CISO across all sectors, and
+                       the differences among their tool kits.
+                     -   Apply systems thinking approach to cybersecurity
+                       scenarios.
+                     -   Align growing awareness of sector differences and
+                       similarities to personal experience, talents, and
+                       interests,
+                     -   Build a matrix of reflections on sectors as a
+                       decision-making tool.
+
+                                       2
+
+                 {{{heading(Prerequisites)}}}
+
+                 There are no required prerequisites other than curiosity and
+                 interest in Cybersecurity. However, CYB001x Introduction to
+                 Cybersecurity provides a good foundation and is Course 1 in
+                 the certificate series. This is an introductory-level course.
+
+                 {{{heading(Earning a Verified Certificate)}}}
+
+                 If you have chosen to become a Verified certificate student,
+                 and achieve a passing grade of at least 70%, you will earn a
+                 Verified Certificate. These verified certificates indicate
+                 that you have successfully completed the course, but will not
+                 include a specific grade. Many students add their certificates
+                 to their resumé, CV, or LinkedIn profile to demonstrate
+                 mastery of a given subject area to potential employers.
+                 Certificates are delivered online through your dashboard on
+                 edx.org.
+
+                 We urge you to consider the Verified Certificate option - you
+                 have limited time to become a Verified Certificate
+                 student. See the edX FAQ for more details on certificates.
+
+                 {{{heading(Time Commitment and Due Dates)}}}
+
+                 This course is self-paced; learners can expect to spend about
+                 2 to 5 hours per weekly topic or lesson engaging with the
+                 course materials.  For Verified Learners, this course is
+                 self-paced. There are no due dates. However, all work must be
+                 completed by the course end date.
+
+                 {{{heading(Certification)}}}
+
+                 This course is the second of four courses in the edX
+                 certificate series on Essentials of Cybersecurity. The other
+                 courses are:
+                     -   CYB001X: Introduction to Cybersecurity
+                     -   CYB003X: Building a Cybersecurity Toolkit
+                     -   CYB004X: Finding your Cybersecurity Career Path
+
+                                       3
+
+       Learners may take these courses in any sequence. A verified learner
+       receives a certificate for successful completion of each course
+       taken. An additional certificate in Essentials of Cybersecurity is
+       issued to learners who successfully complete all four courses in the
+       series.  See edX’s Verified Certificates for more information.
+
+       {{{heading(Course Materials)}}}
+
+       All required materials are included in the weekly or lesson course
+       pages.
+
+       {{{heading(Academic Policies)}}}
+
+       {{{subheading(Grading Policy)}}}
+
+       To pass this course with a verified certificate, all learners must earn
+       a minimum of 70% total for the graded course activities.
+
+       {{{subheading(Academic Honesty)}}}
+
+       edX expect students to participate with academic integrity. Honesty and
+       original work is expected. Full citations for information shared that is
+       not student-generated is also expected.
+
+       {{{heading(Course Activities)}}}
+
+       {{{subheading(Discussion Forums)}}}
+
+       Etiquette
+
+       All learners are expected to engage in respectful dialogue in the public
+       discussion forums.
+
+       Participation Expectation
+
+       The discussion forums in this course provide an additional learning
+       space to practice relevant discourse on the course topics.
+
+                                       4
+
+       {{{subheading(Knowledge Checks)}}}
+
+       Following course content, brief auto-graded questions (some with
+       feedback) may appear that focus the learner on specific concepts or
+       terminology. These knowledge checks are part of the graded course
+       activities.
+
+       {{{subheading(Peer Interaction)}}}
+
+       Peer Assessment
+
+       Other learners in the course score peer-graded activities with a rubric
+       based on understanding of the course content.
+
+       {{{heading(About the Course Developer)}}}
+
+       {{{subheading(Barbara Endicott-Popovsky)}}}
+
+       Barbara Endicott-Popovsky is the director of the Center for Information
+       Assurance and Cybersecurity. She also teaches cybersecurity in several
+       University of Washington programs.
+
+       Endicott-Popovsky is a member of several national committees shaping
+       cybersecurity education. She earned her doctoral degree from the Center
+       for Secure and Dependable Systems in the Department of Computer Science
+       at the University of Idaho.
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
@@ -8017,7 +8313,8 @@ That's why some organizations have started implementing SSO or Single Sign-On.
 #+texinfo_printed_title:Security Information
 #+subtitle:For WebDev
 ** Macro Definitions
-#+macro:heading @@texinfo:@heading $1@@
-#+macro:subheading @@texinfo:@subheading $1@@
-#+macro:dfn @@texinfo:@dfn{$1}@@
+#+macro:heading @@texinfo:@heading @@$1
+#+macro:subheading @@texinfo:@subheading @@$1
+#+macro:dfn @@texinfo:@dfn{@@$1@@texinfo:}@@
 #+macro:noindent @@texinfo:@noindent @@
+#+macro:cite @@texinfo:@cite{@@$1@@texinfo:}@@
