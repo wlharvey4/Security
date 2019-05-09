@@ -1,8 +1,8 @@
 # -*- mode:org; fill-column:79; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 8, 2019
-#+macro:version 0.5.1.<2019-05-09 Thu 05:36>
+#+date:May 9, 2019
+#+macro:version 0.5.2.<2019-05-09 Thu 07:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2493,8 +2493,12 @@ make a real secure application with Auth0.
 :instructor: Kent C. Dodds
 :time:     31 minutes
 :subject:  JWT Angular
+:date:     2014-09-24
+:Github:   https://github.com/eggheadio/egghead-angularjs-aunthentication-with-jwt
 :END:
-*** About AngularJS Authentication with JWT
+Example AngularJS application featuring authentication with Javascript Web
+Tokens (JWT)
+
 JSON Web Tokens (JWT) are a more modern approach to authentication. As the web
 moves to a greater separation between the client and server, JWT provides a
 terrific alternative to traditional cookie based authentication models. For
@@ -2509,14 +2513,48 @@ By the end, we’ll have an application which has a single username/password
 combination (for simplicity) and uses tokens to authorize the client to see the
 random user information. You’ll be able to login, get random users, and logout.
 
+*** Prerequisites---AngularJS Authentication with JWT
+This is the example project for the AngularJS Authentication with JWT lesson
+series on =egghead.io=.
+
+#+CINDEX:@code{node.js}
+#+CINDEX:@code{npm}
+This project uses ~node.js~ and Node Package Manager (~npm~).
+
+#+CINDEX:Bower
+#+CINDEX:AngularJS
+Additionally it uses Bower to grab AngularJS.
+
+#+CINDEX:tags
+The lessons correspond to tags. Note that ~npm~ dependencies will be added for
+each lesson, so it will be required to run ~npm install~ for each lesson to get
+the latest dependencies.
+
+[[file:resources/dodds-jwt-tags-50.png]]
+
+**** Project Initialization
+
+#+name:dodds-jwt-package-init
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+[ -e package.json ] && \
+  echo "package.json has already been created" || \
+  yarn --yes init
+  echo;echo package.json; echo ------------
+  cat package.json
+#+end_src
+
 *** JSON Web Token---JWT---Introduction
 A basic introduction to the mechanics of JWTs and the application we will be
 building in this lesson series.
 
 **** About JWTs
+#+CINDEX:JSON Web Token
+#+CINDEX:token
 00:00 This is an introductory video on JSON Web Tokens, also known as JWTs. A
 JOT is an encoded JSON object, digitally signed by the server, which the client
 sends with every request to identify the user. A JWT here is a token.
+
+[[https://jwt.io][JWT dot IO]]
 
 00:14 We have some identification information about this token, we have the
 payload of the token represented by this blue string of characters, and then we
@@ -2556,9 +2594,23 @@ how to do authentication with JWTs.
 #+CINDEX:@code{server.js}
 #+CINDEX:Express
 #+CINDEX:Faker
-00:21 First of, we're going to need our JavaScript file. We'll call that Server
-js. A couple of things that we're going to need through NPNR, Express and
-Faker.
+00:21 First of, we're going to need our JavaScript file. We'll call that
+~server.js~.  A couple of things that we're going to need through NPNR, Express
+and Faker.
+
+{{{heading(Install Express and Faker)}}}
+
+#+name:angularjs-auth-jwt-prereqs-install
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports results
+yarn add express faker
+#+end_src
+
+{{{heading( ~server.js~)}}}
+
+#+name:angularjs-auth-jwt-server.js
+#+begin_src js :tangle angularjs-auth-jwt/server.js :mkdirp yes
+const express = require('express');
+#+end_src
 
 **** Use the Module ~Faker~
 00:33 Faker's how we're going to make the random user. We're going to require
