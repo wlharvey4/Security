@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 9, 2019
-#+macro:version 0.5.4.<2019-05-09 Thu 15:30>
+#+macro:version 0.5.5.<2019-05-09 Thu 15:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2683,7 +2683,8 @@ Terminate all Node server processes with the command:
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : check-server
 check-server :
-	@curl -sI localhost:3000/random-user | grep -q 200 || { node server1.js & sleep 2; }
+	@pgrep -qlf 'node server[[:digit:]]' || { node server1.js & sleep 2; }
+#	@curl -sI localhost:3000/random-user | grep -q 200 || { node server1.js & sleep 2; }
 
 .phony : server1
 server1 : check-server
