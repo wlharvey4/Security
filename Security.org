@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 9, 2019
-#+macro:version 0.5.3.<2019-05-09 Thu 07:54>
+#+macro:version 0.5.4.<2019-05-09 Thu 15:30>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2582,53 +2582,74 @@ about.
 *** Basic Server Setup for JWT Authentication
 Creating the basic node server to serve up random users via API endpoints.
 
-**** Create the Server
 00:00 This is "Authentication with AngularJS, Getting it Right with JWT."
 That's pronounced "Jot".
 
-#+CINDEX:server, create
-00:07 We're going to create a basic server that will server up a random user
-and then create a front end client that will consume this service to illustrate
-how to do authentication with JWTs.
+#+CINDEX:overview
+00:07 We're going to create a basic server that will serve up a random user and
+then create a front end client that will consume this service to illustrate how
+to do authentication with JWTs.
+
+**** Install Server Dependencies
 
 #+CINDEX:@code{server.js}
 #+CINDEX:Express
 #+CINDEX:Faker
-00:21 First of, we're going to need our JavaScript file. We'll call that
-~server.js~.  A couple of things that we're going to need through NPNR, Express
-and Faker.
+00:21 First off, we're going to need our JavaScript file. We'll call
+that ~server.js~.[fn::Each lesson will use a different ~server<#>.js~
+file.  This lesson will use ~server1.js~.]]  A couple of things that
+we're going to need through NPN[fn::I will be installing dependencies
+with ~yarn~.] are:
+- Express
+- Faker
 
 {{{heading(Install Express and Faker)}}}
 
 #+name:angularjs-auth-jwt-prereqs-install
-#+begin_src sh :dir angularjs-auth-jwt :results output :exports results
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
 yarn add express faker
 #+end_src
 
-{{{heading(server.js)}}}
+**** Create ~server1.js~
+00:33 Faker's how we're going to make the random user. We're going to ~require
+express~ and we'll ~require faker~.  Then we'll create our app.  Then we'll
+have our app and have a get a random user with the request (~req~) and response
+(~resp~).
 
-{{{subheading(Requires)}}}
-
+#+caption:Server basic requirements
 #+name:angularjs-auth-jwt-app-requires
 #+begin_src js
 const express = require('express');
 const faker = require('faker');
 #+end_src
 
+#+caption:Initializing the server app
 #+name:angularjs-auth-jwt-app
 #+begin_src js
 const app = express();
 #+end_src
 
+{{{subheading(Setting Up a User with faker)}}}
+
+00:52 We'll save our "User = faker.Helpers.userCard" and "user.avatar =
+faker.Image.avatar." Then we'll say response send back the user as JSON.
+
+#+caption:Setting up a 'random-user' route
 #+name:angularjs-auth-jwt-random-route
 #+begin_src js
   app.get('/random-user', (req,res) => {
-      const user = faker.Helpers.userCard();
-      user.avatar = faker.Image.avatar();
+      const user = faker.helpers.userCard();
+      user.avatar = faker.image.avatar();
       res.json(user);
   });
 #+end_src
 
+{{{subheading(Have the app listen on port 3000)}}}
+
+Then I will have our app listen on port 3000. We'll just say, "App listening on
+localhost:3000."
+
+#+caption:Start the server listening
 #+name:angularjs-auth-jwt-app-listen
 #+begin_src js
   app.listen(3000, () => {
@@ -2636,28 +2657,50 @@ const app = express();
   });
 #+end_src
 
+***** server1.js
+
+#+caption:server1.js
 #+name:angularjs-auth-jwt-server.js
-#+begin_src js :tangle angularjs-auth-jwt/server.js :mkdirp yes :noweb tangle
+#+begin_src js :tangle angularjs-auth-jwt/server1.js :mkdirp yes :noweb yes
 <<angularjs-auth-jwt-app-requires>>
 <<angularjs-auth-jwt-app>>
 <<angularjs-auth-jwt-random-route>>
 <<angularjs-auth-jwt-app-listen>>
 #+end_src
 
-**** Use the Module ~Faker~
-00:33 Faker's how we're going to make the random user. We're going to require
-Express and we'll require Faker. Then we'll create our app. Then we'll have our
-app and have a get on random user with the request and response.
+***** Makefile
+Hit the server endpoint at =/random-user= with a =GET= request:
+: make server1
 
-00:52 We'll save our "User = faker.Helpers.userCard" and "user.avatar =
-faker.Image.avatar." Then we'll say response send back the user as JSON. Then I
-will have our app listen on port 3000. We'll just say, "App listening on
-localhost:3000."
+The Makefile checks for a running server; if it is not running, then
+it starts the server before hitting the endpoint with a =GET= request.
+
+Terminate all Node server processes with the command:
+: make terminate
+
+#+caption:Makefile for server1.js
+#+name:angularjs-auth-jwt-makefile-server1
+#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : check-server
+check-server :
+	@curl -sI localhost:3000/random-user | grep -q 200 || { node server1.js & sleep 2; }
+
+.phony : server1
+server1 : check-server
+	@curl -sS localhost:3000/random-user | json_xs
+	@open -a "Google Chrome" "http://localhost:3000/random-user"
+
+.phony : terminate
+terminate :
+	@pgrep -lf 'node server[[:digit:]]'
+	@pkill -lf 'node server[[:digit:]]'
+#+end_src
 
 **** Run the Server with Nodemon
 #+CINDEX:Nodemon
-01:17 We're going to use nodemon to have our server automatically restart every
-time we make changes so nodemon server js.
+01:17 We're going to use ~nodemon~ to have our server automatically
+restart every time we make changes so ~nodemon server.js~.[fn::Since
+this project is being set up by Org, I will not be using ~nodemon~.]
 
 01:29 Here we'll go to local host:3000. Obviously we can't get a route but we
 can get random user. Here every time we refresh we have a random user.
