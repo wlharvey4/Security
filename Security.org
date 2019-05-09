@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 9, 2019
-#+macro:version 0.5.2.<2019-05-09 Thu 07:18>
+#+macro:version 0.5.3.<2019-05-09 Thu 07:54>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2605,11 +2605,43 @@ and Faker.
 yarn add express faker
 #+end_src
 
-{{{heading( ~server.js~)}}}
+{{{heading(server.js)}}}
+
+{{{subheading(Requires)}}}
+
+#+name:angularjs-auth-jwt-app-requires
+#+begin_src js
+const express = require('express');
+const faker = require('faker');
+#+end_src
+
+#+name:angularjs-auth-jwt-app
+#+begin_src js
+const app = express();
+#+end_src
+
+#+name:angularjs-auth-jwt-random-route
+#+begin_src js
+  app.get('/random-user', (req,res) => {
+      const user = faker.Helpers.userCard();
+      user.avatar = faker.Image.avatar();
+      res.json(user);
+  });
+#+end_src
+
+#+name:angularjs-auth-jwt-app-listen
+#+begin_src js
+  app.listen(3000, () => {
+      console.log("App listening on localhost:3000");
+  });
+#+end_src
 
 #+name:angularjs-auth-jwt-server.js
-#+begin_src js :tangle angularjs-auth-jwt/server.js :mkdirp yes
-const express = require('express');
+#+begin_src js :tangle angularjs-auth-jwt/server.js :mkdirp yes :noweb tangle
+<<angularjs-auth-jwt-app-requires>>
+<<angularjs-auth-jwt-app>>
+<<angularjs-auth-jwt-random-route>>
+<<angularjs-auth-jwt-app-listen>>
 #+end_src
 
 **** Use the Module ~Faker~
