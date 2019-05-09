@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 8, 2019
-#+macro:version 0.5.0.<2019-05-08 Wed 07:12>
+#+macro:version 0.5.1.<2019-05-09 Thu 05:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2487,6 +2487,560 @@ your =issued at= and an =expiry= time-stamps, which can be very useful.
 09:26 Now that you have this token, you can click on the =Private= button and
 you see the response from your secured endpoint in your API. That's how you
 make a real secure application with Auth0.
+** Course---AngularJS Authentication with JWT
+:PROPERTIES:
+:uri:      https://egghead.io/courses/angularjs-authentication-with-jwt
+:instructor: Kent C. Dodds
+:time:     31 minutes
+:subject:  JWT Angular
+:END:
+*** About AngularJS Authentication with JWT
+JSON Web Tokens (JWT) are a more modern approach to authentication. As the web
+moves to a greater separation between the client and server, JWT provides a
+terrific alternative to traditional cookie based authentication models. For
+more information on JWT visit http://jwt.io/
+
+In this series, we’ll be building a simple application to get random user
+information from a node server with an Angular client. We’ll then implement JWT
+to protect the random user resource on the server and then work through the
+frontend to get JWT authentication working.
+
+By the end, we’ll have an application which has a single username/password
+combination (for simplicity) and uses tokens to authorize the client to see the
+random user information. You’ll be able to login, get random users, and logout.
+
+*** JSON Web Token---JWT---Introduction
+A basic introduction to the mechanics of JWTs and the application we will be
+building in this lesson series.
+
+**** About JWTs
+00:00 This is an introductory video on JSON Web Tokens, also known as JWTs. A
+JOT is an encoded JSON object, digitally signed by the server, which the client
+sends with every request to identify the user. A JWT here is a token.
+
+00:14 We have some identification information about this token, we have the
+payload of the token represented by this blue string of characters, and then we
+have the signed secret piece of the token.
+
+00:29 The server has signed this token with the term =secret=. Let's say it was
+signed with the term =secrets=, this is no longer valid, because this doesn't
+decode properly. That's how the server knows that the token is legitimate.
+
+**** About the App GetRandomUserInfo
+00:47 In this series, we are going to be building this app, get random user
+info, and you'll be required to log in. Then, when you get a random user, every
+request will send the token over the wire to the server. The server will decode
+that token to validate that it's legitimate, and then send back the response if
+it is legitimate.
+
+**** About the Tools
+#+CINDEX:Node.js
+#+CINDEX:Angular.js
+01:09 We'll be using Node.js on the back end for our JWT implementation, and
+we'll use Angular.js on the front end. I'll show you how to use the tools that
+Angular gives you to use JWTs, and that's what our series is going to be all
+about.
+
+*** Basic Server Setup for JWT Authentication
+Creating the basic node server to serve up random users via API endpoints.
+
+**** Create the Server
+00:00 This is "Authentication with AngularJS, Getting it Right with JWT."
+That's pronounced "Jot".
+
+#+CINDEX:server, create
+00:07 We're going to create a basic server that will server up a random user
+and then create a front end client that will consume this service to illustrate
+how to do authentication with JWTs.
+
+#+CINDEX:@code{server.js}
+#+CINDEX:Express
+#+CINDEX:Faker
+00:21 First of, we're going to need our JavaScript file. We'll call that Server
+js. A couple of things that we're going to need through NPNR, Express and
+Faker.
+
+**** Use the Module ~Faker~
+00:33 Faker's how we're going to make the random user. We're going to require
+Express and we'll require Faker. Then we'll create our app. Then we'll have our
+app and have a get on random user with the request and response.
+
+00:52 We'll save our "User = faker.Helpers.userCard" and "user.avatar =
+faker.Image.avatar." Then we'll say response send back the user as JSON. Then I
+will have our app listen on port 3000. We'll just say, "App listening on
+localhost:3000."
+
+**** Run the Server with Nodemon
+#+CINDEX:Nodemon
+01:17 We're going to use nodemon to have our server automatically restart every
+time we make changes so nodemon server js.
+
+01:29 Here we'll go to local host:3000. Obviously we can't get a route but we
+can get random user. Here every time we refresh we have a random user.
+
+*** Client Setup for JWT Authentication
+Creating a basic Angular application to access the random users resource. Also
+setting up CORS on the node server to enable the resource sharing across
+different domains (ports in our case).
+
+**** Create the Front End Client
+00:00 We have our server running and it's serving up a random user every time
+we hit "/random-user." We want to create a front end client that is going to
+interface with this service. It will do so being served at from a different
+server.
+
+**** Install Angular using Bower
+00:16 First we're going to make directory called "public." Then we'll go into
+that directory and bower install Angular. We'll create a new file called
+"index."
+
+**** Setup Angular Front End Client
+00:29 Here we'll want to have a script for Angular and then we'll have another
+script that will create called app.js. We're going to want to make this an
+Angular app with the module app. We'll call this JWT example. Then we'll make a
+controller called main controller as view model.
+
+00:54 Then we'll have "Get Random User" with a div and a button. "Get User" and
+a quick handler on that, vm.getRandomUser.
+
+01:07 Then we'll just have, for simplicity's sake, a pre here that's bound to
+the vm.RandomUser.
+
+01:18 Now we're going to want to have our app. We'll create a new JavaScript
+file called "App" and we'll put this in an immediately invoking function. We'll
+have our app no dependencies.
+
+01:28 We're going to make a constant called API_URL because we're serving these
+up on different URLs. This is a construct for us to be able to make sure that
+all of our HTTP requests will go through the same URL.
+
+01:40 We're going to create a app.controller. We'll call this main
+controller. Then we'll have the vm.GetRandomUser assigned to
+GetRandomUser. We'll define that down here.
+
+01:52 This, we're obviously going to use a service for this so we'll say
+RandomUserFactory.GetUser().Then. We'll assign vm.randomUser to the data that
+we get back.
+
+02:09 Now let's create this RandomUserFactory. This will have the getUser. This
+will be a simple HTTP get. We'll use our API_URL/randomUser and we'll return
+that.
+
+02:24 Now we're going to need inject a couple things into our HTTP and our
+API_URL and then up here in our main controller we'll inject the
+RandomUserFactory. We also need to define getUser here.
+
+**** Add CORS Module
+02:37 Let's see what we blew up. HTTP server and we'll go to
+localhost 8080. That's serving up our client side code, getUser. There is going
+to be an error. It's "Access-Control-Allow-Origin."
+
+02:54 This is CORS. CORS stands for Cross Origin Resource Sharing. It's a
+security mechanism. We have to enable CORS on our server explicitly.
+
+03:03 We're going to use a module, "npm install cors." This is just a very
+simple module that will enable CORS for us.
+
+03:10 Down here we'll say app.use(cors()). That should restart our server, get
+user, and object to object. It looks like we're not piping this through
+json.getUser. There we go.
+
+03:22 Then we can hit our server over and over again to get these random users.
+
+03:27 The next step will be, obviously, setting up authentication to protect
+this resource. That's what we'll cover in the next video.
+
+*** JWT Authentication Setup
+Setting up a login on the angular app and an authentication endpoint on the
+server.
+
+**** Add a Form
+00:01 Here we have an app where we can get random users. Our goal for this
+video is to add authentication to this application.
+
+00:09 The first thing that we're gong to need is a form. Instead of an action
+we'll have an ng-Submit="vm.login(vm.username, vm.password)."
+
+00:18 Then we'll have an ng label input with the out label of Username and the
+type is text and the model is vm.username. Then we'll have another one of these
+for password. It will be a type password. We'll also add a break to make things
+look nice. Then we'll have a button with login and it's type submit.
+
+**** Update the App for the Form
+00:39 Let's go to our app. We'll have a vm.login = login. Login takes a user
+name and password. We'll create a user factory that will have the login. That
+takes the username, password. Then we'll say VM.user equals the data that we
+get back.
+
+00:58 In case of failure, we're going to make a simple function called
+handleError. We'll define that here. That will take a response and it will
+simply alert ('Error: ' + response.data). We'll use that function here, as
+well.
+
+**** Create a User Factory
+01:12 Let's create this user factory, app.factory Userfactory. Function login
+takes your user name and password and it will return $HTTP.get. Actually, it
+will be a post because we're locking. We're going to post the
+data. API_URL/login and the data will be userName, userName, password, password.
+
+01:36 Then we'll export that and we'll inject HTTP_API_URL. Then we'll want to
+inject the user factory here.
+
+01:46 Let's go ahead and refresh. We have user name, kentcdodds and cannot post
+a login because we haven't created that yet but we can still get these
+users. That's important for now.
+
+**** Update the Server for Login
+01:55 We'll go to server and we'll make a login. App.post/login. Now we need to
+authenticate the user. We're gong to ass a middleware function here,
+authenticate. We'll have our util functions. Authenticate will be one of those
+that takes a request, a response.
+
+02:13 And then, next, now we need to be able to read the .JSON that comes back
+in the requests. Specifically the user name and password.
+
+**** Install ~body-parser~
+02:21 To do that we're going to install a module called body-parser. That will
+give Express the ability to parse the body that comes in. We'll require
+body-parser, and just like with CORS, we'll say, App.use(bodyParser.json()).
+
+02:36 Now we have a body on the request. If there's not a body.username or not
+a body.password then we'll send with a response, "Status of 400 must provide
+user name or password."
+
+**** Add a User and Passwoard
+02:52 Now we need to have a user name and password to check against. Normally
+you would obviously store all of your users in a database but in our case, just
+to make things simple, we're going to make a mini database here that's just of
+our user = object with the username kentcdodds and a password P.
+
+03:11 If the body.username is not equal to the user.username or the
+body.password it not equal to the user.password then we'll send her a status of
+401, "User name or password incorrect."
+
+03:30 Then we'll send them to the next function handler.
+
+**** Testing Login
+03:33 If they made it this far we know that they are authenticated. We'll
+simply send the user back. We'll refresh the page. Now, if we log in you see
+we've got no error. If we look in our network tab here we'll try and log in
+again.
+
+03:45 We hit the log in and let's make this big here. Look at the preview. We
+have the password and user name. We have the whole user object.
+
+03:53 Obviously, generally you wouldn't want to send a password over the wire
+but we'll just be simple for now.
+
+03:58 That's a simple log in authentication. We can still hit the endpoint to
+get random users. We can still get the random user here.
+
+04:07 Our next video is going to be protecting this resource behind
+authentication. That's where we'll start to use JWS.
+
+*** Server JWT Authentication Setup
+Adding JWT support to the server. Signing a JSON object as a payload and
+sending the signed token to the browser on authentication.
+
+**** Setup Authentication
+00:01 Here we have our application. I can log in, no errors, so it's
+successful. If I give it the wrong password, I get an error. If I don't give it
+a password at all, I get an error.
+
+00:09 The problem with this application is I can still get a random user
+without being authenticated and we want to protect that resource.
+
+00:15 The first step for doing that from here is to implement JWTs on the
+server. We're going to need a module called JSON Web Token. We'll require that
+and we'll call it JWT, JSON Web Token.
+
+**** What a JWT Is
+00:28 I'm just going to explain, really quickly, what a JWT is.
+
+00:31 JSON Web Token is a specification for authentication. A JWT is an encoded
+JSON object that the server encodes using a secret key. The encoded JSON object
+is called a token. That token is sent to the client when the client
+authenticates. Then the client sends that token back on every single request.
+
+00:55 The server, at that point, will decode that token using the same private
+key, so that it can identify who the user is and act accordingly. What we're
+going to do is set up the encoding of that token.
+
+**** Create a JWT with a Secret
+01:07 For simplicity's sake, we're going to create a JWT secret here and we'll
+just make it a bunch of random characters. Normally, you would want this to be
+stored in an environment variable or some other secure place, but we'll just
+leave it as a string in our app.
+
+01:23 Now, we want to encode the user object when the user authenticates. If we
+scroll down here, instead of sending the user, we're going to want to send a
+token. We'll create that token now. Token is a JWT.sign and the payload is what
+is going to be the encoded object. We'll just encode the username for now, but
+there is an entire specification on what you should actually include in this
+that you can read up on. For our purposes, the username is sufficient.
+
+01:54 Then we're going to give that secret that we set up earlier.
+
+**** Sending Back the Token
+01:57 Now we have the token and we're going to send back the token to the
+client. Just for simplicity's sake, we'll send back the user as well.
+
+02:07 On the front end -- before we were expecting a user with this login
+response. Now we're getting an object that has the user on it. We'll say VM
+user equals that user. We'll just alert with the response.data.token.
+
+02:24 We'll refresh and we'll go ahead and type in the username and
+password. We got a big, honking error. Let's just go ahead and look at what
+that is here. It looks like the username is not defined. We'll go to our server
+and, lo and behold, it's user.username.
+
+02:43 We don't need to refresh the page, because the server and the client are
+totally served up on separate servers. We can just go ahead and log in
+now. That's our token.
+
+02:56 In future requests, we need to store this token somewhere so that it can
+be sent to the server over and over and over again for every protected resource
+request. Then the server can decode it back into this payload to identify who
+the user is and protect the resource that way.
+
+03:16 Just to recap here. The client will send a request to log in and here we
+have that token. If we look at the request, we can see here we're sending the
+username and password. If we look here, we go to authenticate, we double check
+that the username and password are correct, and then we'll sign this token with
+the username and with that JWT secret. Then we'll send the token and the user
+across the wire.
+
+03:46 If we look at the response here, you can see the token and the user comes
+back in the response. In future requests, that token will be used to make those
+requests to identify the user. We'll talk about that in the next video.
+
+*** Auth Interceptor in Angular for JWT
+Adding JWT support to the client. Storing the token in local storage, then
+creating a http interceptor to add the token to requests made to the
+server. Also implementing logout.
+
+**** Updating the Front End for Login
+00:01 OK, so here we have our application. We can login, and get users. We
+don't have to be logged in to get users, and that's what we want to try and
+protect. Also, we don't actually know if we're logged in from the UI, so we're
+just going to add this really quickly. We'll say H2, Welcome, and it'll be
+VMuser.username.
+
+00:26 I'm not going to hide this. Normally you'd want to hide this if there is
+no VM.user, because this really doesn't make sense, but I'm going to keep it
+here because we can still get users, and I want to show that until that
+resource is protected. Anyway, if we login here, now we can see, we do actually
+login, that comes from the server. Here we have our application.
+
+**** Save the Token to Local Storage
+00:46 There are a couple of things that we want to do to this application. If
+you recall from previous videos, when we login, the server is sending us back a
+token, and we want to save that token, and send it on every request to a
+protected resource, and so that's what we're going to do in this video, is save
+this token in local storage, and then set up sending that token on every
+protected resource request, and then we'll also implement logout.
+
+01:14 Let's go ahead and set up saving this to local storage. We're going to
+create a factory that will manage our token for us. We'll just say app.factory,
+and it'll be an auth token factory, and this will be a simple factory, it'll
+have a get token, and a set token, which will take a token. We're going to
+inject window in here so that we can get our store, which will be local
+storage. Then we'll have a key, and that will be auth token, and then we'll
+have our get token, and set token.
+
+**** Get the Token
+01:52 Then here, get token will just simply return store.getitemkey, and our
+set token will say if a token is provided then we'll say store.setitemkeytoken
+else store.removeitem. Now we have our auth token factory. When we login, we
+want to save this token, so we'll add a then here. Here we'll take auth token
+factory and set token to the response.data.token, and then we'll return the
+response for future items in the chain.
+
+02:31 We'll need to inject the auth token factory. Now let's go ahead and see
+this in action. If I refresh the page, get that new client code, we'll say
+kentcdodds P login, and let's look at our local storage here, and our
+resources. There we have our auth token. Now we're storing our token in our
+local storage, and we want to us it on request to protected resources, and so
+now we're going to use what in Angular is called an interceptor, and we're
+going to create that as a factory.
+
+**** Interceptors
+03:04 We'll say app.factory, it will be our auth interceptor, and interceptors
+have a couple of cool things on them. You have the request, the request error
+response, and response error. Each one of them is doing different things to the
+HTTP config. The one that we care about is the request, so we'll have request
+and it will be add token, and then here we'll implement that. It'll take the
+config, and it'll return the config.
+
+03:35 Here we'll have a token, and let's inject our auth token factory, and
+will get the token. Now if there is a token, so if the user is authenticated,
+then we're going to add this to a header on this config object, so we'll say
+config.headers is equal to config.headers or an empty object, just to kind of
+protect ourselves there. Then we'll say authorization equals bearer plus the
+token, and this is just part of the spec. It's the authorization header, image
+prefixed with bearer space, and then the token.
+
+04:16 Now we're sending the token on every HTTP request, but not quite
+actually. We do need to do one more thing, and that is in our app config, we
+need to inject HTTP provider. On that HTTP provider, it has an array called
+interceptors. We're going to push on that array just a string that is the name
+of our interceptor. Angular will look up this interceptor, and every single
+request that HTTP makes will pass through our function that we defined down
+here, this add token function.
+
+04:51 We can see that in action here. Let's refresh our client code, we'll say
+kentcdodds P, and let's go ahead and look at our network tab. We login, and we
+can see the token is given to us. We can see in here in our resources we have
+that token there. Now if we say get user, we'll click here, look at our
+headers, and it's right there, our auth authorization header with the bearer
+and the token.
+
+**** Set Up the Logout User Feature
+05:21 Now we need to alter the server to take this token into account when get
+user is invoked so that that resource can be protected. That's what we'll do in
+the next video. One more thing that we want to do in here that I want to show
+you is how easy it is to logout. We have this auth token in here, we're logged
+in, and it's very simple to add a logout, so we'll just do that now.
+
+05:45 We'll create a button called logout, I'll just add a break here, and
+we'll say ngclick is equal to vm.logout, and then up here we'll say vm.logout
+is equal to logout, and we'll create logout here, and we'll say
+userfactory.logout. Then in our user factory we have it log in, we'll have it
+logout. Then well logout, and we say that auth token factory set token to
+nothing, and that will remove the token from local storage, because that's how
+we implemented it down here.
+
+06:29 Then for the view side of things, will say vm.user equals null. If we
+refresh the page, you can see the auth token is still there, and we don't have
+any logic to automatically log the user in to the client, and we'll build that
+in the future. But here we have the user logged in, now we have this logout
+button. If we click logout, you can see that the auth token is removed from
+local storage, and no longer is the user name appearing here.
+
+06:55 If we refresh, that key is still gone, and then we can login and
+logout. Just in review, we simply added a auth token factory to store the auth
+token in local storage, and then we get that token from local storage on every
+single request using our auth interceptor, and attaching it to the
+authorization header, with bearer and token. Then we take that auth interceptor
+and push it onto the interceptors of the HTTP provider.
+
+07:27 We also implemented a logout function that simply set the user to null,
+and removed the token from local storage. In the next video, we'll talk about
+what we need to do to make it so that when a request is made to get a random
+user, the server will take that token into account, and protect that resource
+to only those who have a signed, verified token. That's what we'll see in the
+next video.
+
+*** Finalizing JWT Authentication with AngularJS
+Adding middleware to the node server to decode and verify the token sent from
+the client. And tidying up the rest of the application. Finally, a walkthrough
+of the whole process.
+
+**** Set Up the Server for Authentication
+00:00 OK, so now here we have our application. Let's just make sure it's all
+working here. We can login, we can logout, we can get users whether or not we
+are logged in. This is what we are trying to protect. If we look in our local
+storage here, because I logged out there's nothing in here, but if I login
+again it is in here. I logout, it goes away. If I'm logged in and I say get
+user, then I'm sending the authorization header with the token that the server
+gave to me in this login request.
+
+00:36 Now what we need to do is set up the server so that it will take this
+authorization header into account when this get user endpoint is hit. This is
+actually very simple with a module that we have called express jot. We'll go
+ahead and install that npm install Express Jot, and then up here we'll simply
+require express jot, and then it's as simple as an app.use Express Jot. This
+will take a secret, and we'll use the same jot secret.
+
+01:19 Because this is going to be verifying our tokens, we need to verify it
+with the same secret. That's actually everything that we need to do. However,
+when a user is logging in, they obviously won't have a token, and so we need to
+add unless, on this middleware, and we'll say the path is in this
+array/login. Now Express Jot, under the covers, is going to intercept all of
+the requests that come in.
+
+01:52 It will take this authorization header, with the bearer and the token, it
+will decode that token using the jot secret. If it does decode properly, and
+the signature is verified, then it will add user to the request object, and the
+user property will simply be the decoded json object. We're going to see what
+that looks like here in a moment, but let's go ahead and see what breaks here.
+
+02:20 I'm pointing to the server directly, to the random user endpoint, and if
+I refresh here, now I'm getting an unauthorized error, "No authorization header
+was found." If I refresh here, I'm not logged in, I say get...Oh, except I
+think that I am logged in. Refresh here, OK, "No authorization header was
+found," and the air is coming from this Express Jot.
+
+02:45 With just these two lines, we were able to take our application and add
+Express Jot. Obviously we do have this jot signing, so that's a couple of extra
+lines, but it's actually very simple to add this authentication scheme to a
+node application. We do have a couple of more things that we want to do on the
+front end to make things a little more sensible. If I go ahead and login here,
+I login. N
+
+03:09 Now I have, in our resources, I have that auth token. We'll clear our
+network here, say get user, and I can get the user. We can see on here I have
+the authorization header, so that's why I was able to get through. If I refresh
+the page, you'll see it's not showing that I'm logged in, but when I get the
+user everything works out fine, because I do have that token locally in the
+client.
+
+03:35 What we want to implement now is to be automatically logged in when we
+refresh the page if we have the token locally. Let's go to our app, and we'll
+have this initialization step in our controller, and we'll say, "user
+factory.getuser" then we'll say vmuser is equal to the data that comes back,
+and so let's go to our user factory, and will add a getuser function here, and
+we'll define that down here. We'll simply say if auth token factory get token,
+so if there is a token in existence, then we can return $HTTP.getapiurl/me.
+
+04:30 Otherwise we'll return $Q.reject, with the data client has no auth
+token. We'll need to inject Q here. Now we need to implement this /me
+endpoint. We'll go back to our server and just right here we'll say
+app.get/me. Because we have this Express Jot here, and the only path that is
+being excluded is the /login, we can know that this /me is being protected by
+this Express Jot, so no request will come through to /me unless they pass
+through this Express Jot first.
+
+05:20 We can rely on the fact that the user is authenticated at this point, and
+Express Jot will put the decoded token onto the user object, and so I can
+simply just say "response send rec.user." This is very simple, so all of this
+should work, assuming I didn't break anything. Let's just double check in our
+resources. We have the auth token, now if I refresh...There we go, Kent C
+Dodds, we're automatically logged in, and we can get the users right from the
+get go.
+
+05:56 If we logout, there's no token in here. Oops. We'll refresh, and now
+we're not able to get any users, and so that's the basic gist of what we're
+trying to accomplish in the series. Actually, there's one other thing that we
+want to do, and that's just for the fun of it. Well say ng show, or actually
+we'll say a hide when there's a vm user we'll hide this, and ng show when there
+is a vm user. Now let's refresh.
+
+06:28 Now it makes more sense. Get random user. We'll login, and we'll login
+with the wrong password, password/username incorrect. We login without a
+password...OK, so all of our error handling is working. Now we login, here we
+have...and now we can get the user, and we can logout, and go back and forth
+that way. If we just hit the endpoint directly, "No authorization header
+found," and so this application is a working application, and that is what
+we've created using Jots.
+
+06:59 Let's just take this full circle and explain what's happening here. We'll
+refresh the page here, we'll clear out here. We login with kentcdodds, and P as
+our password. We send that with this login request. Let's make this big
+here. The payload is the password and username. Then the server returns us a
+signed token with a secret that only the server knows about, and the user.
+
+07:28 Then behind the scenes on the client we add an auth token to local
+storage, and that we have an auth interceptor that will intercept every request
+that we make with HTTP, and add this auth token to our request. If we look at
+our network tab here again, say "get user," we get the user, and here in our
+headers we have that authorization header with the bearer and the token. Then
+when we want to logout, let's take a look at our resources here.
+
+07:59 We say logout, and that auth token is removed from local storage, and the
+user on the view model is set to null, and so our view updates as well. That's
+the application, that's Jots with Angular.
+
 ** Reference
 *** RFC 7797
 - https://tools.ietf.org/html/rfc7519
@@ -2881,7 +3435,6 @@ signature, MAC, and encryption algorithms.
 
 *** JSON Web Encryption
 - http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-20
-
 * MACs and HMACs
 [[*%5B%5Bhttps://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers%5D%5BWhat Is HMAC And How Does It Secure File Transfers?%5D%5D][What Is HMAC And How Does It Secure File Transfers?]]
 
