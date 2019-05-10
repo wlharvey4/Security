@@ -1,8 +1,8 @@
 # -*- mode:org; fill-column:79; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 9, 2019
-#+macro:version 0.5.7.<2019-05-10 Fri 06:24>
+#+date:May 10, 2019
+#+macro:version 0.5.8.<2019-05-10 Fri 06:48>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2519,7 +2519,8 @@ series on =egghead.io=.
 
 #+CINDEX:@code{node.js}
 #+CINDEX:@code{npm}
-This project uses ~node.js~ and Node Package Manager (~npm~).
+This project uses ~node.js~ and Node Package Manager (~npm~).[fn::I will be
+using ~yarn~ instead of ~npm~ to install prerequisites.]
 
 #+CINDEX:Bower
 #+CINDEX:AngularJS
@@ -2540,6 +2541,8 @@ Initialize a new Node.js package in the root directory ~angularjs-auth-jsw~:
 [ -e package.json ] && \
   echo "package.json has already been created" || \
   yarn --yes init
+  yarn add --dev bower
+  mkdir public
 #+end_src
 
 List ~package.json~ contents:
@@ -2761,13 +2764,21 @@ terminate :
 #+CINDEX:Nodemon
 01:17 We're going to use ~nodemon~ to have our server automatically
 restart every time we make changes so ~nodemon server.js~.[fn::Since
-this project is being set up by Org, I will not be using ~nodemon~.]
+this project is being set up by Org, I will not be using ~nodemon~,
+but rather a Makefile.]
 
-01:29 Here we'll go to local host:3000. Obviously we can't get a route but we
-can get random user. Here every time we refresh we have a random user.
+01:29 Here we'll go to local host:3000.  Obviously we can't get a route but we
+can get random user.  Here every time we refresh we have a random user.
+
+For this project, type the command:
+: make server1
+
+to start the server and hit the ~/random-user~ endpoint.  You will get a random
+user pretty-printed to the terminal as well as a random user pretty-printed to
+Chrome.
 
 *** Client Setup for JWT Authentication
-Creating a basic Angular application to access the random users resource. Also
+Creating a basic Angular application to access the random users resource.  Also
 setting up CORS on the node server to enable the resource sharing across
 different domains (ports in our case).
 
@@ -2778,15 +2789,16 @@ interface with this service. It will do so being served at from a different
 server.
 
 **** Install Angular using Bower
-00:16 First we're going to make directory called "public." Then we'll go into
-that directory and bower install Angular. We'll create a new file called
-"index."
+00:16 First we're going to make directory called ~public/~.  Then we'll go into
+that directory and ~bower install angular~.  We'll create a new file called
+~index~.
 
 **** Setup Angular Front End Client
-00:29 Here we'll want to have a script for Angular and then we'll have another
-script that will create called app.js. We're going to want to make this an
-Angular app with the module app. We'll call this JWT example. Then we'll make a
-controller called main controller as view model.
+00:29 Here we'll want to have a script for Angular and then we'll have
+another script that will create called ~app.js~.  We're going to want
+to make this an Angular app with the module app. We'll call this JWT
+example. Then we'll make a controller called main controller as view
+model.
 
 00:54 Then we'll have "Get Random User" with a div and a button. "Get User" and
 a quick handler on that, vm.getRandomUser.
