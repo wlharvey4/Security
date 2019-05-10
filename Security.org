@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 10, 2019
-#+macro:version 0.5.9.<2019-05-10 Fri 07:06>
+#+macro:version 0.5.10.<2019-05-10 Fri 07:30>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2791,8 +2791,14 @@ server.
 **** Install Angular using Bower
 00:16 First we're going to make directory called ~public/~.
 
-Then we'll go into that directory and ~bower install angular~.  We'll
-create a new file called ~index~.
+#+name:make-public-dir
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+mkdir -v public
+#+end_src
+
+Then we'll go into that directory and ~bower install angular~.
+
+We'll create a new file called ~index~.
 
 **** Setup Angular Front End Client
 00:29 Here we'll want to have a script for Angular and then we'll have
