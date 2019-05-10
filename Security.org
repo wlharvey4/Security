@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 9, 2019
-#+macro:version 0.5.6.<2019-05-09 Thu 19:12>
+#+macro:version 0.5.7.<2019-05-10 Fri 06:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2512,8 +2512,8 @@ frontend to get JWT authentication working.
 By the end, we’ll have an application which has a single username/password
 combination (for simplicity) and uses tokens to authorize the client to see the
 random user information. You’ll be able to login, get random users, and logout.
-
-*** Prerequisites---AngularJS Authentication with JWT
+*** Set Up the Project
+**** Prerequisites---AngularJS Authentication with JWT
 This is the example project for the AngularJS Authentication with JWT lesson
 series on =egghead.io=.
 
@@ -2533,41 +2533,70 @@ the latest dependencies.
 [[file:resources/dodds-jwt-tags-50.png]]
 
 **** Project Initialization
+Initialize a new Node.js package in the root directory ~angularjs-auth-jsw~:
 
 #+name:dodds-jwt-package-init
 #+begin_src sh :dir angularjs-auth-jwt :results output :exports both
 [ -e package.json ] && \
   echo "package.json has already been created" || \
   yarn --yes init
-  echo;echo package.json; echo ------------
-  cat package.json
 #+end_src
+
+List ~package.json~ contents:
+
+#+name:list-package.json
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports results
+echo package.json;
+echo ------------
+cat package.json
+#+end_src
+
+**** Create a Makefile
+Create a Makefile and add some user-definable variables.
+
+This project uses Google Chrome as the default browser, and the Perl
+command-line script ~json_xs~ to pretty-print JSON output to the
+terminal.  There are many such options, so feel free to change these
+to your preferences.  Also, this project is running on a Mac, so it is
+using ~open -a~ to open the default browser and feed it a URL.  If you
+are using Linux or Windows, this =OPEN= command will need to be
+changed.
+
+The project uses =localhost= on PORT 3000.
+
+Each lesson uses a different server number.  The Makefile is used to
+start individual servers with the command:
+: make server<#>
+where <#> is a number between 1 and 6.
 
 #+name:angularjs-auth-jwt-makefile
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 # ============================================================
 # USER-DEFINABLE COMMANDS AND VARIABLES
+
 BROWSER := "Google Chrome"
-CURL := curl -sS
+CURL    := curl -sS
 JSON_PP := json_xs
-RANDOM_USER := random-user
-OPEN := open -a
+OPEN    := open -a
 
 URL     := http://localhost
 PORT    := 3000
 
+# This is the only route used by this tutorial.
+DEF_ROUTE := random-user
+
 # END USER-DEFINABLE COMMANDS AND VARIABLES
 # ============================================================
 
-URL_PORT := $(URL):$(PORT)
+URL_PORT         := $(URL):$(PORT)
 
 OPEN_BROWSER     := $(OPEN) $(BROWSER)
-OPEN_BROWSER_URI = $(OPEN_BROWSER) $(URL_PORT)/$(ROUTE)
+OPEN_BROWSER_URI  = $(OPEN_BROWSER) $(URL_PORT)/$(ROUTE)
 
 CURL_URL         := $(CURL) $(URL_PORT)
-CURL_URI_PP      = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
+CURL_URI_PP       = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
 
-NODE := node
+NODE   := node
 SERVER := server
 #+end_src
 
@@ -2710,15 +2739,14 @@ Terminate all Node server processes with the command:
 #+caption:Makefile for server1.js
 #+name:angularjs-auth-jwt-makefile-server1
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+ROUTE ?= $(DEF_ROUTE)
+
 .phony : check-server
 check-server :
 	@pgrep -qlf $(NODE) $(server) || { $(NODE) $(server).js & sleep 2; }
-#	@pgrep -qlf 'node server[[:digit:]]' || { node server1.js & sleep 2; }
-#	@curl -sI localhost:3000/random-user | grep -q 200 || { node server1.js & sleep 2; }
 
 .phony : server1
-server1 : server = $(SERVER)1
-server1 : ROUTE ?= $(RANDOM_USER)
+server1 : server = server1
 server1 : check-server
 	$(CURL_URI_PP)
 	@$(OPEN_BROWSER_URI)
