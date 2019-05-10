@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 9, 2019
-#+macro:version 0.5.5.<2019-05-09 Thu 15:36>
+#+macro:version 0.5.6.<2019-05-09 Thu 19:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2543,6 +2543,34 @@ the latest dependencies.
   cat package.json
 #+end_src
 
+#+name:angularjs-auth-jwt-makefile
+#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+# ============================================================
+# USER-DEFINABLE COMMANDS AND VARIABLES
+BROWSER := "Google Chrome"
+CURL := curl -sS
+JSON_PP := json_xs
+RANDOM_USER := random-user
+OPEN := open -a
+
+URL     := http://localhost
+PORT    := 3000
+
+# END USER-DEFINABLE COMMANDS AND VARIABLES
+# ============================================================
+
+URL_PORT := $(URL):$(PORT)
+
+OPEN_BROWSER     := $(OPEN) $(BROWSER)
+OPEN_BROWSER_URI = $(OPEN_BROWSER) $(URL_PORT)/$(ROUTE)
+
+CURL_URL         := $(CURL) $(URL_PORT)
+CURL_URI_PP      = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
+
+NODE := node
+SERVER := server
+#+end_src
+
 *** JSON Web Token---JWT---Introduction
 A basic introduction to the mechanics of JWTs and the application we will be
 building in this lesson series.
@@ -2669,11 +2697,12 @@ localhost:3000."
 #+end_src
 
 ***** Makefile
-Hit the server endpoint at =/random-user= with a =GET= request:
+Hit the ~server1~ endpoint at =/random-user= with a =GET= request:
 : make server1
 
-The Makefile checks for a running server; if it is not running, then
-it starts the server before hitting the endpoint with a =GET= request.
+The Makefile checks for a running ~server1~; if it is not running,
+then it starts the server before hitting the endpoint with a =GET=
+request.
 
 Terminate all Node server processes with the command:
 : make terminate
@@ -2683,13 +2712,16 @@ Terminate all Node server processes with the command:
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : check-server
 check-server :
-	@pgrep -qlf 'node server[[:digit:]]' || { node server1.js & sleep 2; }
+	@pgrep -qlf $(NODE) $(server) || { $(NODE) $(server).js & sleep 2; }
+#	@pgrep -qlf 'node server[[:digit:]]' || { node server1.js & sleep 2; }
 #	@curl -sI localhost:3000/random-user | grep -q 200 || { node server1.js & sleep 2; }
 
 .phony : server1
+server1 : server = $(SERVER)1
+server1 : ROUTE ?= $(RANDOM_USER)
 server1 : check-server
-	@curl -sS localhost:3000/random-user | json_xs
-	@open -a "Google Chrome" "http://localhost:3000/random-user"
+	$(CURL_URI_PP)
+	@$(OPEN_BROWSER_URI)
 
 .phony : terminate
 terminate :
