@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 10, 2019
-#+macro:version 0.5.10.<2019-05-10 Fri 07:30>
+#+date:May 11, 2019
+#+macro:version 0.6.0.<2019-05-11 Sat 10:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2512,6 +2512,13 @@ frontend to get JWT authentication working.
 By the end, we’ll have an application which has a single username/password
 combination (for simplicity) and uses tokens to authorize the client to see the
 random user information. You’ll be able to login, get random users, and logout.
+
+{{{heading(Project Code Repository)}}}
+
+The GitHub repository for this project is at:
+
+- https://github.com/eggheadio/egghead-angularjs-aunthentication-with-jwt
+
 *** Set Up the Project
 **** Prerequisites---AngularJS Authentication with JWT
 This is the example project for the AngularJS Authentication with JWT lesson
@@ -2520,7 +2527,7 @@ series on =egghead.io=.
 #+CINDEX:@code{node.js}
 #+CINDEX:@code{npm}
 This project uses ~node.js~ and Node Package Manager (~npm~).[fn::I will be
-using ~yarn~ instead of ~npm~ to install prerequisites.]
+using ~yarn~ instead of ~npm~ to install Node prerequisites.]
 
 #+CINDEX:Bower
 #+CINDEX:AngularJS
@@ -2533,15 +2540,30 @@ the latest dependencies.
 
 [[file:resources/dodds-jwt-tags-50.png]]
 
-**** Project Initialization
-Initialize a new Node.js package in the root directory ~angularjs-auth-jsw~:
+{{{heading(Static File Server)}}}
 
+#+CINDEX:static file server @file{http-server}
+#+CINDEX:@file{http-server}
+The front end needs a static file server.  The demo uses the Node module
+~http-server~, which by default loads files from a ~public/~ directory using
+port =8080=, both acceptable defaults for this project.  Feel free to use your
+own choice of static file server.  *Note* that you can delete the =dev=
+dependency below if you wish, *but* you will need to update the Makefile to use
+your choice instead of ~http-server~ ([[makefile-static-file-server][Makefile static file server]]).
+
+**** Project Initialization
+Initialize a new Node.js package in the root directory ~angularjs-auth-jsw~
+using defaults (@option{--yes}) and then add two development dependencies,
+~bower~ and ~http-server~:
+
+#+CINDEX:init
+#+CINDEX:@file{package.init}
 #+name:dodds-jwt-package-init
 #+begin_src sh :dir angularjs-auth-jwt :results output :exports both
 [ -e package.json ] && \
   echo "package.json has already been created" || \
   yarn --yes init
-  yarn add --dev bower
+  yarn add --dev bower http-server
   mkdir public
 #+end_src
 
@@ -2565,6 +2587,9 @@ using ~open -a~ to open the default browser and feed it a URL.  If you
 are using Linux or Windows, this =OPEN= command will need to be
 changed.
 
+<<makefile-static-file-server>>Finally, this project is using ~http-server~ as
+a file server.  Feel free to change this to your choice.
+
 The project uses =localhost= on PORT 3000.
 
 Each lesson uses a different server number.  The Makefile is used to
@@ -2578,12 +2603,19 @@ where <#> is a number between 1 and 6.
 # USER-DEFINABLE COMMANDS AND VARIABLES
 
 BROWSER := "Google Chrome"
+FRONT_END := "Safari"
 CURL    := curl -sS
 JSON_PP := json_xs
 OPEN    := open -a
 
 URL     := http://localhost
 PORT    := 3000
+
+# http-server defaults to /public and port 8080
+STATIC_SERVER := http-server
+STATIC_SERVER_URL := $(URL)
+STATIC_SERVER_PORT := 8080
+START_STATIC_SERVER := ./node_modules/.bin/$(STATIC_SERVER)
 
 # This is the only route used by this tutorial.
 DEF_ROUTE := random-user
@@ -2592,9 +2624,12 @@ DEF_ROUTE := random-user
 # ============================================================
 
 URL_PORT         := $(URL):$(PORT)
+STATIC_SERVER_URL_PORT := $(STATIC_SERVER_URL):$(STATIC_SERVER_PORT)
 
 OPEN_BROWSER     := $(OPEN) $(BROWSER)
 OPEN_BROWSER_URI  = $(OPEN_BROWSER) $(URL_PORT)/$(ROUTE)
+OPEN_FRONT_END   := $(OPEN) $(FRONT_END)
+OPEN_FRONT_END_URI := $(OPEN_FRONT_END) $(STATIC_SERVER_URL_PORT)
 
 CURL_URL         := $(CURL) $(URL_PORT)
 CURL_URI_PP       = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
@@ -2758,6 +2793,8 @@ server1 : check-server
 terminate :
 	@pgrep -lf 'node server[[:digit:]]'
 	@pkill -lf 'node server[[:digit:]]'
+	@pgrep -lf $(STATIC_SERVER)
+	@pkill -lf $(STATIC_SERVER)
 #+end_src
 
 **** Run the Server with Nodemon
@@ -2782,7 +2819,6 @@ Creating a basic Angular application to access the random users resource.  Also
 setting up CORS on the node server to enable the resource sharing across
 different domains (ports in our case).
 
-**** Create the Front End Client
 00:00 We have our server running and it's serving up a random user every time
 we hit "/random-user." We want to create a front end client that is going to
 interface with this service. It will do so being served at from a different
@@ -2790,67 +2826,284 @@ server.
 
 **** Install Angular using Bower
 00:16 First we're going to make directory called ~public/~.
-
-#+name:make-public-dir
-#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
-mkdir -v public
-#+end_src
-
 Then we'll go into that directory and ~bower install angular~.
 
-We'll create a new file called ~index~.
+#+name:bower-install-angular
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+mkdir -v public
+cd public && ../node_modules/.bin/bower install angular
+#+end_src
 
-**** Setup Angular Front End Client
-00:29 Here we'll want to have a script for Angular and then we'll have
-another script that will create called ~app.js~.  We're going to want
-to make this an Angular app with the module app. We'll call this JWT
-example. Then we'll make a controller called main controller as view
-model.
+**** Create ~index.html~ in ~public/~
+We'll create a new file called ~index.html~.
 
-00:54 Then we'll have "Get Random User" with a div and a button. "Get User" and
-a quick handler on that, vm.getRandomUser.
+{{{heading(Index.html)}}}
 
-01:07 Then we'll just have, for simplicity's sake, a pre here that's bound to
-the vm.RandomUser.
+{{{subheading(Install Scripts)}}}
 
+00:29 Here we'll want to have a script for Angular and then we'll have another
+script that will create called ~app.js~.
+
+#+name:angularjs-auth-jwt-index--body---scripts
+#+begin_src html
+<script src="bower_components/angular/angular.js"></script>
+<script src="app.js"></script>
+#+end_src
+
+{{{subheading(Create an Angular App)}}}
+
+We're going to want to make this an Angular app with the module =ng-app=.
+
+#+name:angularjs-auth-jwt-index--html---angular_app
+#+begin_src html
+<html ng-app="app">
+#+end_src
+
+{{{subheading(Add a Title)}}}
+
+We'll call this (=<title>= it as) =JWT Example=.
+
+#+name:angularjs-auth-jwt-index--head---title
+#+begin_src html
+<title>JWT Example</title>
+#+end_src
+
+{{{subheading(Create an Angular Controller as View Model)}}}
+
+Then we'll make a controller called =Main Controller as View Model=
+(=MainCtrl_vm=).
+
+#+name:angularjs-auth-jwt-index--body---MainCtrl_vm
+#+begin_src html
+<body ng-controller="MainCtrl as vm">
+#+end_src
+
+{{{heading(Add a Get User Button)}}}
+
+00:54 Then we'll have a section "Get Random User" with a =div= and a button
+"Get User", and a click-handler (=ng-click=) on that (=vm.getRandomUser=).
+01:07 Then we'll just have, for simplicity's sake, a =<pre>= here that's bound
+to the =vm.RandomUser=.
+
+#+name:angularjs-auth-jwt-index--body---h1.get_random_user
+#+begin_src html
+<h1>Get Random User</h1>
+#+end_src
+
+#+name:angularjs-auth-jwt-index--body---button.get_random_user
+#+begin_src html
+<div>
+  <button ng-click="vm.getRandomUser()">Get User</button>
+  <pre ng-bind="vm.randomUser | json"></pre>
+</div>
+#+end_src
+
+***** Code for ~index.html~
+
+#+caption[angularjs-auth-jwt-index.html]:Code for the AngularJS Auth Jwt @code{index.html} file
+#+name:angularjs-auth-jwt-index.html
+#+begin_src html :tangle angularjs-auth-jwt/public/index.html :mkdirp yes :noweb yes
+<!DOCTYPE html>
+<<angularjs-auth-jwt-index--html---angular_app>>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <<angularjs-auth-jwt-index--head---title>>
+    </head>
+
+    <<angularjs-auth-jwt-index--body---MainCtrl_vm>>
+        <<angularjs-auth-jwt-index--body---h1.get_random_user>>
+        <<angularjs-auth-jwt-index--body---button.get_random_user>>
+
+        <<angularjs-auth-jwt-index--body---scripts>>
+
+    </body>
+</html>
+
+#+end_src
+
+**** Create the Angular App
 01:18 Now we're going to want to have our app. We'll create a new JavaScript
-file called "App" and we'll put this in an immediately invoking function. We'll
-have our app no dependencies.
+file called ~app.js~ and we'll put this in an immediately invoking function. We'll
+have our app have no dependencies.
 
-01:28 We're going to make a constant called API_URL because we're serving these
+{{{heading(Create ~app.js~ Application File)}}}
+
+#+name:angularjs-auth-jwt-app--var_app
+#+begin_src js
+var app = angular.module('app', []);
+#+end_src
+
+{{{subheading(The =API_URL= Constant)}}}
+
+01:28 We're going to make a constant called =API_URL= because we're serving these
 up on different URLs. This is a construct for us to be able to make sure that
 all of our HTTP requests will go through the same URL.
 
-01:40 We're going to create a app.controller. We'll call this main
-controller. Then we'll have the vm.GetRandomUser assigned to
-GetRandomUser. We'll define that down here.
+#+name:angularjs-auth-jwt-app--const_API_URL
+#+begin_src js
+app.constant('API_URL', 'http://localhost:3000');
+#+end_src
+
+{{{subheading(Create the App Controller =MainCtrl=)}}}
+
+01:40 We're going to create an =app.controller=.  We'll call this Main
+Controller (=MainCtrl=).
+
+#+name:angularjs-auth-jwt-app--controller
+#+begin_src js :noweb yes
+app.controller('MainCtrl', function MainCtrl(RandomUserFactory) {
+    'use strict';
+    var vm = this;
+    vm.getRandomUser = getRandomUser;
+
+    <<aaja-getRandomUser>>
+})
+#+end_src
+
+{{{subheading(Get a Random User)}}}
+
+Then we'll have the =vm.GetRandomUser= assigned to =GetRandomUser=.  We'll
+define that down here.
 
 01:52 This, we're obviously going to use a service for this so we'll say
-RandomUserFactory.GetUser().Then. We'll assign vm.randomUser to the data that
-we get back.
+=RandomUserFactory.GetUser().then=.  We'll assign =vm.randomUser= to the data
+that we get back.
 
-02:09 Now let's create this RandomUserFactory. This will have the getUser. This
-will be a simple HTTP get. We'll use our API_URL/randomUser and we'll return
-that.
+#+name:aaja-getRandomUser
+#+begin_src js
+function getRandomUser() {
+    RandomUserFactory.getUser().then(function success(response) {
+        vm.randomUser = response.data;
+    });
+}
+#+end_src
+
+{{{subheading(Create the Random User Factory)}}}
+
+02:09 Now let's create this =RandomUserFactory=.  This will have the =getUser=.
+This will be a simple HTTP =GET=.  We'll use our =API_URL/randomUser= and we'll
+return that.
+
+#+name:angularjs-auth-jwt-app---RandomUserFactory
+#+begin_src js
+app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
+    'use strict';
+    return ({
+        getUser: getUser
+    });
+
+    function getUser() {
+        return $http.get(API_URL + '/random-user');
+    }
+});
+#+end_src
 
 02:24 Now we're going to need inject a couple things into our HTTP and our
-API_URL and then up here in our main controller we'll inject the
-RandomUserFactory. We also need to define getUser here.
+=API_URL= and then up here in our Main Controller we'll inject the
+=RandomUserFactory=.  We also need to define =getUser= here.
 
-**** Add CORS Module
-02:37 Let's see what we blew up. HTTP server and we'll go to
-localhost 8080. That's serving up our client side code, getUser. There is going
-to be an error. It's "Access-Control-Allow-Origin."
+***** Code for ~app.js~
 
-02:54 This is CORS. CORS stands for Cross Origin Resource Sharing. It's a
-security mechanism. We have to enable CORS on our server explicitly.
+#+name:angularjs-auth-jwt-app.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app.js :noweb yes :mkdirp yes
+(function() {
+    'use strict';
+    <<angularjs-auth-jwt-app--var_app>>
+    <<angularjs-auth-jwt-app--const_API_URL>>
+    <<angularjs-auth-jwt-app--controller>>
+    <<angularjs-auth-jwt-app---RandomUserFactory>>
+})()
+#+end_src
+
+**** Add CORS Module to ~server.js~
+02:37 Let's see what we blew up.  From the command line, type =? http-server=
+and we'll go to =http://localhost:8080=.  That's serving up our client side
+code, ~getUser~.
+
+#+begin_example
+? yarn run http-server
+yarn run v1.13.0
+$ /usr/local/dev/programming/Security/angularjs-auth-jwt/node_modules/.bin/http-server
+Starting up http-server, serving ./public
+Available on:
+  http://127.0.0.1:8080
+  http://10.0.0.250:8080
+#+end_example
+
+[[file:./resources/angularjs-auth-jwt--front-end.png]]
+
+There is going to be an error.  It's "Access-Control-Allow-Origin."
+
+[[file:./resources/angularjs-auth-jwt--cors_error.png]]
+
+02:54 This is CORS.  CORS stands for "Cross Origin Resource Sharing".  It's a
+security mechanism.  We have to enable CORS on our server explicitly.
+
+{{{heading(Install ~cors~ Module in ~server.js~)}}}
 
 03:03 We're going to use a module, "npm install cors." This is just a very
 simple module that will enable CORS for us.
 
-03:10 Down here we'll say app.use(cors()). That should restart our server, get
-user, and object to object. It looks like we're not piping this through
-json.getUser. There we go.
+#+begin_src sh :results output :exports both :dir angularjs-auth-jwt
+yarn add cors
+#+end_src
+
+03:10 Down here we'll say ~app.use(cors())~.
+
+#+name:angularjs-auth-jwt-app-requires2
+#+begin_src js :noweb yes
+<<angularjs-auth-jwt-app-requires>>
+const cors = require('cors');
+#+end_src
+
+#+name:angularjs-auth-jwt-app-use_cors
+#+begin_src js
+app.use(cors());
+#+end_src
+
+***** server2
+
+#+caption:server2.js
+#+name:angularjs-auth-jwt-server.js
+#+begin_src js :tangle angularjs-auth-jwt/server2.js :mkdirp yes :noweb yes
+<<angularjs-auth-jwt-app-requires2>>
+
+<<angularjs-auth-jwt-app>>
+<<angularjs-auth-jwt-app-use_cors>>
+
+<<angularjs-auth-jwt-random-route>>
+<<angularjs-auth-jwt-app-listen>>
+#+end_src
+
+***** Makefile for server2
+
+#+caption:Makefile for server2.js
+#+name:angularjs-auth-jwt-makefile-server2
+#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+
+.phony : server2
+server2 : server = server2
+server2 : check-server
+	$(CURL_URI_PP)
+	@$(OPEN_BROWSER_URI)
+#+end_src
+
+***** Makefile for Static File Server
+
+#+name:angularjs-auth-jwt-makefile-static_file_server
+#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : static-server
+static-server :
+	$(START_STATIC_SERVER) &
+	$(OPEN_FRONT_END_URI) &
+#+end_src
+
+**** Front End Serves Up Random Users
+That should restart our server, click =Get User=, and =[object Object]=.  It
+looks like we're not piping this through =json=.  Click =Get User]=.  There we
+go.
+
+[[file:./resources/angularjs-auth-jwt-front-end-get-user.png]]
 
 03:22 Then we can hit our server over and over again to get these random users.
 
@@ -9077,6 +9330,7 @@ That's why some organizations have started implementing SSO or Single Sign-On.
 #+macro:dfn @@texinfo:@dfn{@@$1@@texinfo:}@@
 #+macro:noindent @@texinfo:@noindent @@
 #+macro:cite @@texinfo:@cite{@@$1@@texinfo:}@@
+#+macro:option @@texinfo:@option{@@$1@@texinfo:}@@
 ** Local Variable Definitions
 # Local Variables:
 # fill-column: 79
