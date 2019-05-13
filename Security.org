@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 12, 2019
-#+macro:version 0.6.1.<2019-05-12 Sun 19:24>
+#+date:May 13, 2019
+#+macro:version 0.6.2.<2019-05-13 Mon 07:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -8098,6 +8098,892 @@ coursework.
        cybersecurity education. She earned her doctoral degree from the Center
        for Secure and Dependable Systems in the Department of Computer Science
        at the University of Idaho.
+* Systems Security Certified Practitioner---SSCP
+:PROPERTIES:
+:Instructor: (ISC)^2
+:URL:      https://www.coursera.org/specializations/sscp-training
+:END:
+** About the Specialization "Systems Security Certified Practitioner"---SSCP
+- https://www.coursera.org/specializations/sscp-training
+
+Advance Your IT Career with Cybersecurity Skills.  Gain Flexibility with
+Self-Paced Learning.
+
+Pursue better IT security job opportunities and prove knowledge with
+confidence. The SSCP Professional Training Certificate shows employers you have
+the IT security foundation to defend against cyber attacks – and puts you on a
+clear path to earning SSCP certification.
+
+Learn on your own schedule with 120-day access to content aligned with the
+latest (ISC)2 SSCP exam domains. We’re offering the complete online self-paced
+program for only $1,000 – a $200 savings when you get all domains bundled
+together.
+*** Outline of Courses in the Specialization
+Upon completing the SSCP Professional Certificate, you will:
+
+1. Complete six courses of preparing you to sit for the [[https://www.isc2.org/en/Certifications/SSCP][Systems Security
+   Certified Practitioner (SSCP) certification exam]] as outlined below.
+
+   - Course 1 - Access Controls
+
+     Welcome to Access Controls! The Access Controls Course provides
+     information pertaining to specify what users are permitted to do, the
+     resources they are allowed to access, and what operations they are able to
+     perform on a system. Access Controls help managers limit and monitor
+     systems use at a user level or group membership. You will understand the
+     different access control systems and how they should be implemented to
+     protect the system and data using the different levels of confidentiality,
+     integrity, and availability. The Access Controls course provides
+     information pertaining to specifying what users are permitted to do, the
+     resources they are allowed to access, and what operations they are able to
+     perform on a system. Access Controls help managers limit and monitor
+     systems use at a user level, and is usually predefined based on authority
+     level or group membership. You will understand the different access
+     control systems and how they should be implemented to protect the system
+     and data using the different levels of confidentiality, integrity, and
+     availability. Objectives 1. Describe how to implement Authentication
+     mechanisms 2. Identify and operate internetwork trust
+     architectures 3. Describe the process of administering identity management
+     life cycle 4. Implement the different types of access controls
+     (Subject/Object based)
+
+   - Course 2 - Security Operations and Administration
+
+     Security operations and administration is the task of identifying an
+     organization's information assets and the documentation needed for policy
+     implementation, standards, procedures, and guidelines to ensure
+     confidentiality, integrity, and availability. You will understand the
+     process necessary for working with management and information owners,
+     custodians, and users so that proper data classifications are
+     defined. This will ensure the proper handling of all hard copy and
+     electronic information. The Security operations and Administration course
+     addresses basic security concepts and the application of those concepts in
+     the day to day operation and administration of enterprise computer systems
+     and the information that they host.Ethical considerations in general, and
+     the (ISC)2 Code of Ethics in particular, provide the backdrop for any
+     discussion of information security and SSCP candidates will be tested on
+     both. Information security professionals often find themselves in
+     positions of trust and must be beyond reproach in every way.Several core
+     principles of information security stand above all others and this domain
+     covers these principles in some depth. It can be said that the CIA triad
+     of confidentiality, integrity and availability forms the basis for almost
+     everything that we do in information security and the SSCP candidate must
+     not only fully understand these principles but be able to apply them in
+     all situations. additional security concepts covered in this domain
+     include privacy, least privilege, non-repudiation and the separation of
+     duties. Course Objectives 1. Define Code of Ethics 2. Describe the
+     security concepts 3. Document and operate security controls 4. Describe
+     the asset management process 5. Implement compliance controls 6. Assess
+     compliance controls 7. Describe the change management
+     process 8. Contribute to the security awareness training
+     program 9. Contribute to physical security operations
+
+   - Course 3 - Risk Identification, Monitoring, and Analysis/Incident Response
+     and Recovery
+
+     Risk Identification, Monitoring, and Analysis: In the Risk Identification,
+     Monitoring, and Analysis session, you will learn how to identify, measure,
+     and control losses associated with adverse events. You will review,
+     analyze, select, and evaluate safeguards for mitigating risk.You will
+     learn processes for collecting information, providing methods of
+     identifying security events, assigning priority levels, taking the
+     appropriate actions, and reporting the findings to the correct
+     individuals. After collection of the details from monitoring, we can
+     analyze to determine if the system is being operated in accordance with
+     accepted industry practices, and in compliance with organization policies
+     and procedures. Incident Response and Recovery: In the Incident Response
+     and Recovery Session, you will gain an understanding of how to handle
+     incidents using consistent, applied approaches in order to resolve. Once
+     an incident is identified, action will be necessary in order to
+     resolve. We will examine processes such as damage recovery, data integrity
+     and preservation, and the collection, handling, reporting, and
+     prevention. You will be introduced to the Business Continuity Plan (BCP)
+     and Disaster Recovery Plan (DRP) concepts and how they can be utilized in
+     order to mitigate damages, recover business operations, and avoid critical
+     business interruption. Through the use of the DRP, you will understand the
+     procedures for emergency response and post-disaster recovery. Course
+     Objectives 1. Describe the risk management process 2. Perform security
+     assessment activities 3. Describe processes for operating and maintaining
+     monitoring systems 4. Identify events of interest 5. Describe the various
+     source systems 6. Interpret reporting findings from monitoring
+     results 7. Describe the incident handling process 8. Contribute to the
+     incident handling process based upon role within the
+     organization 9. Describe the supporting role in forensics investigation
+     processes 10. Describe the supporting role in the business continuity
+     planning process 11. Describe the supporting role in the disaster recovery
+     planning process
+
+   - Course 4 - Cryptography
+
+     Welcome to Cryptography! Cryptography is the practice and study of
+     techniques for securing communications in the presence of third
+     parties. You will learn how to protect information in order to ensure its
+     integrity, confidentiality, authenticity, and non-repudiation. You will
+     come out with a basic understanding of cryptographic concepts and how to
+     apply them, implement secure protocols, key management concepts, key
+     administration and validation, and Public Key Infrastructure. Course
+     Objectives 1. Apply the fundamental concepts of cryptography 2. Describe
+     the difference between symmetric and asymmetric cryptography 3. Define the
+     basic requirements for cryptography 4. Identify processes to support
+     secure protocols 5. Describe the process for implementing cryptographic
+     systems 6. Define key management concepts 7. Define Public Key
+     Infrastructure 8. Identify processes for key administration and
+     validation 9. Describe the implementation of secure protocols
+
+   - Course 5 - Network and Communication Security
+
+     Welcome to Networks and Communications Security Course! In the Networks
+     and Communications Security Course, you will learn about the network
+     structure, data transmission methods, transport formats, and the security
+     measures used to maintain integrity, availability, authentication, and
+     confidentiality of the information being transmitted. Concepts for both
+     public and private communication networks will be discussed. Course
+     Objectives 1. Describe network-related security issues 2. Identify
+     protective measures for telecommunication technologies 3. Define processes
+     for controlling network access 4. Identify processes for managing
+     LAN-based security 5. Describe procedures for operating and configuring
+     networked-based security devices 6. Define procedures to implement and
+     operate wireless technologies
+
+   - Course 6 - Systems and Application Security
+
+     Welcome to Systems and Application Security Course! In the Systems and
+     Application Security Course, you will gain an understanding of computer
+     code that can be described as harmful or malicious. Both technical and
+     non-technical attacks will be discussed. You will learn how an
+     organization can protect itself from these attacks. You will learn
+     concepts in endpoint device security, cloud infrastructure security,
+     securing big data systems, and securing virtual
+     environments. Objectives 1. Identify malicious code activity 2. Describe
+     malicious code and the various countermeasures 3. Describe the processes
+     for operating endpoint device security 4. Define mobile device management
+     processes 5. Describe the process for configuring cloud
+     security 6. Explain the process for securing big data systems 7. Summarize
+     the process for securing virtual environments
+
+2. Receive a certificate of program completion.
+
+3. Understand how to implement, monitor and administer an organization’s IT
+   infrastructure in accordance with security policies and procedures that
+   ensure data confidentiality, integrity and availability.
+
+*** About the Instructor
+(ISC)^2 s an international nonprofit membership association focused on inspiring
+a safe and secure cyber world. Best known for the acclaimed Certified
+Information Systems Security Professional (CISSP (R)) certification, (ISC)^2
+offers a portfolio of credentials that are part of a holistic, programmatic
+approach to security. [[https:www.isc2.org][www.isc2.org]].
+** Course on Access Controls
+:PROPERTIES:
+:Specialization: (ISC)² Systems Security Certified Practitioner (SSCP) Specialization
+:Course:   1
+:Length:   16 hours
+:END:
+*** About Access Controls Course
+The Access Controls course provides information pertaining to specifying what
+users are permitted to do, the resources they are allowed to access, and what
+operations they are able to perform on a system.  Access Controls help managers
+limit and monitor systems use at a user level, and is usually predefined based
+on authority level or group membership.  You will understand the different
+access control systems and how they should be implemented to protect the system
+and data using the different levels of confidentiality, integrity, and
+availability.
+**** Objectives
+1. Describe how to implement Authentication mechanisms
+2. Identify and operate internetwork trust architectures
+3. Describe the process of administering identity management life cycle
+4. Implement the different types of access controls (Subject/Object based)
+*** Syllabus
+**** Single Factor/Multifactor Authentication---Biometrics.
+In Single Factor/ Multifactor Authentication, you will learn about
+- identity,
+- methods,
+- registration of new users,
+- periodic review of access levels,
+- clearance,
+- authentication,
+- knowledge,
+- password reset,
+- mass lockouts,
+- ownership, and
+- characteristics.
+
+
+In Biometrics, you will learn about
+- biometrics,
+- behavioral biometrics,
+- physiological biometrics,
+- biometric implementation issues,
+- biometric accuracy,
+- physiological use as identification,
+- next-generation identification (NGI) database,
+- department of defense (DoD) electronic biometric transmission specification
+  (EBTS), and
+- biometric standards development.
+
+***** Videos
+- Welcome to Access Controls1m
+- Authentication Mechanisms: Identity4m
+- Authentication Mechanisms: Methods7m
+- Authentication Mechanisms: Registration of New Users7m
+- Authentication Mechanisms: Clearance6m
+- Authentication Mechanisms: Proof of Identity6m
+- Authentication Mechanisms: Password Reset6m
+- Authentication Mechanisms: Mass Lockouts6m
+- Authentication Mechanisms: Biometrics9m
+- Authentication Mechanisms: Biometric Implementation Issues7m
+- Authentication Mechanisms: Biometric Accuracy6m
+- Authentication Mechanisms: Biometric Standards Development4m
+
+***** Readings
+- Authentication Mechanisms: Identity10m
+- Authentication Mechanisms: Methods10m
+- Authentication Mechanisms: Registration of New Users10m
+- Authentication Mechanisms: Clearance10m
+- Authentication Mechanisms: Proof of Identity10m
+- Authentication Mechanisms: Password Reset10m
+- Authentication Mechanisms: Mass Lockouts10m
+- Authentication Mechanisms: Biometrics10m
+- Authentication Mechanisms: Biometric Implementation Issues10m
+- Authentication Mechanisms: Biometric Accuracy10m
+- Authentication Mechanisms: Biometric Standards Development10m
+
+**** Tokens---Single Sign-On---Offline and Device Authentication
+In Tokens, you will learn about uses of
+- token information,
+- time-synchronized one-time passwords,
+- mathematical-algorithm based one time passwords,
+- physical types,
+- disconnected tokens,
+- connected tokens,
+- contactless tokens,
+- bluetooth and mobile device tokens,
+- smart cards,
+- types of smart card technology,
+- smart card applications,
+- multifactor authentication,
+- two-factor vs. three-factor authentication,
+- dual control,
+- continuous authentication,
+- periodic authentication,
+- time outs,
+- reverse authentication,
+- certificate-based authentication,
+- authorization,
+- access to systems vs. data,
+- network,
+- access control lists/matrix, and
+- directories.
+
+
+In Single Sign-On, you will learn about
+- SSO risks,
+- SSO implementation:
+  - kerberos,
+  - Kerberos applications,
+  - Kerberos process,
+  - Kerberos considerations,
+  - Kerberos tools,
+  - Klist purge,
+  - Server 2012/(R2) and
+  - Windows 8/8.1 features, and
+  - network ports used during Kerberos authentication.
+
+
+In Offline and Device Authentication, you will learn about
+- types of authentication.
+
+***** Videos
+- Authentication Mechanisms: Uses of Token Information7m
+- Authentication Mechanisms: Types of Tokens6m
+- Authentication Mechanisms: Multifactor Authentication7m
+- Authentication Mechanisms: Multifactor Authentication5m
+- Authentication Mechanisms: Access to systems vs. data, Network5m
+- Authentication Mechanisms: Access Control Lists/Matrix7m
+- Authentication Mechanisms: Single Sign-On Risks4m
+- Authentication Mechanisms: Kerberos6m
+- Authentication Mechanisms: Kerberos Applications and Process5m
+- Authentication Mechanisms: Kerberos Considerations and Tools4m
+- Authentication Mechanisms: Types of Authentication5m
+
+***** Readings
+- Authentication Mechanisms: Uses of Token Information10m
+- Authentication Mechanisms: Types of Tokens10m
+- Authentication Mechanisms: Multifactor Authentication10m
+- Authentication Mechanisms: Multifactor Authentication10m
+- Authentication Mechanisms: Access to systems vs. data, Network10m
+- Authentication Mechanisms: Access Control Lists/ Matrix10m
+- Authentication Mechanisms: Single Sign-On Risks10m
+- Authentication Mechanisms: Kerberos10m
+- Authentication Mechanisms: Kerberos Applications and Process10m
+- Authentication Mechanisms: Kerberos Considerations and Tools10m
+- Authentication Mechanisms: Types of Authentication10m
+
+**** Comparing Internetwork Architectures---One-way Trust--Two-way Trust---Transitive Trust
+In Comparing Internetwork Architectures, you will learn about typical DMZ
+design, trust path.
+
+In Trust, you will learn about one-way trust, two-way trust, and transitive
+trust.
+
+***** Videos
+- Internetwork Trust Architecture: Comparing Architectures7m
+- Internetwork Trust Architecture: Trust Path7m
+- Internetwork Trust Architectures: Two-Way Trust2m
+- Internetwork Trust Architecture: Transitive Trust8m
+
+***** Readings
+- Internetwork Trust Architecture: Comparing Architectures10m
+- Internetwork Trust Architecture: Trust Path10m
+- Internetwork Trust Architecture: Two-Way Trust10m
+- Internetwork Trust Architecture: Transitive Trust10m
+
+**** Identity Management---Authorization--Proofing--Provisioning--Maintenance---Entitlement.
+In Identity management, you will learn about identity management cycle. You will
+also learn about, authorization, proofing, provisioning, and maintenance.
+
+In Entitlement, you will learn about entities, entitlement defined.
+
+***** Videos
+- Identity Management Life Cycle: Identity Management5m
+- Identity Management Life Cycle: Provisioning5m
+- Identity Management Life Cycle: Entitlement Defined4m
+
+***** Readings
+- Identity Management Life Cycle: Identity Management10m
+- Identity Management Life Cycle: Provisioning10m
+- Identity Management Life Cycle: Entitlement Defined10m
+
+**** Implement Access Controls
+- Mandatory Access Control (MAC), Non-Discretionary Access Control,
+
+- Discretionary Access Control (DAC)
+
+  you will learn about Rule Set-Based Access Controls (RSBAC), RSBAC GFAC logic
+  for data access request.
+
+- Role-Based Access Control (RBAC), Content Dependent, Context-Based, Temporal
+  Isolation (Time Based)
+
+  In Role -Based Access Control (RBAC), you will learn about role hierarchies,
+  constrained user interface (CUI), types of restricted interfaces, view-based
+  access control (VBAC), and VBAC examples.
+
+  You will also learn about Content-Dependent Access Control (CDAC), and
+  Temperoal isolation (Time-Based) Access Control.
+
+- Attribute-Based, Separation of Duties
+
+  In Attribute-based Access Control (ABAC), you will learn about key terms.
+
+- Security Architecture and Models
+
+  In Security Architecture and Models, you will learn about Bell-LaPadula
+  confidentiality Model, Biba integrity model, BLP and Biba model comparison,
+  Clark-Wilson integrity model, and additional models
+
+***** Videos
+- Implement Access Controls: Mandatory Access Control5m
+- Implement Access Controls: Discretionary and Non-Discretionary Access Controls3m
+- Implement Access Controls: Rule-Set Based and Role-Based Access Control7m
+- Implement Access Controls: Role Hierarchies6m
+- Implement Access Controls: Restricted Interfaces6m
+- Implement Access Controls: key Terms4m
+- Implement Access Controls: Security Architecture and Models6m
+- Implement Access Controls: BLP and Biba Model Comparison5m
+- Implement Access Controls: BLP and Biba Model Comparison6m
+
+***** Readings
+- Implement Access Controls: Mandatory Access Control10m
+- Implement Access Controls: Discretionary and Non-Discretionary Access Controls10m
+- Implement Access Controls: Rule-Set Based and Role-Based Access Control10m
+- Implement Access Controls: Role Hierarchies10m
+- Implement Access Controls: Restricted Interfaces10m
+- Implement Access Controls: Key Terms10m
+- Implement Access Controls: Security Architecture and Models10m
+- Implement Access Controls: BLP and Biba Model Comparison10m
+- Implement Access Controls: BLP and Biba Model Comparison10m
+
+**** Case Study
+This assignment is based on a case study that will require the student to put
+into practice the knowledge they have gained through the course.  It requires
+the basic understanding of the topics and the ability to relate those topics to
+the real world.  The objective of review is to determine whether the student
+has understood the concepts and has performed the necessary analysis to ensure
+a complete and thorough answer.
+
+**** Exam
+
+***** Reading
+- SSCP Exam Information10m
+
+***** Practice Exercice
+- Access Controls Course Assessment30m
+** Course on Cryptography
+:PROPERTIES:
+:Specialization: (ISC)² Systems Security Certified Practitioner (SSCP)
+:Course:   4
+:END:
+- https://www.coursera.org/learn/cryptography-sscp?specialization=sscp-training
+*** About Cryptography Course
+Cryptography is the practice and study of techniques for securing
+communications in the presence of third parties.  You will learn how to protect
+information in order to ensure its integrity, confidentiality, authenticity,
+and non-repudiation.  You will come out with a basic understanding of
+cryptographic concepts and how to apply them, implement secure protocols, key
+management concepts, key administration and validation, and Public Key
+Infrastructure.
+**** Course Objectives
+1. Apply the fundamental concepts of cryptography
+2. Describe the difference between symmetric and asymmetric cryptography
+3. Define the basic requirements for cryptography
+4. Identify processes to support secure protocols
+5. Describe the process for implementing cryptographic systems
+6. Define key management concepts
+7. Define Public Key Infrastructure
+8. Identify processes for key administration and validation
+9. Describe the implementation of secure protocols
+
+*** Syllabus
+
+**** Understand and Apply Fundamental Concepts of Cryptography
+- Encryption Concepts---Methods of Cryptography---Specific Hashing.
+
+  In Encryption Concepts you will learn about key concepts and definitions and
+  high work factor.
+
+  In Methods of Cryptography you will learn about
+  - stream-based ciphers,
+  - stream-based cipher rules,
+  - block ciphers,
+  - Initialization Vectors (IV) – Why are they needed?
+  - basic block cipher modes,
+  - evaluation of algorithms,
+  - common encryption techniques,
+  - encryption algorithm characteristics, and
+  - hashing.
+
+  In Specific Hashing you will learn about
+  - message digest (MD) 2, 4, and 5,
+  - secure hash algorithm (SHA) 0, 1, and 2,
+  - hAVAL,
+  - RIPEMD-160,
+  - attacks on hashing algorithms and message authentication codes, and
+  - the birthday paradox.
+
+***** Videos
+Welcome to Cryptography5m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions6m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions6m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions3m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions5m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions3m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions6m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions4m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions8m
+- Fundamental Concepts of Cryptography: High Work Factor5m
+- Fundamental Concepts of Cryptography: Block Ciphers4m
+- Fundamental Concepts of Cryptography: Basic Block Cipher Modes5m
+- Fundamental Concepts of Cryptography: Evaluation of Algorithms7m
+- Fundamental Concepts of Cryptography: Algorithm Characteristics6m
+- Fundamental Concepts of Cryptography: Attacks7m
+- Fundamental Concepts of Cryptography: The Birthday Paradox4m
+
+***** Readings
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: Key Concepts and Definitions10m
+- Fundamental Concepts of Cryptography: High Work Factor10m
+- Fundamental Concepts of Cryptography: Block Ciphers10m
+- Fundamental Concepts of Cryptography: Basic Block Cipher Modes10m
+- Fundamental Concepts of Cryptography: Evaluation of Algorithms10m
+- Fundamental Concepts of Cryptography: Algorithm Characteristics10m
+- Fundamental Concepts of Cryptography: Attacks10m
+- Fundamental Concepts of Cryptography: The Birthday Paradox10m
+
+**** Understand Requirements for Cryptography
+- Salting, Symmetric/Asymmetric Cryptography
+
+  In Symmetric/Asymmetric Cryptography you will learn about
+  - encryption and decryption,
+  - symmetric cryptography,
+  - out-of-band key distribution,
+  - advantages and disadvantages of DES,
+  - double DES,
+  - meet-in-the-middle,
+  - triple DES (3DES),
+  - advanced encryption standard (AES),
+  - Counter Mode with Cipher Block Chaining Message Authentication Code
+    Protocol (CCMP), and
+  - how CCMP works,
+  - Rijndael.
+
+- Additional algorithms
+
+  In Additional algorithms you will learn about
+  - International Data Encryption Algorithm (IDEA),
+  - CAST,
+  - Secure and Fast Encryption Routine (SAFER),
+  - Blowfish,
+  - Twofish,
+  - RC5,
+  - RC4,
+  - advantages and disadvantages of
+    - symmetric algorithms,
+    - asymmetric cryptography,
+    - asymmetric algorithms,
+    - confidential messages, open message,
+    - confidential messages with proof of origin,
+    - RSA,
+    - attacking RSA,
+    - Diffie–Hellmann Algorithm,
+    - El Gamal,
+    - Elliptic Curve Cryptography (ECC),
+  - advantages and disadvantages of
+    - asymmetric key algorithms,
+    - hybrid cryptography,
+    - message digests,
+    - message authentication code (MAC),
+    - HMAC,
+    - digital signatures, and
+
+- Non-Repudiation
+
+- Methods of Cryptanalytic Attack
+
+  In methods of Cryptanalytic Attack you will learn about
+  - chosen plain-text,
+  - Social engineering for key discovery,
+  - brute force,
+  - differential cryptanalysis,
+  - linear cryptanalysis,
+  - Algebraic,
+  - rainbow table,
+  - ciphertext-only attack,
+  - known plaintext,
+  - frequency analysis,
+  - chosen cipher-text,
+  - birthday attack,
+  - dictionary attack,
+  - replay attack,
+  - reverse engineering, and
+  - temporary files.
+
+- Data Sensitivity and Regulatory Requirements
+
+  In Data Sensitivity and Regulatory Requirements you will learn about
+  - data classification examples,
+  - protected data examples,
+  - non-sensitive data examples,
+  - legislative and regulatory compliance,
+  - United States example,
+  - privacy requirements compliance, and
+  - European Data Protection Directive.
+
+- End-User Training
+
+  In End-User Training you will learn about security awareness training topics.
+
+***** Videos
+- Fundamental Concepts of Cryptography: Salting8m
+- Fundamental Concepts of Cryptography: Symmetric Cryptography5m
+- Fundamental Concepts of Cryptography: Key Distribution6m
+- Fundamental Concepts of Cryptography: Additional Algorithms5m
+- Fundamental Concepts of Cryptography: Asymmetric Cryptography7m
+- Fundamental Concepts of Cryptography: Using Public Key Cryptography7m
+- Fundamental Concepts of Cryptography: Attacking RSA7m
+- Fundamental Concepts of Cryptography: Message Digests5m
+- Fundamental Concepts of Cryptography: Chosen Plain-Text7m
+- Fundamental Concepts of Cryptography: Known Plaintext6m
+- Fundamental Concepts of Cryptography: Dictionary Attack4m
+- Fundamental Concepts of Cryptography: Factoring Attack5m
+- Understand Requirements For Cryptography: Data Sensitivity2m
+- Understand Requirements For Cryptography: Data Protection Directive7m
+
+***** Readings
+- Fundamental Concepts of Cryptography: Salting10m
+- Fundamental Concepts of Cryptography: Symmetric Cryptography10m
+- Fundamental Concepts of Cryptography: Key Distribution10m
+- Fundamental Concepts of Cryptography: Additional Algorithms10m
+- Fundamental Concepts of Cryptography: Asymmetric Cryptography10m
+- Fundamental Concepts of Cryptography: Using Public Key Cryptography10m
+- Fundamental Concepts of Cryptography: Attacking RSA10m
+- Fundamental Concepts of Cryptography: Message Digests10m
+- Fundamental Concepts of Cryptography: Chosen Plain-Text10m
+- Fundamental Concepts of Cryptography: Known Plaintext10m
+- Fundamental Concepts of Cryptography: Dictionary Attack10m
+- Fundamental Concepts of Cryptography: Factoring Attack10m
+- Understand Requirements For Cryptography: Data Sensitivity10m
+- Understand Requirements For Cryptography: Data Protection Directive10m
+
+**** Operate and Implement Cryptographic System
+- Public Key Infrastructure (PKI)
+
+  In PKI you will learn about
+
+  - functions of CA,
+  - establishing trust, and
+  - X.509v3 certification issued by VeriSign.
+
+- Fundamental Key Management concepts
+
+  In Fundamental Key Management Concepts you will learn about
+
+  - standards for financial institutions,
+  - segregation of duties, and
+  - examples
+
+- Creation and Distribution of Keys
+
+  In Creation and Distribution of Keys you will learn about
+
+  - truly random,
+  - random,
+  - generating a two-key encryption key set,
+  - key length,
+  - Asymmetric key length,
+  - key wrapping and key encryption keys,
+  - key distribution,
+  - key distribution centers,
+  - key storage and destruction,
+  - factors affecting risk exposure,
+  - cost of certificate replacement/revocation,
+  - key recovery,
+  - key escrow.
+
+- Web of Trust
+
+- Secure Protocols
+
+  In Secure Protocols you will learn about
+
+  - Authentication Header (AH),
+  - Encapsulating Security Payload (ESP),
+  - security associations,
+  - transport mode and tunnel mode,
+  - Internet Key Exchange (IKE),
+  - Secure/Multipurpose Internet Mail Extensions (S/MIME),
+  - S/MIME provides two security services,
+  - digital signatures,
+  - process for verifying a digital signature of an E-Mail message,
+  - message encryption,
+  - process for encryption of an E-Mail message,
+  - process for decrypting an E-Mail message,
+  - process of digitally signing and encrypting an E-mail message,
+  - process of decrypting an E-Mail message and verifying a digital signature,
+    and
+  - triple-wrapped messages.
+
+***** Videos
+- Operate and Implement Cryptographic System: PKI4m
+- Operate and Implement Cryptographic System: X.509 Certification8m
+- Operate and Implement Cryptographic System: PKI Activity4m
+- Operate and Implement Cryptographic System: Standards5m
+- Operate and Implement Cryptographic System: Truly Random7m
+- Operate and Implement Cryptographic System: Key Storage and Destruction3m
+- Operate and Implement Cryptographic System: Factors Affecting Risk6m
+- Operate and Implement Cryptographic System: Secure Protocols7m
+- Operate and Implement Cryptographic System: Digital Signatures7m
+
+***** Readings
+- Operate and Implement Cryptographic System: PKI10m
+- Operate and Implement Cryptographic System: X.509 Certification10m
+- Operate and Implement Cryptographic System: PKI Activity10m
+- Operate and Implement Cryptographic System: Standards10m
+- Operate and Implement Cryptographic System: Truly Random10m
+- Operate and Implement Cryptographic System: Key Storage and Destruction10m
+- Operate and Implement Cryptographic System: Factors Affecting Risk10m
+- Operate and Implement Cryptographic System: Secure Protocols10m
+- Operate and Implement Cryptographic System: Digital Signatures10m
+
+**** Cryptography Case Study
+This assignment is based on a case study that will require the student to put
+into practice the knowledge they have gained through the course.  It requires
+the basic understanding of the topics and the ability to relate those topics to
+the real world.  The objective of review is to determine whether the student has
+understood the concepts and has performed the necessary analysis to ensure a
+complete and thorough answer.
+
+**** End-of-Course Assessment
+* Cryptography I
+:PROPERTIES:
+:Instructor: Dan Boneh, Stanford University
+:URL:      https://www.coursera.org/learn/crypto
+:Length:   28 hours
+:END:
+** About Cryptogphy I
+Cryptography is an indispensable tool for protecting information in computer
+systems. In this course you will learn the inner workings of cryptographic
+systems and how to correctly use them in real-world applications. The course
+begins with a detailed discussion of how two parties who have a shared secret
+key can communicate securely when a powerful adversary eavesdrops and tampers
+with traffic. We will examine many deployed protocols and analyze mistakes in
+existing systems. The second half of the course discusses public-key techniques
+that let two parties generate a shared secret key. Throughout the course
+participants will be exposed to many exciting open problems in the field and
+work on fun (optional) programming projects. In a second course (Crypto II) we
+will cover more advanced cryptographic tasks such as zero-knowledge, privacy
+mechanisms, and other forms of encryption.
+** Syllabus for Cryptography I
+*** Course overview and stream ciphers
+This week's topic is an overview of what cryptography is about as well as our
+first example ciphers. You will learn about pseudo-randomness and how to use it
+for encryption. We will also look at a few basic definitions of secure
+encryption.
+
+**** Videos
+- Course Overview10m
+- What is Cryptography?15m
+- History of Cryptography18m
+- Discrete Probability (Crash Course)18m
+- Discrete Probability (Crash Course, Cont.)13m
+- Information Theoretic Security and The One Time Pad18m
+- Stream Ciphers and Pseudo Random Generators19m
+- Attacks on Stream Ciphers and The One Time Pad23m
+- Real-World Stream Ciphers19m
+- PRG Security Definitions24m
+- Semantic Security15m
+- Stream Ciphers are Semantically Secure [optional]10m
+
+**** Readings
+- Lecture slides for all six weeks10m
+- Course overview and additional reading resources10m
+
+*** Block Ciphers
+We introduce a new primitive called a block cipher that will let us build more
+powerful forms of encryption. We will look at a few classic block-cipher
+constructions (AES and 3DES) and see how to use them for encryption. Block
+ciphers are the work horse of cryptography and have many applications. Next
+week we will see how to use block ciphers to provide data integrity. The
+optional programming assignment this week asks students to build an
+encryption/decryption system using AES.
+
+**** Videos
+- What are Block Ciphers?16m
+- The Data Encryption Standard21m
+- Exhaustive Search Attacks19m
+- More Attacks on Block Ciphers 16m
+- The AES Block Cipher13m
+- Block Ciphers From PRGs11m
+- Review: PRPs and PRFs11m
+- Modes of Operation: One Time Key7m
+- Security for Many-Time Key (CPA security)22m
+- Modes of Operation: Many Time Key (CBC)16m
+- Modes of Operation: Many Time Key (CTR) 9m
+
+*** Message Integrity
+This week's topic is data integrity. We will discuss a number of classic
+constructions for MAC systems that are used to ensure data integrity. For now
+we only discuss how to prevent modification of non-secret data. Next week we
+will come back to encryption and show how to provide both confidentiality and
+integrity. This week's programming project shows how to authenticate large
+video files. Even if you don't do the project, please read the project
+description --- it teaches an important concept called a hash chain.
+
+**** Videos
+- Message Authentication Codes15m
+- MACs Based On PRFs9m
+- CBC-MAC and NMAC19m
+- MAC Padding8m
+- PMAC and the Carter-Wegman MAC15m
+- Introduction 10m
+- Generic Birthday Attack14m
+- The Merkle-Damgard Paradigm 11m
+- Constructing Compression Functions8m
+- HMAC7m
+- Timing attacks on MAC verification8m
+
+*** Authenticated Encryption
+This week's topic is authenticated encryption: encryption methods that ensure
+both confidentiality and integrity. We will also discuss a few odds and ends
+such as how to search on encrypted data. This is our last week studying
+symmetric encryption. Next week we start with key management and public-key
+cryptography. As usual there is also an extra credit programming project. This
+week's project involves a bit of networking to experiment with a chosen
+ciphertext attack on a toy web site.
+
+**** Videos
+- Active Attacks on CPA-Secure Encryption12m
+- Definitions 5m
+- Chosen Ciphertext Attacks12m
+- Constructions From Ciphers and MACs20m
+- Case Study: TLS 1.217m
+- CBC Padding Attacks14m
+- Attacking Non-Atomic Decryption 9m
+- Key Derivation13m
+- Deterministic Encryption14m
+- Deterministic Encryption: SIV and Wide PRP20m
+- Tweakable Encryption14m
+- Format Preserving Encryption12m
+
+*** Basic Key Exchange
+This week's topic is basic key exchange: how to setup a secret key between two
+parties. For now we only consider protocols secure against eavesdropping. This
+question motivates the main concepts of public key cryptography, but before we
+build public-key systems we need to take a brief detour and cover a few basic
+concepts from computational number theory. We will start with algorithms dating
+back to antiquity (Euclid) and work our way up to Fermat, Euler, and
+Legendre. We will also mention in passing a few useful concepts from 20th
+century math. Next week we will put our hard work from this week to good use
+and construct several public key encryption systems.
+
+**** Videos
+- Trusted 3rd Parties 11m
+- Merkle Puzzles11m
+- The Diffie-Hellman Protocol19m
+- Public-Key Encryption10m
+- Notation14m
+- Fermat and Euler18m
+- Modular e'th Roots17m
+- Arithmetic algorithms12m
+- Intractable Problems18m
+
+**** Reading
+- More background on number theory10m
+
+*** Public-Key Encryption
+This week's topic is public key encryption: how to encrypt using a public key
+and decrypt using a secret key. Public key encryption is used for key
+management in encrypted file systems, in encrypted messaging systems, and for
+many other tasks. The videos cover two families of public key encryption
+systems: one based on trapdoor functions (RSA in particular) and the other
+based on the Diffie-Hellman protocol. We construct systems that are secure
+against tampering, also known as chosen ciphertext security (CCA
+security). There has been a ton of research on CCA security over the past
+decade and given the allotted time we can only summarize the main results from
+the last few years. The lectures contain suggestions for further readings for
+those interested in learning more about CCA secure public-key systems. The
+problem set this week involves a bit more math than usual, but should expand
+your understanding of public-key encryption. Please don't be shy about posting
+questions in the forum. This is the last week of this Crypto I course. I hope
+everyone learned a lot and enjoyed the material. Crypto is a beautiful topic
+with lots of open problems and room for further research. I look forward to
+seeing you in Crypto II where we will cover additional core topics and a few
+more advanced topics.
+
+**** Videos
+- Definitions and Security 15m
+- Constructions10m
+- The RSA Trapdoor Permutation17m
+- PKCS 121m
+- Is RSA a One-Way Function?16m
+- RSA in Practice13m
+- The ElGamal Public-key System19m
+- ElGamal Security13m
+- ElGamal Variants With Better Security10m
+- A Unifying Theme11m
+- Farewell (For Now)5m
+
+*** Final exam
+Congratulations! We are at the end of the course. This module contains only the
+final exam which covers the entire course. I hope everyone learned a lot during
+these 6 weeks. Good luck on the final exam and I look forward to seeing you at
+a future course!
 * SECURITY Articles
 ** [[https://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers][What Is HMAC And How Does It Secure File Transfers?]]
 
