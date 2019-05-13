@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 11, 2019
-#+macro:version 0.6.0.<2019-05-11 Sat 10:42>
+#+date:May 12, 2019
+#+macro:version 0.6.1.<2019-05-12 Sun 19:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2579,31 +2579,35 @@ cat package.json
 **** Create a Makefile
 Create a Makefile and add some user-definable variables.
 
-This project uses Google Chrome as the default browser, and the Perl
-command-line script ~json_xs~ to pretty-print JSON output to the
-terminal.  There are many such options, so feel free to change these
-to your preferences.  Also, this project is running on a Mac, so it is
-using ~open -a~ to open the default browser and feed it a URL.  If you
-are using Linux or Windows, this =OPEN= command will need to be
-changed.
+This project uses Safari as the default browser for the backend server, Google
+Chrome as the default browser for the front end server, and the Perl
+command-line script ~json_xs~ to pretty-print JSON output to the terminal.
+There are many available options, so feel free to change these to your
+preferences.  Also, this project is running on a Mac, so it is using ~open -a~
+to open the default browsers and feed them URLs from the command line.  If you
+are using Linux or Windows, this =OPEN= command will need to be changed for
+your operating system.
+
+The backend server uses =localhost= on PORT 3000.
 
 <<makefile-static-file-server>>Finally, this project is using ~http-server~ as
-a file server.  Feel free to change this to your choice.
-
-The project uses =localhost= on PORT 3000.
+a file server.  Feel free to change this to better suit your preference.  The
+static file server ~http-server~ uses =localhost= on PORT 8080 by default.  You
+can change these if you need.
 
 Each lesson uses a different server number.  The Makefile is used to
 start individual servers with the command:
 : make server<#>
-where <#> is a number between 1 and 6.
+: make static-server<#>
+where <#> is a number between 1 and 6, and roughly correspond to lessons.
 
 #+name:angularjs-auth-jwt-makefile
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 # ============================================================
 # USER-DEFINABLE COMMANDS AND VARIABLES
 
-BROWSER := "Google Chrome"
-FRONT_END := "Safari"
+BROWSER := "Safari"
+FRONT_END := "Google Chrome"
 CURL    := curl -sS
 JSON_PP := json_xs
 OPEN    := open -a
@@ -2611,7 +2615,7 @@ OPEN    := open -a
 URL     := http://localhost
 PORT    := 3000
 
-# http-server defaults to /public and port 8080
+# http-server defaults to using /public and port 8080
 STATIC_SERVER := http-server
 STATIC_SERVER_URL := $(URL)
 STATIC_SERVER_PORT := 8080
@@ -2814,17 +2818,20 @@ to start the server and hit the ~/random-user~ endpoint.  You will get a random
 user pretty-printed to the terminal as well as a random user pretty-printed to
 Chrome.
 
-*** Client Setup for JWT Authentication
+*** Client Front End Setup for JWT Authentication
+#+CINDEX:Angular application
+#+CINDEX:CORS
 Creating a basic Angular application to access the random users resource.  Also
 setting up CORS on the node server to enable the resource sharing across
 different domains (ports in our case).
 
+#+CINDEX:front end client
 00:00 We have our server running and it's serving up a random user every time
-we hit "/random-user." We want to create a front end client that is going to
+we hit "/random-user."  We want to create a front end client that is going to
 interface with this service. It will do so being served at from a different
 server.
 
-**** Install Angular using Bower
+**** Install Angular using Bower inside ~public/~ Directory
 00:16 First we're going to make directory called ~public/~.
 Then we'll go into that directory and ~bower install angular~.
 
@@ -2834,16 +2841,20 @@ mkdir -v public
 cd public && ../node_modules/.bin/bower install angular
 #+end_src
 
-**** Create ~index.html~ in ~public/~
+**** Create an Angular App in ~public/index.html~
 We'll create a new file called ~index.html~.
 
 {{{heading(Index.html)}}}
 
 {{{subheading(Install Scripts)}}}
 
+#+CINDEX:Angular script
+#+CINDEX:scripts
+#+CINDEX:import @file{app.js}
 00:29 Here we'll want to have a script for Angular and then we'll have another
 script that will create called ~app.js~.
 
+#+caption:Importing scripts
 #+name:angularjs-auth-jwt-index--body---scripts
 #+begin_src html
 <script src="bower_components/angular/angular.js"></script>
@@ -2852,8 +2863,12 @@ script that will create called ~app.js~.
 
 {{{subheading(Create an Angular App)}}}
 
+#+CINDEX:Angular app
+#+CINDEX:app, Angular
+#+CINDEX:@code{ng-app}
 We're going to want to make this an Angular app with the module =ng-app=.
 
+#+caption:Angular app
 #+name:angularjs-auth-jwt-index--html---angular_app
 #+begin_src html
 <html ng-app="app">
@@ -2861,8 +2876,10 @@ We're going to want to make this an Angular app with the module =ng-app=.
 
 {{{subheading(Add a Title)}}}
 
+#+CINDEX:title
 We'll call this (=<title>= it as) =JWT Example=.
 
+#+caption:JWT Example title
 #+name:angularjs-auth-jwt-index--head---title
 #+begin_src html
 <title>JWT Example</title>
@@ -2870,9 +2887,15 @@ We'll call this (=<title>= it as) =JWT Example=.
 
 {{{subheading(Create an Angular Controller as View Model)}}}
 
-Then we'll make a controller called =Main Controller as View Model=
-(=MainCtrl_vm=).
+#+CINDEX:controller, Angular
+#+CINDEX:Angular controller
+#+CINDEX:@code{ng-controller}
+#+CINDEX:@code{vm}
+#+CINDEX:@code{MainCtrl}
+Then we'll make an Angular controller (=ng-controller=) called =Main Controller
+as View Model= (=MainCtrl as vm=).
 
+#+caption:Angular controller
 #+name:angularjs-auth-jwt-index--body---MainCtrl_vm
 #+begin_src html
 <body ng-controller="MainCtrl as vm">
@@ -2880,6 +2903,10 @@ Then we'll make a controller called =Main Controller as View Model=
 
 {{{heading(Add a Get User Button)}}}
 
+#+CINDEX:button
+#+CINDEX:click-handler, for button
+#+CINDEX:@code{ng-click}
+#+CINDEX:@code{vm.RandomUser}
 00:54 Then we'll have a section "Get Random User" with a =div= and a button
 "Get User", and a click-handler (=ng-click=) on that (=vm.getRandomUser=).
 01:07 Then we'll just have, for simplicity's sake, a =<pre>= here that's bound
@@ -2890,6 +2917,7 @@ to the =vm.RandomUser=.
 <h1>Get Random User</h1>
 #+end_src
 
+#+caption:Get User button
 #+name:angularjs-auth-jwt-index--body---button.get_random_user
 #+begin_src html
 <div>
@@ -2902,7 +2930,7 @@ to the =vm.RandomUser=.
 
 #+caption[angularjs-auth-jwt-index.html]:Code for the AngularJS Auth Jwt @code{index.html} file
 #+name:angularjs-auth-jwt-index.html
-#+begin_src html :tangle angularjs-auth-jwt/public/index.html :mkdirp yes :noweb yes
+#+begin_src html :tangle angularjs-auth-jwt/public/index.html :mkdirp yes :noweb tangle
 <!DOCTYPE html>
 <<angularjs-auth-jwt-index--html---angular_app>>
     <head lang="en">
@@ -2921,13 +2949,15 @@ to the =vm.RandomUser=.
 
 #+end_src
 
-**** Create the Angular App
+**** Create the Angular App in ~app.js~
+#+CINDEX:@file{app.js}
 01:18 Now we're going to want to have our app. We'll create a new JavaScript
-file called ~app.js~ and we'll put this in an immediately invoking function. We'll
-have our app have no dependencies.
+file called ~app.js~ and we'll put this in an immediately-invoking
+function.  We'll have our app have no dependencies.
 
 {{{heading(Create ~app.js~ Application File)}}}
 
+#+caption:Angular app creation
 #+name:angularjs-auth-jwt-app--var_app
 #+begin_src js
 var app = angular.module('app', []);
@@ -2935,6 +2965,7 @@ var app = angular.module('app', []);
 
 {{{subheading(The =API_URL= Constant)}}}
 
+#+CINDEX:@code{API_URL}
 01:28 We're going to make a constant called =API_URL= because we're serving these
 up on different URLs. This is a construct for us to be able to make sure that
 all of our HTTP requests will go through the same URL.
@@ -2946,15 +2977,19 @@ app.constant('API_URL', 'http://localhost:3000');
 
 {{{subheading(Create the App Controller =MainCtrl=)}}}
 
+#+CINDEX:@code{MainCtrl}
+#+CINDEX:app controller
+#+CINDEX:controller, app, main
+#+CINDEX:main controller
 01:40 We're going to create an =app.controller=.  We'll call this Main
 Controller (=MainCtrl=).
 
-#+name:angularjs-auth-jwt-app--controller
+#+caption:Angular app controller
+#+name:angularjs-auth-jwt-app--controller.MainCtrl
 #+begin_src js :noweb yes
 app.controller('MainCtrl', function MainCtrl(RandomUserFactory) {
     'use strict';
     var vm = this;
-    vm.getRandomUser = getRandomUser;
 
     <<aaja-getRandomUser>>
 })
@@ -2962,15 +2997,29 @@ app.controller('MainCtrl', function MainCtrl(RandomUserFactory) {
 
 {{{subheading(Get a Random User)}}}
 
-Then we'll have the =vm.GetRandomUser= assigned to =GetRandomUser=.  We'll
+#+CINDEX:@code{getRandomUser} function
+#+CINDEX:@code{vm.getRandomUser}
+Then we'll have the =vm.getRandomUser= assigned to =getRandomUser=.  We'll
 define that down here.
 
+#+CINDEX:server, Angular
+#+CINDEX:Angular service
+#+CINDEX:Angular factory
+#+CINDEX:factory, Angular
+#+CINDEX:@code{RandomUserFactory}
+#+CINDEX:@code{getUser} method
+#+CINDEX:data, from factory
+#+CINDEX:@code{response.data}
+#+CINDEX:@code{randomUser}
 01:52 This, we're obviously going to use a service for this so we'll say
-=RandomUserFactory.GetUser().then=.  We'll assign =vm.randomUser= to the data
+=RandomUserFactory.getUser().then=.  We'll assign =vm.randomUser= to the data
 that we get back.
 
+#+caption:@code{getRandomUser()} Service
 #+name:aaja-getRandomUser
 #+begin_src js
+vm.getRandomUser = getRandomUser;
+
 function getRandomUser() {
     RandomUserFactory.getUser().then(function success(response) {
         vm.randomUser = response.data;
@@ -2978,12 +3027,17 @@ function getRandomUser() {
 }
 #+end_src
 
-{{{subheading(Create the Random User Factory)}}}
+{{{subheading(Create the =RandomUserFactory=)}}}
 
+#+CINDEX:@code{RandomUserFactory}, create
+#+CINDEX:factory, Angular, create
+#+CINDEX:@code{getUser} object, function
+#+CINDEX:HTTP @code{GET}
 02:09 Now let's create this =RandomUserFactory=.  This will have the =getUser=.
 This will be a simple HTTP =GET=.  We'll use our =API_URL/randomUser= and we'll
 return that.
 
+#+caption:@code{RandomUserFactory} definition
 #+name:angularjs-auth-jwt-app---RandomUserFactory
 #+begin_src js
 app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
@@ -2998,19 +3052,20 @@ app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
 });
 #+end_src
 
-02:24 Now we're going to need inject a couple things into our HTTP and our
+02:24 Now we're going to need to inject a couple things into our HTTP and our
 =API_URL= and then up here in our Main Controller we'll inject the
 =RandomUserFactory=.  We also need to define =getUser= here.
 
 ***** Code for ~app.js~
 
+#+caption:@file{app.js} Code
 #+name:angularjs-auth-jwt-app.js
 #+begin_src js :tangle angularjs-auth-jwt/public/app.js :noweb yes :mkdirp yes
 (function() {
     'use strict';
     <<angularjs-auth-jwt-app--var_app>>
     <<angularjs-auth-jwt-app--const_API_URL>>
-    <<angularjs-auth-jwt-app--controller>>
+    <<angularjs-auth-jwt-app--controller.MainCtrl>>
     <<angularjs-auth-jwt-app---RandomUserFactory>>
 })()
 #+end_src
@@ -3032,40 +3087,49 @@ Available on:
 
 [[file:./resources/angularjs-auth-jwt--front-end.png]]
 
+#+CINDEX:error 'Access-Control-Allow-Origin'
+#+CINDEX:'Access-Control-Allow-Origin'
 There is going to be an error.  It's "Access-Control-Allow-Origin."
 
 [[file:./resources/angularjs-auth-jwt--cors_error.png]]
 
+#+CINDEX:CORS error
+#+CINDEX:error, CORS
+#+CINDEX:'Cross Origin Resource Sharing', CORS
 02:54 This is CORS.  CORS stands for "Cross Origin Resource Sharing".  It's a
 security mechanism.  We have to enable CORS on our server explicitly.
 
 {{{heading(Install ~cors~ Module in ~server.js~)}}}
 
+#+CINDEX:@file{cors} module, require
 03:03 We're going to use a module, "npm install cors." This is just a very
 simple module that will enable CORS for us.
 
+#+name:add-cors
 #+begin_src sh :results output :exports both :dir angularjs-auth-jwt
 yarn add cors
 #+end_src
 
 03:10 Down here we'll say ~app.use(cors())~.
 
+#+caption:require-cors
 #+name:angularjs-auth-jwt-app-requires2
 #+begin_src js :noweb yes
 <<angularjs-auth-jwt-app-requires>>
 const cors = require('cors');
 #+end_src
 
+#+caption:Use @file{cors} module
 #+name:angularjs-auth-jwt-app-use_cors
 #+begin_src js
 app.use(cors());
 #+end_src
 
-***** server2
+***** server2 Code
 
 #+caption:server2.js
 #+name:angularjs-auth-jwt-server.js
-#+begin_src js :tangle angularjs-auth-jwt/server2.js :mkdirp yes :noweb yes
+#+begin_src js :tangle angularjs-auth-jwt/server2.js :mkdirp yes :noweb tangle
 <<angularjs-auth-jwt-app-requires2>>
 
 <<angularjs-auth-jwt-app>>
@@ -3076,7 +3140,11 @@ app.use(cors());
 #+end_src
 
 ***** Makefile for server2
+To invoke the server with CORS enabled, type the command:
+: make server2
 
+#+CINDEX:server2, Makefile
+#+CINDEX:Makefile server2
 #+caption:Makefile for server2.js
 #+name:angularjs-auth-jwt-makefile-server2
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
@@ -3090,6 +3158,8 @@ server2 : check-server
 
 ***** Makefile for Static File Server
 
+#+CINDEX:static-server, Makefile
+#+CINDEX:Makefile static-server
 #+name:angularjs-auth-jwt-makefile-static_file_server
 #+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : static-server
@@ -3100,7 +3170,7 @@ static-server :
 
 **** Front End Serves Up Random Users
 That should restart our server, click =Get User=, and =[object Object]=.  It
-looks like we're not piping this through =json=.  Click =Get User]=.  There we
+looks like we're not piping this through =json=.  Click =Get User=.  There we
 go.
 
 [[file:./resources/angularjs-auth-jwt-front-end-get-user.png]]
