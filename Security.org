@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 13, 2019
-#+macro:version 0.6.2.<2019-05-13 Mon 07:18>
+#+macro:version 0.6.3.<2019-05-13 Mon 23:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2552,6 +2552,12 @@ dependency below if you wish, *but* you will need to update the Makefile to use
 your choice instead of ~http-server~ ([[makefile-static-file-server][Makefile static file server]]).
 
 **** Project Initialization
+
+#+name:tangle-Security.org
+#+BEGIN_SRC emacs-lisp :results output silent :exports results
+(org-babel-tangle-file "Security.org")
+#+END_SRC
+
 Initialize a new Node.js package in the root directory ~angularjs-auth-jsw~
 using defaults (@option{--yes}) and then add two development dependencies,
 ~bower~ and ~http-server~:
@@ -2576,7 +2582,7 @@ echo ------------
 cat package.json
 #+end_src
 
-**** Create a Makefile
+**** Makefile for AngularJS Auth JWT Project
 Create a Makefile and add some user-definable variables.
 
 This project uses Safari as the default browser for the backend server, Google
@@ -2619,13 +2625,15 @@ PORT    := 3000
 STATIC_SERVER := http-server
 STATIC_SERVER_URL := $(URL)
 STATIC_SERVER_PORT := 8080
-START_STATIC_SERVER := ./node_modules/.bin/$(STATIC_SERVER)
+START_STATIC_SERVER = $(NODE_BIN)/$(STATIC_SERVER)
 
 # This is the only route used by this tutorial.
 DEF_ROUTE := random-user
 
 # END USER-DEFINABLE COMMANDS AND VARIABLES
 # ============================================================
+
+PROJECTS = angularjs-auth-jwt egghead-jwt-auth
 
 URL_PORT         := $(URL):$(PORT)
 STATIC_SERVER_URL_PORT := $(STATIC_SERVER_URL):$(STATIC_SERVER_PORT)
@@ -2639,7 +2647,16 @@ CURL_URL         := $(CURL) $(URL_PORT)
 CURL_URI_PP       = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
 
 NODE   := node
+NODE_BIN := ./node_modules/.bin
 SERVER := server
+
+.phony : clean
+clean :
+	cd .. && rm -v *.{texi,info}
+
+.phony : dist-clean
+dist-clean : clean
+	cd .. && rm -vrf $(PROJECTS)
 #+end_src
 
 *** JSON Web Token---JWT---Introduction
