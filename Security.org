@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 13, 2019
-#+macro:version 0.6.3.<2019-05-13 Mon 23:18>
+#+macro:version 0.6.4.<2019-05-13 Mon 23:49>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2608,7 +2608,7 @@ start individual servers with the command:
 where <#> is a number between 1 and 6, and roughly correspond to lessons.
 
 #+name:angularjs-auth-jwt-makefile
-#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 # ============================================================
 # USER-DEFINABLE COMMANDS AND VARIABLES
 
@@ -2650,9 +2650,12 @@ NODE   := node
 NODE_BIN := ./node_modules/.bin
 SERVER := server
 
+# START OF RULES
+# ============================================================
+
 .phony : clean
 clean :
-	cd .. && rm -v *.{texi,info}
+	cd .. && rm -vf *.{texi,info}
 
 .phony : dist-clean
 dist-clean : clean
@@ -2797,7 +2800,7 @@ Terminate all Node server processes with the command:
 
 #+caption:Makefile for server1.js
 #+name:angularjs-auth-jwt-makefile-server1
-#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 ROUTE ?= $(DEF_ROUTE)
 
 .phony : check-server
@@ -2966,15 +2969,15 @@ to the =vm.RandomUser=.
 
 #+end_src
 
-**** Create the Angular App in ~app.js~
-#+CINDEX:@file{app.js}
+**** Create the Angular App in ~app1.js~
+#+CINDEX:@file{app1.js}
 01:18 Now we're going to want to have our app. We'll create a new JavaScript
 file called ~app.js~ and we'll put this in an immediately-invoking
 function.  We'll have our app have no dependencies.
 
-{{{heading(Create ~app.js~ Application File)}}}
+{{{heading(Create ~app1.js~ Application File)}}}
 
-#+caption:Angular app creation
+#+caption:First Angular app creation
 #+name:angularjs-auth-jwt-app--var_app
 #+begin_src js
 var app = angular.module('app', []);
@@ -3073,11 +3076,11 @@ app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
 =API_URL= and then up here in our Main Controller we'll inject the
 =RandomUserFactory=.  We also need to define =getUser= here.
 
-***** Code for ~app.js~
+***** Code for ~app1.js~
 
-#+caption:@file{app.js} Code
-#+name:angularjs-auth-jwt-app.js
-#+begin_src js :tangle angularjs-auth-jwt/public/app.js :noweb yes :mkdirp yes
+#+caption:@file{app1.js} Code
+#+name:angularjs-auth-jwt-app1.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app1.js :noweb yes :mkdirp yes
 (function() {
     'use strict';
     <<angularjs-auth-jwt-app--var_app>>
@@ -3164,7 +3167,7 @@ To invoke the server with CORS enabled, type the command:
 #+CINDEX:Makefile server2
 #+caption:Makefile for server2.js
 #+name:angularjs-auth-jwt-makefile-server2
-#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 
 .phony : server2
 server2 : server = server2
@@ -3178,9 +3181,14 @@ server2 : check-server
 #+CINDEX:static-server, Makefile
 #+CINDEX:Makefile static-server
 #+name:angularjs-auth-jwt-makefile-static_file_server
-#+begin_src sh :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : static-server
 static-server :
+	cd public && ln -fs $(APP) app.js
+
+.phony : static-server1
+static-server1 : APP = app1.js
+static-server1 : static-server
 	$(START_STATIC_SERVER) &
 	$(OPEN_FRONT_END_URI) &
 #+end_src
