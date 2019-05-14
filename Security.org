@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 13, 2019
-#+macro:version 0.6.4.<2019-05-13 Mon 23:49>
+#+date:May 14, 2019
+#+macro:version 0.6.5.<2019-05-14 Tue 06:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2597,15 +2597,16 @@ your operating system.
 The backend server uses =localhost= on PORT 3000.
 
 <<makefile-static-file-server>>Finally, this project is using ~http-server~ as
-a file server.  Feel free to change this to better suit your preference.  The
-static file server ~http-server~ uses =localhost= on PORT 8080 by default.  You
-can change these if you need.
+a static file server.  Feel free to change this to better suit your preference.
+The static file server ~http-server~ uses =localhost= on PORT 8080 by default.
+You can change these if you need.
 
 Each lesson uses a different server number.  The Makefile is used to
 start individual servers with the command:
 : make server<#>
-: make static-server<#>
+: make app<#>
 where <#> is a number between 1 and 6, and roughly correspond to lessons.
+Different numbers can be used together.
 
 #+name:angularjs-auth-jwt-makefile
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
@@ -2622,10 +2623,10 @@ URL     := http://localhost
 PORT    := 3000
 
 # http-server defaults to using /public and port 8080
-STATIC_SERVER := http-server
-STATIC_SERVER_URL := $(URL)
-STATIC_SERVER_PORT := 8080
-START_STATIC_SERVER = $(NODE_BIN)/$(STATIC_SERVER)
+APP_SERVER      := http-server
+APP_SERVER_URL  := $(URL)
+APP_SERVER_PORT := 8080
+START_APP_SERVER = $(PKG_MGR-RUN) $(APP_SERVER)
 
 # This is the only route used by this tutorial.
 DEF_ROUTE := random-user
@@ -2633,33 +2634,35 @@ DEF_ROUTE := random-user
 # END USER-DEFINABLE COMMANDS AND VARIABLES
 # ============================================================
 
-PROJECTS = angularjs-auth-jwt egghead-jwt-auth
+PROJECT = angularjs-auth-jwt
 
 URL_PORT         := $(URL):$(PORT)
-STATIC_SERVER_URL_PORT := $(STATIC_SERVER_URL):$(STATIC_SERVER_PORT)
+APP_SERVER_URL_PORT := $(APP_SERVER_URL):$(APP_SERVER_PORT)
 
 OPEN_BROWSER     := $(OPEN) $(BROWSER)
 OPEN_BROWSER_URI  = $(OPEN_BROWSER) $(URL_PORT)/$(ROUTE)
-OPEN_FRONT_END   := $(OPEN) $(FRONT_END)
-OPEN_FRONT_END_URI := $(OPEN_FRONT_END) $(STATIC_SERVER_URL_PORT)
+OPEN_APP         := $(OPEN) $(FRONT_END)
+OPEN_APP_URI     := $(OPEN_APP) $(APP_SERVER_URL_PORT)
 
 CURL_URL         := $(CURL) $(URL_PORT)
 CURL_URI_PP       = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
 
-NODE   := node
+NODE     := node
+PKG_MGR  := yarn
+PKG_MGR-RUN := $(PKG_MGR) run
 NODE_BIN := ./node_modules/.bin
-SERVER := server
+SERVER   := server
 
 # START OF RULES
 # ============================================================
 
 .phony : clean
 clean :
-	cd .. && rm -vf *.{texi,info}
+	-cd .. && rm -vf *.{texi,info}
 
 .phony : dist-clean
 dist-clean : clean
-	cd .. && rm -vrf $(PROJECTS)
+	-cd .. && rm -rf $(PROJECT)
 #+end_src
 
 *** JSON Web Token---JWT---Introduction
@@ -2787,7 +2790,7 @@ localhost:3000."
 <<angularjs-auth-jwt-app-listen>>
 #+end_src
 
-***** Makefile
+***** Makefile for server1
 Hit the ~server1~ endpoint at =/random-user= with a =GET= request:
 : make server1
 
@@ -2815,10 +2818,10 @@ server1 : check-server
 
 .phony : terminate
 terminate :
-	@pgrep -lf 'node server[[:digit:]]'
-	@pkill -lf 'node server[[:digit:]]'
-	@pgrep -lf $(STATIC_SERVER)
-	@pkill -lf $(STATIC_SERVER)
+	-@pgrep -lf 'node server[[:digit:]]'
+	-@pkill -lf 'node server[[:digit:]]'
+	-@pgrep -lf $(APP_SERVER)
+	-@pkill -lf $(APP_SERVER)
 #+end_src
 
 **** Run the Server with Nodemon
@@ -3182,15 +3185,15 @@ server2 : check-server
 #+CINDEX:Makefile static-server
 #+name:angularjs-auth-jwt-makefile-static_file_server
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
-.phony : static-server
-static-server :
+.phony : app
+app :
 	cd public && ln -fs $(APP) app.js
 
-.phony : static-server1
-static-server1 : APP = app1.js
-static-server1 : static-server
-	$(START_STATIC_SERVER) &
-	$(OPEN_FRONT_END_URI) &
+.phony : app1
+app1 : APP = app1.js
+app1 : app
+	$(START_APP_SERVER) &
+	$(OPEN_APP_URI) &
 #+end_src
 
 **** Front End Serves Up Random Users
