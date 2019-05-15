@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 14, 2019
-#+macro:version 0.6.5.<2019-05-14 Tue 06:42>
+#+date:May 15, 2019
+#+macro:version 0.6.6.<2019-05-15 Wed 07:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2650,8 +2650,6 @@ CURL_URI_PP       = $(CURL_URL)/$(ROUTE) | $(JSON_PP)
 NODE     := node
 PKG_MGR  := yarn
 PKG_MGR-RUN := $(PKG_MGR) run
-NODE_BIN := ./node_modules/.bin
-SERVER   := server
 
 # START OF RULES
 # ============================================================
@@ -2806,15 +2804,16 @@ Terminate all Node server processes with the command:
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 ROUTE ?= $(DEF_ROUTE)
 
-.phony : check-server
-check-server :
-	@pgrep -qlf $(NODE) $(server) || { $(NODE) $(server).js & sleep 2; }
+.phony : server
+server :
+	@pgrep -qlf $(NODE) $(SERVER) || { $(NODE) $(SERVER).js & sleep 2; }
+	@$(CURL_URI_PP) && printf "${YELLOW}$(SERVER) started...\'make terminate\' to stop.${CLEAR}"
+	@$(OPEN_BROWSER_URI)
 
 .phony : server1
-server1 : server = server1
-server1 : check-server
-	$(CURL_URI_PP)
-	@$(OPEN_BROWSER_URI)
+server1 : SERVER = server1
+server1 : server
+	@:
 
 .phony : terminate
 terminate :
@@ -2822,6 +2821,10 @@ terminate :
 	-@pkill -lf 'node server[[:digit:]]'
 	-@pgrep -lf $(APP_SERVER)
 	-@pkill -lf $(APP_SERVER)
+
+.phony : terminate-clean
+terminate-clean : terminate dist-clean
+	@:
 #+end_src
 
 **** Run the Server with Nodemon
@@ -3173,10 +3176,9 @@ To invoke the server with CORS enabled, type the command:
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 
 .phony : server2
-server2 : server = server2
-server2 : check-server
-	$(CURL_URI_PP)
-	@$(OPEN_BROWSER_URI)
+server2 : SERVER = server2
+server2 : server
+	@:
 #+end_src
 
 ***** Makefile for Static File Server
@@ -3187,13 +3189,17 @@ server2 : check-server
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : app
 app :
-	cd public && ln -fs $(APP) app.js
+	@cd public && ln -fs $(APP).js app.js
+	@$(START_APP_SERVER) &
+	@pgrep -qlf $(APP_SERVER) && \
+		printf "${YELLOW}$(APP) started... \'make terminate\' to stop.${CLEAR}" || \
+		printf "${RED}$(APP) failed to start.${CLEAR}"
+	@$(OPEN_APP_URI) &
 
 .phony : app1
-app1 : APP = app1.js
+app1 : APP = app1
 app1 : app
-	$(START_APP_SERVER) &
-	$(OPEN_APP_URI) &
+	@:
 #+end_src
 
 **** Front End Serves Up Random Users
