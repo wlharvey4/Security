@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 16, 2019
-#+macro:version 0.6.7.<2019-05-16 Thu 05:54>
+#+macro:version 0.6.8.<2019-05-16 Thu 10:54>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2730,7 +2730,7 @@ with ~yarn~.] are:
 yarn add express faker
 #+end_src
 
-**** Create ~server1.js~
+**** Create server1.js
 00:33 Faker's how we're going to make the random user. We're going to ~require
 express~ and we'll ~require faker~.  Then we'll create our app.  Then we'll
 have our app and have a get a random user with the request (~req~) and response
@@ -2777,7 +2777,7 @@ localhost:3000."
   });
 #+end_src
 
-***** server1.js
+***** Code for server1.js
 
 #+caption:server1.js
 #+name:angularjs-auth-jwt-server.js
@@ -2952,11 +2952,11 @@ to the =vm.RandomUser=.
 </div>
 #+end_src
 
-***** Code for ~index.html~
+***** Code for index.html
 
-#+caption[angularjs-auth-jwt-index.html]:Code for the AngularJS Auth Jwt @code{index.html} file
-#+name:angularjs-auth-jwt-index.html
-#+begin_src html :tangle angularjs-auth-jwt/public/index.html :mkdirp yes :noweb tangle
+#+caption[angularjs-auth-jwt-index1.html]:Code for the AngularJS Auth Jwt @code{index1.html} file
+#+name:angularjs-auth-jwt-index1.html
+#+begin_src html :tangle angularjs-auth-jwt/public/index1.html :mkdirp yes :noweb tangle
 <!DOCTYPE html>
 <<angularjs-auth-jwt-index--html---angular_app>>
     <head lang="en">
@@ -3084,7 +3084,7 @@ app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
 =API_URL= and then up here in our Main Controller we'll inject the
 =RandomUserFactory=.  We also need to define =getUser= here.
 
-***** Code for ~app1.js~
+***** Code for app1.js
 
 #+caption:@file{app1.js} Code
 #+name:angularjs-auth-jwt-app1.js
@@ -3118,6 +3118,7 @@ This command terminates both servers.
 .phony : app
 app :
 	@cd public && ln -fs $(APP).js app.js
+	@cd public && ln -fs $(INDEX).html index.html
 	@$(START_APP_SERVER) &
 	@pgrep -qlf $(APP_SERVER) && \
 		printf "${YELLOW}$(APP) started... \'make terminate\' to stop.${CLEAR}" || \
@@ -3126,6 +3127,7 @@ app :
 
 .phony : app1
 app1 : APP = app1
+app1 : INDEX = index1
 app1 : app
 	@:
 #+end_src
@@ -3185,7 +3187,7 @@ const cors = require('cors');
 app.use(cors());
 #+end_src
 
-***** server2 Code
+***** Code for server2 Code
 
 #+caption:server2.js
 #+name:angularjs-auth-jwt-server.js
@@ -3227,45 +3229,188 @@ go.
 03:27 The next step will be, obviously, setting up authentication to protect
 this resource. That's what we'll cover in the next video.
 
-*** JWT Authentication Setup
-Setting up a login on the angular app and an authentication endpoint on the
+*** Adding Authentication
+Setting up a login on the Angular application and an authentication endpoint on the
 server.
 
-**** Add a Form
-00:01 Here we have an app where we can get random users. Our goal for this
+**** Add a Login Form to index2.html
+#+CINDEX:authentication, on app
+00:01 Here we have an app where we can get random users.  Our goal for this
 video is to add authentication to this application.
 
-00:09 The first thing that we're gong to need is a form. Instead of an action
-we'll have an ng-Submit="vm.login(vm.username, vm.password)."
+#+CINDEX:form, login
+#+CINDEX:login form
+#+CINDEX:@code{vm.login}
+#+CINDEX:Username
+#+CINDEX:Password
+#+CINDEX:login button
+#+CINDEX:button, login
+00:09 The first thing that we're gong to need is a form.  Instead of an
+=action= we'll have an ~ng-submit="vm.login(vm.username, vm.password)"~.
 
 00:18 Then we'll have an ng label input with the out label of Username and the
-type is text and the model is vm.username. Then we'll have another one of these
-for password. It will be a type password. We'll also add a break to make things
-look nice. Then we'll have a button with login and it's type submit.
+type is text and the model is ~vm.username~.  Then we'll have another one of
+these for Password.  It will be a type =password=.  We'll also add a break
+=<br />= to make things look nice.  Then we'll have a =button= with "Login" and
+it's type =submit=.
 
-**** Update the App for the Form
-00:39 Let's go to our app. We'll have a vm.login = login. Login takes a user
-name and password. We'll create a user factory that will have the login. That
-takes the username, password. Then we'll say VM.user equals the data that we
-get back.
+#+caption:Login Form
+#+name:angularjs-auth-jwt-index2--authentication-form
+#+begin_src html
+<div>
+  <form ng-submit="vm.login(vm.username, vm.password)">
+    <label>Username: <input type="text" ng-model="vm.username" /></label><br/>
+    <label>Password: <input type="password" ng-model="vm.password" /></label><br />
+    <button type="submit">Login</button>
+  </form>
+</div>
+#+end_src
+
+***** Code for index2.html
+
+#+caption[angularjs-auth-jwt-index2.html]:Code for the AngularJS Auth Jwt @code{index2.html} file
+#+name:angularjs-auth-jwt-index2.html
+#+begin_src html :tangle angularjs-auth-jwt/public/index2.html :mkdirp yes :noweb tangle
+<!DOCTYPE html>
+<<angularjs-auth-jwt-index--html---angular_app>>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <<angularjs-auth-jwt-index--head---title>>
+    </head>
+
+    <<angularjs-auth-jwt-index--body---MainCtrl_vm>>
+        <<angularjs-auth-jwt-index--body---h1.get_random_user>>
+
+        <<angularjs-auth-jwt-index2--authentication-form>>
+
+        <<angularjs-auth-jwt-index--body---button.get_random_user>>
+
+        <<angularjs-auth-jwt-index--body---scripts>>
+
+    </body>
+</html>
+
+#+end_src
+
+**** Add a Login Form to app2.js
+#+CINDEX:@code{app2.js}
+#+CINDEX:@code{vm.login}
+#+CINDEX:@code{login()} function
+#+CINDEX:@code{vm.user}
+00:39 Let's go to our app.  We'll have a ~vm.login = login~.  ~login()~ takes a
+~username~ and ~password~.  We'll create a ~UserFactory~ that will have the
+~login()~.  That takes the ~username~, ~password~.  Then we'll say ~vm.user~ equals the
+data that we get back.
+
+#+caption:Login on the App controller
+#+name:angularjs-auth-jwt-app2--controller.MainCtrl
+#+begin_src js :noweb yes
+app.controller('MainCtrl', function MainCtrl(RandomUserFactory, UserFactory) {
+    'use strict';
+    var vm = this;
+
+    <<aaja2-getRandomUser>>
+    <<aaja2-login>>
+    <<aaja2-handleError>>
+})
+#+end_src
+
+#+caption:Login function and Handle Errors on App Controller
+#+name:aaja2-login
+#+begin_src js
+vm.login = login;
+
+function login(username, password) {
+    UserFactory.login(username, password).then(function success(response) {
+        vm.user = response.data;
+    }, handleError);
+}
+
+#+end_src
 
 00:58 In case of failure, we're going to make a simple function called
-handleError. We'll define that here. That will take a response and it will
-simply alert ('Error: ' + response.data). We'll use that function here, as
-well.
+~handleError()~.  We'll define that here.  That will take a =response= and it
+will simply alert "('Error: ' + response.data)".
+
+#+caption:@caption{handleError} function
+#+name:aaja2-handleError
+#+begin_src js
+function handleError(response) {
+    alert('Error: ' + response.data);
+}
+
+#+end_src
+
+We'll use that ~handleError()~ function here, as well (in ~getRandomUser()~).
+
+#+caption:Handle Error in @code{getRandomUser()} Service
+#+name:aaja2-getRandomUser
+#+begin_src js
+vm.getRandomUser = getRandomUser;
+
+function getRandomUser() {
+    RandomUserFactory.getUser().then(function success(response) {
+        vm.randomUser = response.data;
+    }, handleError);
+}
+
+#+end_src
 
 **** Create a User Factory
-01:12 Let's create this user factory, app.factory Userfactory. Function login
-takes your user name and password and it will return $HTTP.get. Actually, it
-will be a post because we're locking. We're going to post the
-data. API_URL/login and the data will be userName, userName, password, password.
+01:12 Let's create this ~Userfactory~, ~app.factory('Userfactory', function)~.
+Login takes your username and password and it will return HTTP =GET=.
+Actually, it will be a =POST= because we're locking.  We're going to post the
+data. =API_URL/login= and the data will be =userName=, =password=.
 
-01:36 Then we'll export that and we'll inject HTTP_API_URL. Then we'll want to
-inject the user factory here.
+#+name:angularjs-auth-jwt-app2--UserFactory
+#+begin_src js
+app.factory('UserFactory', function UserFactory($http, API_URL) {
+    'use strict';
+    return ({
+        login: login
+    });
 
-01:46 Let's go ahead and refresh. We have user name, kentcdodds and cannot post
-a login because we haven't created that yet but we can still get these
-users. That's important for now.
+    function login(username, password) {
+        return $http.post(API_URL + '/login', {
+            username: username,
+            password: password
+        });
+    }
+}
+#+end_src
+
+01:36 Then we'll export that and we'll inject =$http= and =_API_URL=.  Then
+we'll want to inject the ~UserFactory= here (in ~app.controller~).
+
+***** Code for app2.js
+
+#+caption:@file{app2.js} Code
+#+name:angularjs-auth-jwt-app2.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app2.js :noweb yes :mkdirp yes
+(function() {
+    'use strict';
+    <<angularjs-auth-jwt-app--var_app>>
+    <<angularjs-auth-jwt-app--const_API_URL>>
+    <<angularjs-auth-jwt-app2--controller.MainCtrl>>
+    <<angularjs-auth-jwt-app--RandomUserFactory>>
+    <<angularjs-auth-jwt-app2--UserFactory>>
+})()
+#+end_src
+
+***** Makefile for app2
+#+name: angularjs-auth-jwt-makefile-static-file_server2
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : app2
+app2 : APP = app2
+app2 : INDEX = index2
+app2 : app
+	@:
+#+end_src
+
+**** Running App2 with Authentication
+01:46 Let's go ahead and refresh.  We have =username=, "kentcdodds" and cannot
+=POST= a login because we haven't created that yet but we can still get these
+users.  That's important for now.
 
 **** Update the Server for Login
 01:55 We'll go to server and we'll make a login. App.post/login. Now we need to
@@ -3285,7 +3430,7 @@ body-parser, and just like with CORS, we'll say, App.use(bodyParser.json()).
 a body.password then we'll send with a response, "Status of 400 must provide
 user name or password."
 
-**** Add a User and Passwoard
+**** Add a User and Password
 02:52 Now we need to have a user name and password to check against. Normally
 you would obviously store all of your users in a database but in our case, just
 to make things simple, we're going to make a mini database here that's just of
@@ -3314,8 +3459,7 @@ get random users. We can still get the random user here.
 
 04:07 Our next video is going to be protecting this resource behind
 authentication. That's where we'll start to use JWS.
-
-*** Server JWT Authentication Setup
+*** JWT Authentication Setup on the Server
 Adding JWT support to the server. Signing a JSON object as a payload and
 sending the signed token to the browser on authentication.
 
@@ -3617,7 +3761,6 @@ when we want to logout, let's take a look at our resources here.
 07:59 We say logout, and that auth token is removed from local storage, and the
 user on the view model is set to null, and so our view updates as well. That's
 the application, that's Jots with Angular.
-
 ** Reference
 *** RFC 7797
 - https://tools.ietf.org/html/rfc7519
