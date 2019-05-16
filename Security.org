@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 15, 2019
-#+macro:version 0.6.6.<2019-05-15 Wed 07:12>
+#+date:May 16, 2019
+#+macro:version 0.6.7.<2019-05-16 Thu 05:54>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2975,10 +2975,10 @@ to the =vm.RandomUser=.
 
 #+end_src
 
-**** Create the Angular App in ~app1.js~
+**** Create a First Basic Angular App in ~public/app1.js~
 #+CINDEX:@file{app1.js}
-01:18 Now we're going to want to have our app. We'll create a new JavaScript
-file called ~app.js~ and we'll put this in an immediately-invoking
+01:18 Now we're going to want to have our app.  We'll create a new JavaScript
+file called ~app1.js~ and we'll put this in an immediately-invoking
 function.  We'll have our app have no dependencies.
 
 {{{heading(Create ~app1.js~ Application File)}}}
@@ -2992,16 +2992,16 @@ var app = angular.module('app', []);
 {{{subheading(The =API_URL= Constant)}}}
 
 #+CINDEX:@code{API_URL}
-01:28 We're going to make a constant called =API_URL= because we're serving these
-up on different URLs. This is a construct for us to be able to make sure that
-all of our HTTP requests will go through the same URL.
+01:28 We're going to make a constant called =API_URL= because we're serving
+these up on different URLs.  This is a construct for us to be able to make sure
+that all of our HTTP requests will go through the same URL.
 
 #+name:angularjs-auth-jwt-app--const_API_URL
 #+begin_src js
 app.constant('API_URL', 'http://localhost:3000');
 #+end_src
 
-{{{subheading(Create the App Controller =MainCtrl=)}}}
+{{{subheading(Create the App Controller Called =MainCtrl=)}}}
 
 #+CINDEX:@code{MainCtrl}
 #+CINDEX:app controller
@@ -3053,18 +3053,18 @@ function getRandomUser() {
 }
 #+end_src
 
-{{{subheading(Create the =RandomUserFactory=)}}}
+{{{heading(Create the =RandomUserFactory=)}}}
 
 #+CINDEX:@code{RandomUserFactory}, create
 #+CINDEX:factory, Angular, create
 #+CINDEX:@code{getUser} object, function
 #+CINDEX:HTTP @code{GET}
-02:09 Now let's create this =RandomUserFactory=.  This will have the =getUser=.
-This will be a simple HTTP =GET=.  We'll use our =API_URL/randomUser= and we'll
-return that.
+02:09 Now let's create this =RandomUserFactory=.  This will have the
+~getUser()~ method.  This will be a simple HTTP =GET= to our server defined
+above.  We'll use our =API_URL/randomUser= and we'll return that.
 
 #+caption:@code{RandomUserFactory} definition
-#+name:angularjs-auth-jwt-app---RandomUserFactory
+#+name:angularjs-auth-jwt-app--RandomUserFactory
 #+begin_src js
 app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
     'use strict';
@@ -3077,6 +3077,8 @@ app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
     }
 });
 #+end_src
+
+{{{heading(Tidy Up)}}}
 
 02:24 Now we're going to need to inject a couple things into our HTTP and our
 =API_URL= and then up here in our Main Controller we'll inject the
@@ -3092,11 +3094,43 @@ app.factory('RandomUserFactory', function RandomUserFactory($http, API_URL) {
     <<angularjs-auth-jwt-app--var_app>>
     <<angularjs-auth-jwt-app--const_API_URL>>
     <<angularjs-auth-jwt-app--controller.MainCtrl>>
-    <<angularjs-auth-jwt-app---RandomUserFactory>>
+    <<angularjs-auth-jwt-app--RandomUserFactory>>
 })()
 #+end_src
 
-**** Add CORS Module to ~server.js~
+***** Makefile for app1
+Start this first Application by typing the command:
+: make app1
+
+This command starts the static file server, which uses the ~public/~ directory
+on port 3000 to serve up the ~index.html~, which consumes the ~app<#>.js~
+file.
+
+To shut off the server, type the command:
+: make terminate
+
+This command terminates both servers.
+
+#+CINDEX:static-server, Makefile
+#+CINDEX:Makefile static-server
+#+name:angularjs-auth-jwt-makefile-static_file_server
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : app
+app :
+	@cd public && ln -fs $(APP).js app.js
+	@$(START_APP_SERVER) &
+	@pgrep -qlf $(APP_SERVER) && \
+		printf "${YELLOW}$(APP) started... \'make terminate\' to stop.${CLEAR}" || \
+		printf "${RED}$(APP) failed to start.${CLEAR}"
+	@$(OPEN_APP_URI) &
+
+.phony : app1
+app1 : APP = app1
+app1 : app
+	@:
+#+end_src
+
+**** Allow Cross-Site Scripting with the CORS Module in ~server2.js~
 02:37 Let's see what we blew up.  From the command line, type =? http-server=
 and we'll go to =http://localhost:8080=.  That's serving up our client side
 code, ~getUser~.
@@ -3178,27 +3212,6 @@ To invoke the server with CORS enabled, type the command:
 .phony : server2
 server2 : SERVER = server2
 server2 : server
-	@:
-#+end_src
-
-***** Makefile for Static File Server
-
-#+CINDEX:static-server, Makefile
-#+CINDEX:Makefile static-server
-#+name:angularjs-auth-jwt-makefile-static_file_server
-#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
-.phony : app
-app :
-	@cd public && ln -fs $(APP).js app.js
-	@$(START_APP_SERVER) &
-	@pgrep -qlf $(APP_SERVER) && \
-		printf "${YELLOW}$(APP) started... \'make terminate\' to stop.${CLEAR}" || \
-		printf "${RED}$(APP) failed to start.${CLEAR}"
-	@$(OPEN_APP_URI) &
-
-.phony : app1
-app1 : APP = app1
-app1 : app
 	@:
 #+end_src
 
