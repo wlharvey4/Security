@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 16, 2019
-#+macro:version 0.6.8.<2019-05-16 Thu 10:54>
+#+macro:version 0.6.9.<2019-05-16 Thu 12:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2755,13 +2755,14 @@ const app = express();
 faker.Image.avatar." Then we'll say response send back the user as JSON.
 
 #+caption:Setting up a 'random-user' route
-#+name:angularjs-auth-jwt-random-route
+#+name:angularjs-auth-jwt-app--random-route
 #+begin_src js
   app.get('/random-user', (req,res) => {
       const user = faker.helpers.userCard();
       user.avatar = faker.image.avatar();
       res.json(user);
   });
+
 #+end_src
 
 {{{subheading(Have the app listen on port 3000)}}}
@@ -2770,7 +2771,7 @@ Then I will have our app listen on port 3000. We'll just say, "App listening on
 localhost:3000."
 
 #+caption:Start the server listening
-#+name:angularjs-auth-jwt-app-listen
+#+name:angularjs-auth-jwt-app--listen
 #+begin_src js
   app.listen(3000, () => {
       console.log("App listening on localhost:3000");
@@ -2780,12 +2781,12 @@ localhost:3000."
 ***** Code for server1.js
 
 #+caption:server1.js
-#+name:angularjs-auth-jwt-server.js
+#+name:angularjs-auth-jwt-server1.js
 #+begin_src js :tangle angularjs-auth-jwt/server1.js :mkdirp yes :noweb yes
 <<angularjs-auth-jwt-app-requires>>
 <<angularjs-auth-jwt-app>>
-<<angularjs-auth-jwt-random-route>>
-<<angularjs-auth-jwt-app-listen>>
+<<angularjs-auth-jwt-app--random-route>>
+<<angularjs-auth-jwt-app--listen>>
 #+end_src
 
 ***** Makefile for server1
@@ -2825,6 +2826,7 @@ terminate :
 .phony : terminate-clean
 terminate-clean : terminate dist-clean
 	@:
+
 #+end_src
 
 **** Run the Server with Nodemon
@@ -3182,7 +3184,7 @@ const cors = require('cors');
 #+end_src
 
 #+caption:Use @file{cors} module
-#+name:angularjs-auth-jwt-app-use_cors
+#+name:angularjs-auth-jwt-app--use_cors
 #+begin_src js
 app.use(cors());
 #+end_src
@@ -3190,15 +3192,15 @@ app.use(cors());
 ***** Code for server2 Code
 
 #+caption:server2.js
-#+name:angularjs-auth-jwt-server.js
+#+name:angularjs-auth-jwt-server2.js
 #+begin_src js :tangle angularjs-auth-jwt/server2.js :mkdirp yes :noweb tangle
 <<angularjs-auth-jwt-app-requires2>>
 
 <<angularjs-auth-jwt-app>>
-<<angularjs-auth-jwt-app-use_cors>>
+<<angularjs-auth-jwt-app--use_cors>>
 
-<<angularjs-auth-jwt-random-route>>
-<<angularjs-auth-jwt-app-listen>>
+<<angularjs-auth-jwt-app--random-route>>
+<<angularjs-auth-jwt-app--listen>>
 #+end_src
 
 ***** Makefile for server2
@@ -3210,11 +3212,11 @@ To invoke the server with CORS enabled, type the command:
 #+caption:Makefile for server2.js
 #+name:angularjs-auth-jwt-makefile-server2
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
-
 .phony : server2
 server2 : SERVER = server2
 server2 : server
 	@:
+
 #+end_src
 
 **** Front End Serves Up Random Users
@@ -3229,11 +3231,11 @@ go.
 03:27 The next step will be, obviously, setting up authentication to protect
 this resource. That's what we'll cover in the next video.
 
-*** Adding Authentication
+*** Add Authentication with Username and Password
 Setting up a login on the Angular application and an authentication endpoint on the
 server.
 
-**** Add a Login Form to index2.html
+**** Add a Login Form to index2
 #+CINDEX:authentication, on app
 00:01 Here we have an app where we can get random users.  Our goal for this
 video is to add authentication to this application.
@@ -3292,7 +3294,7 @@ it's type =submit=.
 
 #+end_src
 
-**** Add a Login Form to app2.js
+**** Add a Login Form to app2
 #+CINDEX:@code{app2.js}
 #+CINDEX:@code{vm.login}
 #+CINDEX:@code{login()} function
@@ -3356,7 +3358,7 @@ function getRandomUser() {
 
 #+end_src
 
-**** Create a User Factory
+**** Add a User Factory to app2
 01:12 Let's create this ~Userfactory~, ~app.factory('Userfactory', function)~.
 Login takes your username and password and it will return HTTP =GET=.
 Actually, it will be a =POST= because we're locking.  We're going to post the
@@ -3376,12 +3378,18 @@ app.factory('UserFactory', function UserFactory($http, API_URL) {
             password: password
         });
     }
-}
+});
 #+end_src
 
 01:36 Then we'll export that and we'll inject =$http= and =_API_URL=.  Then
 we'll want to inject the ~UserFactory= here (in ~app.controller~).
 
+**** Running App2 with Authentication
+01:46 Let's go ahead and refresh.  We have =username=, "kentcdodds" and cannot
+=POST= a login because we haven't created that yet but we can still get these
+users.  That's important for now.
+
+**** Login Code for app2
 ***** Code for app2.js
 
 #+caption:@file{app2.js} Code
@@ -3407,58 +3415,152 @@ app2 : app
 	@:
 #+end_src
 
-**** Running App2 with Authentication
-01:46 Let's go ahead and refresh.  We have =username=, "kentcdodds" and cannot
-=POST= a login because we haven't created that yet but we can still get these
-users.  That's important for now.
+**** Add a =login= Route with Authentication Middleware to server3
+01:55 We'll go to our server (~server3.js~) and we'll make a =login= route:
+~app.post/login~.  Now we need to authenticate the user.  We're gong to add a
+middleware function here, ~authenticate~.  We'll have our =UTIL FUNCTIONS=.
+~authenticate()~ will be one of those that takes a =request=, a =response= and
+a =next=.
 
-**** Update the Server for Login
-01:55 We'll go to server and we'll make a login. App.post/login. Now we need to
-authenticate the user. We're gong to ass a middleware function here,
-authenticate. We'll have our util functions. Authenticate will be one of those
-that takes a request, a response.
+#+name:angularjs-auth-jwt-app--login-route
+#+begin_src js
+app.post('/login', authenticate, function(req, res) {
+    res.send(user);
+});
 
-02:13 And then, next, now we need to be able to read the .JSON that comes back
-in the requests. Specifically the user name and password.
+#+end_src
+
+**** Add a =UTIL FUNCTIONS= Section for Authentication Middleware
+
+#+caption:Authentication Middleware
+#+name:angularjs-auth-jwt-app--utils-functions
+#+begin_src js :noweb yes
+//UTIL FUNCTIONS
+
+function authenticate(req, res, next) {
+    var body = req.body;
+    <<angularjs-auth-jwt-app--require-username-password>>
+    <<angularjs-auth-jwt-app--check-username-password>>
+    next();
+}
+#+end_src
 
 **** Install ~body-parser~
-02:21 To do that we're going to install a module called body-parser. That will
-give Express the ability to parse the body that comes in. We'll require
-body-parser, and just like with CORS, we'll say, App.use(bodyParser.json()).
+02:13 Now we need to be able to read the JSON that comes back in the =request=:
+specifically, the =username= and =password=.
 
-02:36 Now we have a body on the request. If there's not a body.username or not
-a body.password then we'll send with a response, "Status of 400 must provide
-user name or password."
+02:21 To do that we're going to install a module called ~body-parser~.  That
+will give Express the ability to parse the body that comes in.  We'll ~require
+body-parser~, and just like with CORS, we'll say, ~app.use(bodyParser.json())~.
+
+#+name:install-body-parser
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+yarn add body-parser
+#+end_src
+
+#+name:angularjs-auth-jwt-app--requires3
+#+begin_src js :noweb yes
+<<angularjs-auth-jwt-app-requires2>>
+const bodyParser = require('body-parser');
+#+end_src
+
+#+name:angularjs-auth-jwt-app--use_bodyParser
+#+begin_src js
+app.use(bodyParser.json());
+#+end_src
+
+02:36 Now we have a =body= on the =request=.  If there's not a =body.username=
+or not a =body.password= then we'll send back a response with status of 400 and
+a message, "Must provide user name or password."
+
+#+name:angularjs-auth-jwt-app--require-username-password
+#+begin_src js
+if (!body.username || !body.password) {
+    res.status(400).end('Must provide username and password');
+}
+
+#+end_src
 
 **** Add a User and Password
-02:52 Now we need to have a user name and password to check against. Normally
+02:52 Now we need to have a username and password to check against.  Normally
 you would obviously store all of your users in a database but in our case, just
-to make things simple, we're going to make a mini database here that's just of
-our user = object with the username kentcdodds and a password P.
+to make things simple, we're going to make a mini-database here that's just a
+variable user, which is an object with a =username= of "kentcdodds" and a
+=password= of =p=.
 
-03:11 If the body.username is not equal to the user.username or the
-body.password it not equal to the user.password then we'll send her a status of
-401, "User name or password incorrect."
+#+name:angularjs-auth-jwt-app--mini-database
+#+begin_src js
+let user = {
+    username: 'John Q. Smith',
+    password: 'q'
+};
+#+end_src
+
+03:11 If the ~body.username~ is not equal to the ~user.username~ or the
+~body.password~ is not equal to the ~user.password~, then we'll send back a
+status of 401, and a message "User name or password incorrect."
+
+#+name:angularjs-auth-jwt-app--check-username-password
+#+begin_src js
+if (body.username !== user.username || body.password !== user.password) {
+    res.status(401).end('Username-Password combination not correct');
+}
+
+#+end_src
 
 03:30 Then we'll send them to the next function handler.
 
 **** Testing Login
-03:33 If they made it this far we know that they are authenticated. We'll
-simply send the user back. We'll refresh the page. Now, if we log in you see
-we've got no error. If we look in our network tab here we'll try and log in
+03:33 If they made it this far we know that they are authenticated.  We'll
+simply send the user back.  We'll refresh the page.  Now, if we log in you see
+we've got no error.  If we look in our network tab here we'll try and log in
 again.
 
-03:45 We hit the log in and let's make this big here. Look at the preview. We
-have the password and user name. We have the whole user object.
+03:45 We hit the log in and let's make this big here.  Look at the preview.  We
+have the password and user name.  We have the whole user object.
 
 03:53 Obviously, generally you wouldn't want to send a password over the wire
 but we'll just be simple for now.
 
-03:58 That's a simple log in authentication. We can still hit the endpoint to
-get random users. We can still get the random user here.
+03:58 That's a simple log in authentication.  We can still hit the endpoint to
+get random users.  We can still get the random user here.
 
 04:07 Our next video is going to be protecting this resource behind
 authentication. That's where we'll start to use JWS.
+
+**** server3 Code and Makefile
+***** Code for server3
+
+#+caption:Code for @code{server3.js}
+#+name:angularjs-auth-jwt-server3.js
+#+begin_src js :tangle angularjs-auth-jwt/server3.js :mkdirp yes :noweb tangle
+<<angularjs-auth-jwt-app--requires3>>
+
+<<angularjs-auth-jwt-app--mini-database>>
+
+<<angularjs-auth-jwt-app>>
+<<angularjs-auth-jwt-app--use_cors>>
+<<angularjs-auth-jwt-app--use_bodyParser>>
+
+<<angularjs-auth-jwt-app--random-route>>
+<<angularjs-auth-jwt-app--login-route>>
+<<angularjs-auth-jwt-app--listen>>
+
+<<angularjs-auth-jwt-app--utils-functions>>
+#+end_src
+
+***** Makefile for server3
+
+#+caption:Makefile for server3
+#+name:angularjs-auth-jwt-makefile-server3
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : server3
+server3 : SERVER = server3
+server3 : server
+	@:
+
+#+end_src
+
 *** JWT Authentication Setup on the Server
 Adding JWT support to the server. Signing a JSON object as a payload and
 sending the signed token to the browser on authentication.
