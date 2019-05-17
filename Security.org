@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 16, 2019
-#+macro:version 0.6.9.<2019-05-16 Thu 12:18>
+#+macro:version 0.6.10.<2019-05-16 Thu 18:00>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3477,6 +3477,7 @@ a message, "Must provide user name or password."
 #+begin_src js
 if (!body.username || !body.password) {
     res.status(400).end('Must provide username and password');
+    return;
 }
 
 #+end_src
@@ -3504,6 +3505,7 @@ status of 401, and a message "User name or password incorrect."
 #+begin_src js
 if (body.username !== user.username || body.password !== user.password) {
     res.status(401).end('Username-Password combination not correct');
+    return;
 }
 
 #+end_src
