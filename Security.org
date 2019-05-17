@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 17, 2019
-#+macro:version 0.7.1.<2019-05-17 Fri 12:36>
+#+macro:version 0.7.2.<2019-05-17 Fri 13:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3747,52 +3747,9 @@ those requests to identify the user.  We'll talk about that in the next video.
 })()
 #+end_src
 
-***** Makefile for server4
-
-#+name:angularjs-auth-jwt-makefile-server4
-#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
-.phony : server4
-server4 : SERVER = server4
-server4 : server
-	@:
-
-.phony : app3
-app3 : APP = app3
-app3 : INDEX = index3
-app3 : app
-	@:
-
-#+end_src
-
-*** Auth Interceptor in Angular for JWT
-Adding JWT support to the client.  Storing the token in local storage, then
-creating a HTTP interceptor to add the token to requests made to the
-server.  Also implementing =logout=.
-
-**** Updating the Front End for Login
-00:01 OK, so here we have our application.  We can login, and get users.  We
-don't have to be logged in to get users, and that's what we want to try and
-protect.  Also, we don't actually know if we're logged in from the UI, so we're
-just going to add this really quickly.  We'll say =<h2>Welcome
-{{vm.user.username}}</h2>=.
-
-
-#+caption:Get User button with Welcome
-#+name:angularjs-auth-jwt-index--body---button.get_random_user----Welcome
-#+begin_src html
-<div>
-  <h2>Welcome {{vm.user.username}}</h2>
-  <button ng-click="vm.getRandomUser()">Get User</button>
-  <pre ng-bind="vm.randomUser | json"></pre>
-</div>
-#+end_src
-
-00:26 I'm not going to hide this. Normally you'd want to hide this if there is
-no VM.user, because this really doesn't make sense, but I'm going to keep it
-here because we can still get users, and I want to show that until that
-resource is protected. Anyway, if we login here, now we can see, we do actually
-login, that comes from the server. Here we have our application.
 ***** Code for index3.html
+This code addes a =Welcome= heading to indicate when a user is logged in.  It
+is actually added in the next section, but belongs here with ~app3~.
 
 #+caption[angularjs-auth-jwt-index3.html]:Code for the AngularJS Auth Jwt @code{index2.html} file
 #+name:angularjs-auth-jwt-index3.html
@@ -3818,29 +3775,120 @@ login, that comes from the server. Here we have our application.
 
 #+end_src
 
-**** Save the Token to Local Storage
-00:46 There are a couple of things that we want to do to this application. If
+***** Makefile for server4
+
+#+name:angularjs-auth-jwt-makefile-server4
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : server4
+server4 : SERVER = server4
+server4 : server
+	@:
+
+.phony : app3
+app3 : APP = app3
+app3 : INDEX = index3
+app3 : app
+	@:
+
+#+end_src
+*** Auth Interceptor in Angular for JWT
+Adding JWT support to the client.  Storing the token in local storage, then
+creating a HTTP interceptor to add the token to requests made to the
+server.  Also implementing =logout=.
+
+**** Updating the Front End for Login
+00:01 OK, so here we have our application.  We can login, and get users.  We
+don't have to be logged in to get users, and that's what we want to try and
+protect.  Also, we don't actually know if we're logged in from the UI, so we're
+just going to add this really quickly.  We'll say =<h2>Welcome
+{{vm.user.username}}</h2>=.
+
+#+caption:Get User button with Welcome
+#+name:angularjs-auth-jwt-index--body---button.get_random_user----Welcome
+#+begin_src html
+<div>
+  <h2>Welcome {{vm.user.username}}</h2>
+  <button ng-click="vm.getRandomUser()">Get User</button>
+  <pre ng-bind="vm.randomUser | json"></pre>
+</div>
+#+end_src
+
+00:26 I'm not going to hide this. Normally you'd want to hide this if there is
+no ~VM.user~, because this really doesn't make sense, but I'm going to keep it
+here because we can still get users, and I want to show that until that
+resource is protected.  Anyway, if we login here, now we can see, we do actually
+login, that comes from the server.  Here we have our application.
+
+00:46 There are a couple of things that we want to do to this application.  If
 you recall from previous videos, when we login, the server is sending us back a
 token, and we want to save that token, and send it on every request to a
 protected resource, and so that's what we're going to do in this video, is save
 this token in local storage, and then set up sending that token on every
 protected resource request, and then we'll also implement logout.
 
-01:14 Let's go ahead and set up saving this to local storage. We're going to
-create a factory that will manage our token for us. We'll just say app.factory,
-and it'll be an auth token factory, and this will be a simple factory, it'll
-have a get token, and a set token, which will take a token. We're going to
-inject window in here so that we can get our store, which will be local
-storage. Then we'll have a key, and that will be auth token, and then we'll
-have our get token, and set token.
+**** Save the Token to Local Storage
+01:14 Let's go ahead and set up saving this to local storage.  We're going to
+create a =Factory= that will manage our token for us.  We'll just say
+~app.factory~, and it'll be an =AuthTokenFactory=, and this will be a simple
+factory, it'll have a =getToken=, and a =setToken=, which will take a =token=.
+We're going to inject =window= in here so that we can get our =store=, which
+will be local storage.  Then we'll have a =key=, and that will be =auth-token=,
+and then we'll have our =getToken=, and =setToken=.
+
+#+name:angularjs-auth-jwt-app4--AuthTokenFactory
+#+begin_src js
+app.factory('AuthTokenFactory', function AuthTokenFactory($window) {
+    'use strict';
+    var store = $window.localStorage;
+    var key = 'auth-token';
+    return ({
+        getToken: getToken,
+        setToken: setToken
+    });
+
+    function getToken() {
+        return store.getItem(key);
+    }
+
+    function setToken(token) {
+        if (token) {
+            store.setItem(key, token);
+        } else {
+            store.removeItem(key);
+        }
+    }
+});
+#+end_src
 
 **** Get the Token
-01:52 Then here, get token will just simply return store.getitemkey, and our
-set token will say if a token is provided then we'll say store.setitemkeytoken
-else store.removeitem. Now we have our auth token factory. When we login, we
-want to save this token, so we'll add a then here. Here we'll take auth token
-factory and set token to the response.data.token, and then we'll return the
-response for future items in the chain.
+01:52 Then here, =getToken= will just simply return =store.getitemkey=, and our
+=setToken= will say if a token is provided then we'll say
+=store.setitemkeytoken= else =store.removeitem=.  Now we have our
+=AuthTokenFactory=.
+
+When we login, we want to save this token, so we'll add a ~then~ here.  Here
+we'll take =AuthTokenFactory= and =setToken= to the =response.data.token=, and
+then we'll return the response for future items in the chain.
+
+#+name:angularjs-auth-jwt-app4--UserFactory---save-token
+#+begin_src js
+app.factory('UserFactory', function UserFactory($http, API_URL, AuthTokenFactory) {
+    'use strict';
+    return ({
+        login: login
+    });
+
+    function login(username, password) {
+        return $http.post(API_URL + '/login', {
+            username: username,
+            password: password
+        }).then(function success(response) {
+            AuthTokenFactory.setToken(response.data.token);
+            return response;
+        });;
+    }
+});
+#+end_src
 
 02:31 We'll need to inject the auth token factory. Now let's go ahead and see
 this in action. If I refresh the page, get that new client code, we'll say
@@ -3916,6 +3964,31 @@ what we need to do to make it so that when a request is made to get a random
 user, the server will take that token into account, and protect that resource
 to only those who have a signed, verified token. That's what we'll see in the
 next video.
+
+**** Code for app4 and Makefile
+
+#+name:angularjs-auth-jwt-app4.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app4.js :noweb yes :mkdirp yes
+(function() {
+    'use strict';
+    <<angularjs-auth-jwt-app--var_app>>
+    <<angularjs-auth-jwt-app--const_API_URL>>
+    <<angularjs-auth-jwt-app3--controller.MainCtrl>>
+    <<angularjs-auth-jwt-app--RandomUserFactory>>
+    <<angularjs-auth-jwt-app4--UserFactory---save-token>>
+    <<angularjs-auth-jwt-app4--AuthTokenFactory>>
+})()
+#+end_src
+
+#+name:Makefile app4
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : app4
+app4 : APP = app4
+app4 : INDEX = index3
+app4 : app
+	@:
+
+#+end_src
 
 *** Finalizing JWT Authentication with AngularJS
 Adding middleware to the node server to decode and verify the token sent from
