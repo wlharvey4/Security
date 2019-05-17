@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 16, 2019
-#+macro:version 0.6.10.<2019-05-16 Thu 18:00>
+#+date:May 17, 2019
+#+macro:version 0.7.0.<2019-05-17 Fri 11:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3569,60 +3569,121 @@ sending the signed token to the browser on authentication.
 
 **** Setup Authentication
 00:01 Here we have our application. I can log in, no errors, so it's
-successful. If I give it the wrong password, I get an error. If I don't give it
-a password at all, I get an error.
+successful.  If I give it the wrong password, I get an error.  If I don't give
+it a password at all, I get an error.
 
 00:09 The problem with this application is I can still get a random user
 without being authenticated and we want to protect that resource.
 
 00:15 The first step for doing that from here is to implement JWTs on the
-server. We're going to need a module called JSON Web Token. We'll require that
-and we'll call it JWT, JSON Web Token.
+server.  We're going to need a module called ~jsonwebtoken~.  We'll ~require~
+that and we'll call it ~jwt = jsonwebtoken~.
+
+#+name:install-jsonwebtoken
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+yarn add jsonwebtoken
+#+end_src
+
+#+name:angularjs-auth-jwt-app--requires4
+#+begin_src js :noweb yes
+<<angularjs-auth-jwt-app--requires3>>
+const jwt = require('jsonwebtoken');
+#+end_src
 
 **** What a JWT Is
 00:28 I'm just going to explain, really quickly, what a JWT is.
 
-00:31 JSON Web Token is a specification for authentication. A JWT is an encoded
-JSON object that the server encodes using a secret key. The encoded JSON object
-is called a token. That token is sent to the client when the client
-authenticates. Then the client sends that token back on every single request.
+00:31 JSON Web Token is a specification for authentication.  A JWT is an
+encoded JSON object that the server encodes using a secret key.  The encoded
+JSON object is called a {{{dfn(token)}}}.  That token is sent to the client
+when the client authenticates.  Then the client sends that token back on every
+single request.
 
 00:55 The server, at that point, will decode that token using the same private
-key, so that it can identify who the user is and act accordingly. What we're
+key, so that it can identify who the user is and act accordingly.  What we're
 going to do is set up the encoding of that token.
 
 **** Create a JWT with a Secret
 01:07 For simplicity's sake, we're going to create a JWT secret here and we'll
-just make it a bunch of random characters. Normally, you would want this to be
+just make it a bunch of random characters.  Normally, you would want this to be
 stored in an environment variable or some other secure place, but we'll just
 leave it as a string in our app.
 
-01:23 Now, we want to encode the user object when the user authenticates. If we
-scroll down here, instead of sending the user, we're going to want to send a
-token. We'll create that token now. Token is a JWT.sign and the payload is what
-is going to be the encoded object. We'll just encode the username for now, but
-there is an entire specification on what you should actually include in this
-that you can read up on. For our purposes, the username is sufficient.
+#+name:angularjs-auth-jwt-app--jwtSecret
+#+begin_src js
+var jwtSecret = 'dkekdkd9&dksk!KD80zen>'
+#+end_src
+
+01:23 Now, we want to encode the user object when the user authenticates.  If
+we scroll down here (to the =POST /login= route), instead of sending the
+=user=, we're going to want to send a token.  We'll create that token now.
+Token is a JWT.sign and the payload is what is going to be the encoded object.
+We'll just encode the username for now, but there is an entire specification on
+what you should actually include in this that you can read up on.  For our
+purposes, the username is sufficient.
 
 01:54 Then we're going to give that secret that we set up earlier.
 
-**** Sending Back the Token
 01:57 Now we have the token and we're going to send back the token to the
-client. Just for simplicity's sake, we'll send back the user as well.
+client.  Just for simplicity's sake, we'll send back the user as well.
 
-02:07 On the front end -- before we were expecting a user with this login
-response. Now we're getting an object that has the user on it. We'll say VM
-user equals that user. We'll just alert with the response.data.token.
+#+name:angularjs-auth-jwt-app--login-route---token
+#+begin_src js
+app.post('/login', authenticate, function(req, res) {
+    var token = jwt.sign({
+        username: user.username
+    }, jwtSecret);
+    res.send({
+        token: token,
+        user: user
+    });
+});
+
+#+end_src
+
+**** Sending Back the Token
+02:07 On the front end --- before we were expecting a user with this login
+response.  Now we're getting an object that has the user on it.  We'll say
+~vm.user = response.data.user~.  We'll just alert with the
+~response.data.token~.
+
+#+caption:Login function and Handle Errors on App Controller with Token
+#+name:aaja3-login
+#+begin_src js
+vm.login = login;
+
+function login(username, password) {
+    UserFactory.login(username, password).then(function success(response) {
+        vm.user = response.data.user;
+        alert(response.data.token);
+    }, handleError);
+}
+
+#+end_src
+
+#+caption:Login on the App controller with Token
+#+name:angularjs-auth-jwt-app3--controller.MainCtrl
+#+begin_src js :noweb yes
+app.controller('MainCtrl', function MainCtrl(RandomUserFactory, UserFactory) {
+    'use strict';
+    var vm = this;
+
+    <<aaja2-getRandomUser>>
+    <<aaja3-login>>
+    <<aaja2-handleError>>
+})
+#+end_src
 
 02:24 We'll refresh and we'll go ahead and type in the username and
-password. We got a big, honking error. Let's just go ahead and look at what
-that is here. It looks like the username is not defined. We'll go to our server
-and, lo and behold, it's user.username.
+password.  We got a big, honking error.  Let's just go ahead and look at what
+that is here.  It looks like the =username= is not defined.  We'll go to our server
+and, lo and behold, it's =user.username=.
 
 02:43 We don't need to refresh the page, because the server and the client are
-totally served up on separate servers. We can just go ahead and log in
-now. That's our token.
+totally served up on separate servers.  We can just go ahead and log in now.
+That's our token.
 
+**** Save the Token for Requests
 02:56 In future requests, we need to store this token somewhere so that it can
 be sent to the server over and over and over again for every protected resource
 request. Then the server can decode it back into this payload to identify who
@@ -3638,6 +3699,70 @@ across the wire.
 03:46 If we look at the response here, you can see the token and the user comes
 back in the response. In future requests, that token will be used to make those
 requests to identify the user. We'll talk about that in the next video.
+
+**** Code for server4 and app3 and Makefile
+
+***** Code for server4
+
+#+caption:Code for @code{server4.js}
+#+name:angularjs-auth-jwt-server4.js
+#+begin_src js :tangle angularjs-auth-jwt/server4.js :mkdirp yes :noweb tangle
+/*--- requirements ---*/
+<<angularjs-auth-jwt-app--requires4>>
+
+/*--- jwtSecret ---*/
+<<angularjs-auth-jwt-app--jwtSecret>>
+
+/*--- mini-database ---*/
+<<angularjs-auth-jwt-app--mini-database>>
+
+/*--- app and app middlewares ---*/
+<<angularjs-auth-jwt-app>>
+<<angularjs-auth-jwt-app--use_cors>>
+<<angularjs-auth-jwt-app--use_bodyParser>>
+
+/*--- app routes ---*/
+<<angularjs-auth-jwt-app--random-route>>
+<<angularjs-auth-jwt-app--login-route---token>>
+
+/*--- app listen ---*/
+<<angularjs-auth-jwt-app--listen>>
+
+/*--- util functions ---*/
+<<angularjs-auth-jwt-app--utils-functions>>
+#+end_src
+
+***** Code for app3
+
+#+caption:@file{app3.js} Code
+#+name:angularjs-auth-jwt-app3.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app3.js :noweb yes :mkdirp yes
+(function() {
+    'use strict';
+    <<angularjs-auth-jwt-app--var_app>>
+    <<angularjs-auth-jwt-app--const_API_URL>>
+    <<angularjs-auth-jwt-app3--controller.MainCtrl>>
+    <<angularjs-auth-jwt-app--RandomUserFactory>>
+    <<angularjs-auth-jwt-app2--UserFactory>>
+})()
+#+end_src
+
+***** Makefile for server4
+
+#+name:angularjs-auth-jwt-makefile-server4
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : server4
+server4 : SERVER = server4
+server4 : server
+	@:
+
+.phony : app3
+app3 : APP = app3
+app3 : INDEX = index2
+app3 : app
+	@:
+
+#+end_src
 
 *** Auth Interceptor in Angular for JWT
 Adding JWT support to the client. Storing the token in local storage, then
