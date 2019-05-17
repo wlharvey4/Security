@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 17, 2019
-#+macro:version 0.7.0.<2019-05-17 Fri 11:24>
+#+macro:version 0.7.1.<2019-05-17 Fri 12:36>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3564,7 +3564,7 @@ server3 : server
 #+end_src
 
 *** JWT Authentication Setup on the Server
-Adding JWT support to the server. Signing a JSON object as a payload and
+Adding JWT support to the server.  Signing a JSON object as a payload and
 sending the signed token to the browser on authentication.
 
 **** Setup Authentication
@@ -3643,7 +3643,7 @@ app.post('/login', authenticate, function(req, res) {
 
 **** Sending Back the Token
 02:07 On the front end --- before we were expecting a user with this login
-response.  Now we're getting an object that has the user on it.  We'll say
+response --- now we're getting an object that has the user on it.  We'll say
 ~vm.user = response.data.user~.  We'll just alert with the
 ~response.data.token~.
 
@@ -3655,7 +3655,7 @@ vm.login = login;
 function login(username, password) {
     UserFactory.login(username, password).then(function success(response) {
         vm.user = response.data.user;
-        alert(response.data.token);
+        alert("TOKEN: " + response.data.token);
     }, handleError);
 }
 
@@ -3683,22 +3683,22 @@ and, lo and behold, it's =user.username=.
 totally served up on separate servers.  We can just go ahead and log in now.
 That's our token.
 
-**** Save the Token for Requests
+**** Review the Use of Tokens in Accessing Protected Resources
 02:56 In future requests, we need to store this token somewhere so that it can
 be sent to the server over and over and over again for every protected resource
-request. Then the server can decode it back into this payload to identify who
+request.  Then the server can decode it back into this payload to identify who
 the user is and protect the resource that way.
 
-03:16 Just to recap here. The client will send a request to log in and here we
-have that token. If we look at the request, we can see here we're sending the
-username and password. If we look here, we go to authenticate, we double check
-that the username and password are correct, and then we'll sign this token with
-the username and with that JWT secret. Then we'll send the token and the user
-across the wire.
+03:16 Just to recap here.  The client will send a request to log in and here we
+have that token.  If we look at the request, we can see here we're sending the
+=username= and =password=.  If we look here, we go to =authenticate=, we double
+check that the =username= and =password= are correct, and then we'll sign this
+token with the username and with that JWT secret.  Then we'll send the token
+and the user across the wire.
 
 03:46 If we look at the response here, you can see the token and the user comes
-back in the response. In future requests, that token will be used to make those
-requests to identify the user. We'll talk about that in the next video.
+back in the response.  In future requests, that token will be used to make
+those requests to identify the user.  We'll talk about that in the next video.
 
 **** Code for server4 and app3 and Makefile
 
@@ -3758,29 +3758,65 @@ server4 : server
 
 .phony : app3
 app3 : APP = app3
-app3 : INDEX = index2
+app3 : INDEX = index3
 app3 : app
 	@:
 
 #+end_src
 
 *** Auth Interceptor in Angular for JWT
-Adding JWT support to the client. Storing the token in local storage, then
-creating a http interceptor to add the token to requests made to the
-server. Also implementing logout.
+Adding JWT support to the client.  Storing the token in local storage, then
+creating a HTTP interceptor to add the token to requests made to the
+server.  Also implementing =logout=.
 
 **** Updating the Front End for Login
-00:01 OK, so here we have our application. We can login, and get users. We
+00:01 OK, so here we have our application.  We can login, and get users.  We
 don't have to be logged in to get users, and that's what we want to try and
-protect. Also, we don't actually know if we're logged in from the UI, so we're
-just going to add this really quickly. We'll say H2, Welcome, and it'll be
-VMuser.username.
+protect.  Also, we don't actually know if we're logged in from the UI, so we're
+just going to add this really quickly.  We'll say =<h2>Welcome
+{{vm.user.username}}</h2>=.
+
+
+#+caption:Get User button with Welcome
+#+name:angularjs-auth-jwt-index--body---button.get_random_user----Welcome
+#+begin_src html
+<div>
+  <h2>Welcome {{vm.user.username}}</h2>
+  <button ng-click="vm.getRandomUser()">Get User</button>
+  <pre ng-bind="vm.randomUser | json"></pre>
+</div>
+#+end_src
 
 00:26 I'm not going to hide this. Normally you'd want to hide this if there is
 no VM.user, because this really doesn't make sense, but I'm going to keep it
 here because we can still get users, and I want to show that until that
 resource is protected. Anyway, if we login here, now we can see, we do actually
 login, that comes from the server. Here we have our application.
+***** Code for index3.html
+
+#+caption[angularjs-auth-jwt-index3.html]:Code for the AngularJS Auth Jwt @code{index2.html} file
+#+name:angularjs-auth-jwt-index3.html
+#+begin_src html :tangle angularjs-auth-jwt/public/index3.html :mkdirp yes :noweb tangle
+<!DOCTYPE html>
+<<angularjs-auth-jwt-index--html---angular_app>>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <<angularjs-auth-jwt-index--head---title>>
+    </head>
+
+    <<angularjs-auth-jwt-index--body---MainCtrl_vm>>
+        <<angularjs-auth-jwt-index--body---h1.get_random_user>>
+
+        <<angularjs-auth-jwt-index2--authentication-form>>
+
+        <<angularjs-auth-jwt-index--body---button.get_random_user----Welcome>>
+
+        <<angularjs-auth-jwt-index--body---scripts>>
+
+    </body>
+</html>
+
+#+end_src
 
 **** Save the Token to Local Storage
 00:46 There are a couple of things that we want to do to this application. If
