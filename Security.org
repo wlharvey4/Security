@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 18, 2019
-#+macro:version 0.7.6.<2019-05-18 Sat 11:12>
+#+macro:version 0.7.7.<2019-05-18 Sat 16:42>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -4284,33 +4284,62 @@ trying to accomplish in the series.
 
 ***** Show and Hide Based Upon Login Status
 Actually, there's one other thing that we want to do, and that's just for the
-fun of it. Well say ng show, or actually we'll say a hide when there's a vm
-user we'll hide this, and ng show when there is a vm user. Now let's refresh.
+fun of it.  In ~index.html~, at the login form, we'll say =ng-show=, or
+actually we'll say =ng-hide=; when there's a =vm.user= we'll hide this, and, at
+the =Welcome= message, =ng-show= when there is a =vm-user=.  Now let's refresh.
 
+#+caption:Login Form that hides and shows
+#+name:angularjs-auth-jwt-index4--authentication-form-show-hide
+#+begin_src html
+<div ng-hide="vm.user">
+  <form ng-submit="vm.login(vm.username, vm.password)">
+    <label>Username: <input type="text" ng-model="vm.username" /></label><br/>
+    <label>Password: <input type="password" ng-model="vm.password" /></label><br />
+    <button type="submit">Login</button>
+  </form>
+</div>
+#+end_src
+
+#+caption:Get User button with Welcome that shows and hides
+#+name:angularjs-auth-jwt-index--body---button.get_random_user----Welcome-show-hide
+#+begin_src html
+<div ng-show="vm.user">
+  <h2>Welcome {{vm.user.username}}</h2>
+  <button ng-click="vm.logout()">Logout</button>
+  <br />
+  <button ng-click="vm.getRandomUser()">Get User</button>
+  <pre ng-bind="vm.randomUser | json"></pre>
+</div>
+#+end_src
+
+***** Check Show and Hide Functionality
 06:28 Now it makes more sense. Get random user. We'll login, and we'll login
-with the wrong password, password/username incorrect. We login without a
-password...OK, so all of our error handling is working. Now we login, here we
-have...and now we can get the user, and we can logout, and go back and forth
-that way. If we just hit the endpoint directly, "No authorization header
+with the wrong password, password/username incorrect.  We login without a
+password... OK, so all of our error handling is working.  Now we login, here we
+have... and now we can get the =user=, and we can logout, and go back and forth
+that way.  If we just hit the endpoint directly, "No authorization header
 found," and so this application is a working application, and that is what
-we've created using Jots.
+we've created using JWTs.
 
-06:59 Let's just take this full circle and explain what's happening here. We'll
-refresh the page here, we'll clear out here. We login with kentcdodds, and P as
-our password. We send that with this login request. Let's make this big
-here. The payload is the password and username. Then the server returns us a
-signed token with a secret that only the server knows about, and the user.
+**** Overall Review of the Working Application
+06:59 Let's just take this full circle and explain what's happening here.
+We'll refresh the page here, we'll clear out here.  We login with 'kentcdodds',
+and 'p' as our password.  We send that with this login request.  Let's make
+this big here.  The payload is the =password= and =username=.  Then the server
+returns us a signed =token= with a secret that only the server knows about, and
+the =user=.
 
-07:28 Then behind the scenes on the client we add an auth token to local
-storage, and that we have an auth interceptor that will intercept every request
-that we make with HTTP, and add this auth token to our request. If we look at
-our network tab here again, say "get user," we get the user, and here in our
-headers we have that authorization header with the bearer and the token. Then
-when we want to logout, let's take a look at our resources here.
+07:28 Then behind the scenes on the client we add an =auth-token= to local
+storage, and that we have an =AuthInterceptor= that will intercept every
+request that we make with HTTP, and add this =auth-token= to our request.  If
+we look at our network tab here again, say "Get User," we get the =user=, and
+here in our headers we have that =Authorization= header with the =Bearer= and
+the =token=.  Then when we want to logout, let's take a look at our resources
+here.
 
-07:59 We say logout, and that auth token is removed from local storage, and the
-user on the view model is set to null, and so our view updates as well. That's
-the application, that's Jots with Angular.
+07:59 We say =Logout=, and that =auth-token= is removed from local storage, and
+the =user= on the view model is set to =null=, and so our view updates as
+well.  That's the application, that's JWTs with Angular.
 
 **** Code for server5 and app5
 
@@ -4362,6 +4391,32 @@ the application, that's Jots with Angular.
 })()
 #+end_src
 
+***** Code for index4
+
+#+caption[angularjs-auth-jwt-index4.html]:Code for the AngularJS Auth Jwt @code{index4.html} file
+#+name:angularjs-auth-jwt-index4.html
+#+begin_src html :tangle angularjs-auth-jwt/public/index4.html :mkdirp yes :noweb tangle
+<!DOCTYPE html>
+<<angularjs-auth-jwt-index--html---angular_app>>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <<angularjs-auth-jwt-index--head---title>>
+    </head>
+
+    <<angularjs-auth-jwt-index--body---MainCtrl_vm>>
+        <<angularjs-auth-jwt-index--body---h1.get_random_user>>
+
+        <<angularjs-auth-jwt-index4--authentication-form-show-hide>>
+
+        <<angularjs-auth-jwt-index--body---button.get_random_user----Welcome-show-hide>>
+
+        <<angularjs-auth-jwt-index--body---scripts>>
+
+    </body>
+</html>
+
+#+end_src
+
 ***** Makefile for server5
 
 #+name:angularjs-auth-jwt-makefile-server5
@@ -4373,7 +4428,7 @@ server5 : server
 
 .phony : app5
 app5 : APP = app5
-app5 : INDEX = index3
+app5 : INDEX = index4
 app5 : app
 	@:
 
