@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 18, 2019
-#+macro:version 0.7.5.<2019-05-18 Sat 09:00>
+#+macro:version 0.7.6.<2019-05-18 Sat 11:12>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -4160,49 +4160,132 @@ I think that I am logged in.  Refresh here, OK, "No authorization header was
 found," and the error is coming from this =expressJwt=.
 
 02:45 With just these two lines, we were able to take our application and add
-Express Jot. Obviously we do have this jot signing, so that's a couple of extra
-lines, but it's actually very simple to add this authentication scheme to a
-node application. We do have a couple of more things that we want to do on the
-front end to make things a little more sensible. If I go ahead and login here,
-I login. N
+=expressJwt=.  Obviously we do have this =jwt.sign()=ing, so that's a couple of
+extra lines, but it's actually very simple to add this authentication scheme to
+a Node application.
 
-03:09 Now I have, in our resources, I have that auth token. We'll clear our
-network here, say get user, and I can get the user. We can see on here I have
-the authorization header, so that's why I was able to get through. If I refresh
-the page, you'll see it's not showing that I'm logged in, but when I get the
-user everything works out fine, because I do have that token locally in the
-client.
+**** Update the Front End to Be More Sensible
+We do have a couple of more things that we want to do on the front end to make
+things a little more sensible.  If I go ahead and login here, I login.
 
+03:09 Now I have, in our resources, I have that =auth-token=.  We'll clear our
+network here, say =Get User=, and I can get the =user=.  We can see on here I
+have the =Authorization= header, so that's why I was able to get through.  If I
+refresh the page, you'll see it's not showing that I'm logged in, but when I
+get the user everything works out fine, because I do have that token locally in
+the client.
+
+***** Automatic Login
 03:35 What we want to implement now is to be automatically logged in when we
-refresh the page if we have the token locally. Let's go to our app, and we'll
-have this initialization step in our controller, and we'll say, "user
-factory.getuser" then we'll say vmuser is equal to the data that comes back,
-and so let's go to our user factory, and will add a getuser function here, and
-we'll define that down here. We'll simply say if auth token factory get token,
-so if there is a token in existence, then we can return $HTTP.getapiurl/me.
+refresh the page if we have the =token= locally.
 
-04:30 Otherwise we'll return $Q.reject, with the data client has no auth
-token. We'll need to inject Q here. Now we need to implement this /me
-endpoint. We'll go back to our server and just right here we'll say
-app.get/me. Because we have this Express Jot here, and the only path that is
-being excluded is the /login, we can know that this /me is being protected by
-this Express Jot, so no request will come through to /me unless they pass
-through this Express Jot first.
+Let's go to our app, and we'll have this initialization step in our controller,
+and we'll say, =UserFactory.getUser().then= we'll say =vm.user= is equal to the
+data that comes back, =response.data=.
+
+#+caption:App Controller Initialization
+#+name:aaja5-initialization
+#+begin_src js
+UserFactory.getUser().then(function success(response) {
+    vm.user = response.data;
+});
+#+end_src
+
+#+caption:Automatic Login in app5
+#+name:angularjs-auth-jwt-app5--controller.MainCtrl
+#+begin_src js :noweb yes
+app.controller('MainCtrl', function MainCtrl(RandomUserFactory, UserFactory) {
+    'use strict';
+    var vm = this;
+
+    /* Get Random User */
+    <<aaja2-getRandomUser>>
+    /* Login and Logout */
+    <<aaja3-login>>
+    <<aaja4-logout>>
+    /* Initialization */
+    <<aaja5-initialization>>
+    /* Handle Error */
+    <<aaja2-handleError>>
+})
+#+end_src
+
+and so let's go to our =UserFactory=, and will add a =getUser= function here,
+and we'll define that down here.  We'll simply say if
+=AuthTokenFactory.getToken()=, so if there is a token in existence, then we can
+return =$http.get(API_URL + '/me')=.
+
+04:30 Otherwise we'll return =$q.reject=, with the "data client has no auth
+token".  We'll need to inject =$q= here (in ~app.factory~).
+
+#+name:aaja5-userfactory--getUser
+#+begin_src js
+function getUser() {
+    if (AuthTokenFactory.getToken()) {
+        return $http.get(API_URL + '/me');
+    } else {
+        return ($q.reject({ data: 'client has no auth token' }));
+    }
+}
+#+end_src
+
+#+name:angularjs-auth-jwt-app5--UserFactory---getUser
+#+begin_src js :noweb yes
+app.factory('UserFactory', function UserFactory($http, API_URL, AuthTokenFactory, $q) {
+    'use strict';
+    return ({
+        login: login,
+        logout: logout,
+        getUser: getUser
+    });
+
+    function login(username, password) {
+        return $http.post(API_URL + '/login', {
+            username: username,
+            password: password
+        }).then(function success(response) {
+            AuthTokenFactory.setToken(response.data.token);
+            return response;
+        });;
+    }
+
+    <<aaja4-userfactory--logout>>
+    <<aaja5-userfactory--getUser>>
+});
+#+end_src
+
+***** Implement the /me Endpoint
+Now we need to implement this =/me= endpoint.  We'll go back to our server and
+just right here we'll say =app.get('/me')=.  Because we have this =expressJwt=
+here, and the only path that is being excluded is the =/login=, we can know
+that this =/me= is being protected by this =express.Jwt=, so no =request= will
+come through to =/me= unless they pass through this =expressJwt= first.
 
 05:20 We can rely on the fact that the user is authenticated at this point, and
-Express Jot will put the decoded token onto the user object, and so I can
-simply just say "response send rec.user." This is very simple, so all of this
-should work, assuming I didn't break anything. Let's just double check in our
-resources. We have the auth token, now if I refresh...There we go, Kent C
-Dodds, we're automatically logged in, and we can get the users right from the
-get go.
+=express.Jwt= will put the decoded =token= onto the =user= object, and so I can
+simply just say =res.send(req.user)=.
+
+#+name:angularjs-auth-jwt-app5--me-route
+#+begin_src js
+app.get('/me', function(req, res) {
+    res.send(req.user);
+});
+#+end_src
+
+***** Check Automatic Login Functionality
+This is very simple; so all of this should work, assuming I didn't break
+anything.  Let's just double check in our resources.  We have the =auth-token=,
+now if I refresh... There we go, Kent C Dodds, we're automatically logged in,
+and we can get the users right from the get go.
 
 05:56 If we logout, there's no token in here. Oops. We'll refresh, and now
 we're not able to get any users, and so that's the basic gist of what we're
-trying to accomplish in the series. Actually, there's one other thing that we
-want to do, and that's just for the fun of it. Well say ng show, or actually
-we'll say a hide when there's a vm user we'll hide this, and ng show when there
-is a vm user. Now let's refresh.
+trying to accomplish in the series.
+
+***** Show and Hide Based Upon Login Status
+Actually, there's one other thing that we want to do, and that's just for the
+fun of it. Well say ng show, or actually we'll say a hide when there's a vm
+user we'll hide this, and ng show when there is a vm user. Now let's refresh.
 
 06:28 Now it makes more sense. Get random user. We'll login, and we'll login
 with the wrong password, password/username incorrect. We login without a
@@ -4229,7 +4312,7 @@ when we want to logout, let's take a look at our resources here.
 user on the view model is set to null, and so our view updates as well. That's
 the application, that's Jots with Angular.
 
-**** Code for server5
+**** Code for server5 and app5
 
 ***** Code for server5
 
@@ -4254,12 +4337,29 @@ the application, that's Jots with Angular.
 /*--- app routes ---*/
 <<angularjs-auth-jwt-app--random-route>>
 <<angularjs-auth-jwt-app--login-route---token>>
+<<angularjs-auth-jwt-app5--me-route>>
 
 /*--- app listen ---*/
 <<angularjs-auth-jwt-app--listen>>
 
 /*--- util functions ---*/
 <<angularjs-auth-jwt-app--utils-functions>>
+#+end_src
+
+***** Code for app5
+#+caption:Code for app5.js with Automatic Login
+#+name:angularjs-auth-jwt-app5.js
+#+begin_src js :tangle angularjs-auth-jwt/public/app5.js :noweb yes :mkdirp yes
+(function() {
+    'use strict';
+    <<angularjs-auth-jwt-app--var_app4---interceptor>>
+    <<angularjs-auth-jwt-app--const_API_URL>>
+    <<angularjs-auth-jwt-app5--controller.MainCtrl>>
+    <<angularjs-auth-jwt-app--RandomUserFactory>>
+    <<angularjs-auth-jwt-app5--UserFactory---getUser>>
+    <<angularjs-auth-jwt-app4--AuthTokenFactory>>
+    <<angularjs-auth-jwt-app4--AuthInterceptor>>
+})()
 #+end_src
 
 ***** Makefile for server5
@@ -4269,6 +4369,12 @@ the application, that's Jots with Angular.
 .phony : server5
 server5 : SERVER = server5
 server5 : server
+	@:
+
+.phony : app5
+app5 : APP = app5
+app5 : INDEX = index3
+app5 : app
 	@:
 
 #+end_src
