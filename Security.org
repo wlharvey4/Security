@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 18, 2019
-#+macro:version 0.7.4.<2019-05-18 Sat 08:18>
+#+macro:version 0.7.5.<2019-05-18 Sat 09:00>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -2730,6 +2730,8 @@ with ~yarn~.] are:
 yarn add express faker
 #+end_src
 
+#+call:list-package.json()
+
 **** Create server1.js
 00:33 Faker's how we're going to make the random user. We're going to ~require
 express~ and we'll ~require faker~.  Then we'll create our app.  Then we'll
@@ -3174,6 +3176,8 @@ simple module that will enable CORS for us.
 yarn add cors
 #+end_src
 
+#+call:list-package.json()
+
 03:10 Down here we'll say ~app.use(cors())~.
 
 #+caption:require-cors
@@ -3458,6 +3462,8 @@ body-parser~, and just like with CORS, we'll say, ~app.use(bodyParser.json())~.
 yarn add body-parser
 #+end_src
 
+#+call:list-package.json()
+
 #+name:angularjs-auth-jwt-app--requires3
 #+begin_src js :noweb yes
 <<angularjs-auth-jwt-app-requires2>>
@@ -3583,6 +3589,8 @@ that and we'll call it ~jwt = jsonwebtoken~.
 #+begin_src sh :dir angularjs-auth-jwt :results output :exports both
 yarn add jsonwebtoken
 #+end_src
+
+#+call:list-package.json()
 
 #+name:angularjs-auth-jwt-app--requires4
 #+begin_src js :noweb yes
@@ -3775,7 +3783,7 @@ is actually added in the next section, but belongs here with ~app3~.
 
 #+end_src
 
-***** Makefile for server4
+***** Makefile for server4 and app3
 
 #+name:angularjs-auth-jwt-makefile-server4
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
@@ -3962,7 +3970,7 @@ var app = angular.module('app', [], function config($httpProvider) {
 });
 #+end_src
 
-**** Verifying the Authorization Bearer Token on a Request
+***** Verifying the Authorization Bearer Token on a Request
 04:51 We can see that in action here.  Let's refresh our client code, we'll say
 'kentcdodds' 'p', and let's go ahead and look at our network tab.  We login,
 and we can see the =token= is given to us.
@@ -4064,6 +4072,7 @@ account, and protect that resource to only those who have a signed, verified
 
 **** Code for app4 and Makefile
 
+***** Code for app4
 #+caption:Code for app4.js with Authorization Bearer Token
 #+name:angularjs-auth-jwt-app4.js
 #+begin_src js :tangle angularjs-auth-jwt/public/app4.js :noweb yes :mkdirp yes
@@ -4079,6 +4088,7 @@ account, and protect that resource to only those who have a signed, verified
 })()
 #+end_src
 
+***** Makefile for app4 and index3
 #+name:Makefile app4
 #+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
 .phony : app4
@@ -4095,39 +4105,59 @@ the client. And tidying up the rest of the application. Finally, a walkthrough
 of the whole process.
 
 **** Set Up the Server for Authentication
-00:00 OK, so now here we have our application. Let's just make sure it's all
-working here. We can login, we can logout, we can get users whether or not we
-are logged in. This is what we are trying to protect. If we look in our local
+00:00 OK, so now here we have our application.  Let's just make sure it's all
+working here.  We can login, we can logout, we can get users whether or not we
+are logged in.  This is what we are trying to protect.  If we look in our local
 storage here, because I logged out there's nothing in here, but if I login
-again it is in here. I logout, it goes away. If I'm logged in and I say get
-user, then I'm sending the authorization header with the token that the server
-gave to me in this login request.
+again it is in here.  I logout, it goes away.  If I'm logged in and I say =Get
+User=, then I'm sending the =Authorization= header with the =token= that the
+server gave to me in this =Login= request.
 
 00:36 Now what we need to do is set up the server so that it will take this
-authorization header into account when this get user endpoint is hit. This is
-actually very simple with a module that we have called express jot. We'll go
-ahead and install that npm install Express Jot, and then up here we'll simply
-require express jot, and then it's as simple as an app.use Express Jot. This
-will take a secret, and we'll use the same jot secret.
+=Authorization= header into account when this get user endpoint is hit.  This
+is actually very simple with a module that we have called ~express-jwt~.  We'll
+go ahead and install that using =npm install express-jwt=, and then up here
+we'll simply ~require(express-jwt)~, and then it's as simple as an ~app.use
+express-jwt~.  This will take a secret, and we'll use the same =jwtSecret=.
+
+#+name:install-express-jwt
+#+begin_src sh :dir angularjs-auth-jwt :results output :exports both
+yarn add express-jwt
+#+end_src
+
+#+call:list-package.json()
+
+#+name:angularjs-auth-jwt-app--requires5
+#+begin_src js :noweb yes
+<<angularjs-auth-jwt-app--requires4>>
+const expressJwt = require('express-jwt');
+#+end_src
 
 01:19 Because this is going to be verifying our tokens, we need to verify it
-with the same secret. That's actually everything that we need to do. However,
+with the same secret.  That's actually everything that we need to do.  However,
 when a user is logging in, they obviously won't have a token, and so we need to
-add unless, on this middleware, and we'll say the path is in this
-array/login. Now Express Jot, under the covers, is going to intercept all of
+add =unless=, on this middleware, and we'll say the path is in this
+array =[ /login ]=.  Now =expressJwt=, under the covers, is going to intercept all of
 the requests that come in.
 
-01:52 It will take this authorization header, with the bearer and the token, it
-will decode that token using the jot secret. If it does decode properly, and
-the signature is verified, then it will add user to the request object, and the
-user property will simply be the decoded json object. We're going to see what
-that looks like here in a moment, but let's go ahead and see what breaks here.
+#+name:angularjs-auth-jwt-app--use_expressJwt
+#+begin_src js
+app.use(expressJwt({ secret: jwtSecret }).unless({ path: [ '/login' ]}));
+#+end_src
 
-02:20 I'm pointing to the server directly, to the random user endpoint, and if
-I refresh here, now I'm getting an unauthorized error, "No authorization header
-was found." If I refresh here, I'm not logged in, I say get...Oh, except I
-think that I am logged in. Refresh here, OK, "No authorization header was
-found," and the air is coming from this Express Jot.
+01:52 It will take this =Authorization= header, with the =Bearer= and the
+=token=, it will decode that =token= using the =jwtSecret=.  If it does decode
+properly, and the signature is verified, then it will add =user= to the request
+object, and the =user= property will simply be the decoded JSON object.  We're
+going to see what that looks like here in a moment, but let's go ahead and see
+what breaks here.
+
+**** Check that the Server Protects the random-user Resource
+02:20 I'm pointing to the server directly, to the =/random-user= endpoint, and
+if I refresh here, now I'm getting an =Unauthorized= error, "No authorization
+header was found."  If I refresh here, I'm not logged in, I say get...Oh, except
+I think that I am logged in.  Refresh here, OK, "No authorization header was
+found," and the error is coming from this =expressJwt=.
 
 02:45 With just these two lines, we were able to take our application and add
 Express Jot. Obviously we do have this jot signing, so that's a couple of extra
@@ -4198,6 +4228,52 @@ when we want to logout, let's take a look at our resources here.
 07:59 We say logout, and that auth token is removed from local storage, and the
 user on the view model is set to null, and so our view updates as well. That's
 the application, that's Jots with Angular.
+
+**** Code for server5
+
+***** Code for server5
+
+#+caption:Code for @code{server5.js}
+#+name:angularjs-auth-jwt-server5.js
+#+begin_src js :tangle angularjs-auth-jwt/server5.js :mkdirp yes :noweb tangle
+/*--- requirements ---*/
+<<angularjs-auth-jwt-app--requires5>>
+
+/*--- jwtSecret ---*/
+<<angularjs-auth-jwt-app--jwtSecret>>
+
+/*--- mini-database ---*/
+<<angularjs-auth-jwt-app--mini-database>>
+
+/*--- app and app middlewares ---*/
+<<angularjs-auth-jwt-app>>
+<<angularjs-auth-jwt-app--use_cors>>
+<<angularjs-auth-jwt-app--use_bodyParser>>
+<<angularjs-auth-jwt-app--use_expressJwt>>
+
+/*--- app routes ---*/
+<<angularjs-auth-jwt-app--random-route>>
+<<angularjs-auth-jwt-app--login-route---token>>
+
+/*--- app listen ---*/
+<<angularjs-auth-jwt-app--listen>>
+
+/*--- util functions ---*/
+<<angularjs-auth-jwt-app--utils-functions>>
+#+end_src
+
+***** Makefile for server5
+
+#+name:angularjs-auth-jwt-makefile-server5
+#+begin_src make :tangle angularjs-auth-jwt/Makefile :mkdirp yes
+.phony : server5
+server5 : SERVER = server5
+server5 : server
+	@:
+
+#+end_src
+
+
 ** Reference
 *** RFC 7797
 - https://tools.ietf.org/html/rfc7519
