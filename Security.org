@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:May 17, 2019
-#+macro:version 0.7.2.<2019-05-17 Fri 13:42>
+#+date:May 18, 2019
+#+macro:version 0.7.3.<2019-05-18 Sat 07:24>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3827,6 +3827,8 @@ this token in local storage, and then set up sending that token on every
 protected resource request, and then we'll also implement logout.
 
 **** Save the Token to Local Storage
+
+***** Create an AuthTokenFactory
 01:14 Let's go ahead and set up saving this to local storage.  We're going to
 create a =Factory= that will manage our token for us.  We'll just say
 ~app.factory~, and it'll be an =AuthTokenFactory=, and this will be a simple
@@ -3834,6 +3836,11 @@ factory, it'll have a =getToken=, and a =setToken=, which will take a =token=.
 We're going to inject =window= in here so that we can get our =store=, which
 will be local storage.  Then we'll have a =key=, and that will be =auth-token=,
 and then we'll have our =getToken=, and =setToken=.
+
+01:52 Then here (~function getToken()~), =getToken= will just simply return
+=store.getitemkey=, and (~function setToken()~) our =setToken= will say if a
+=token= is provided then we'll say =store.setItem(key,token)= else
+=store.removeItem=.  Now we have our =AuthTokenFactory=.
 
 #+name:angularjs-auth-jwt-app4--AuthTokenFactory
 #+begin_src js
@@ -3860,12 +3867,7 @@ app.factory('AuthTokenFactory', function AuthTokenFactory($window) {
 });
 #+end_src
 
-**** Get the Token
-01:52 Then here, =getToken= will just simply return =store.getitemkey=, and our
-=setToken= will say if a token is provided then we'll say
-=store.setitemkeytoken= else =store.removeitem=.  Now we have our
-=AuthTokenFactory=.
-
+***** Login and Save Token using AuthTokenFactory.setToken
 When we login, we want to save this token, so we'll add a ~then~ here.  Here
 we'll take =AuthTokenFactory= and =setToken= to the =response.data.token=, and
 then we'll return the response for future items in the chain.
@@ -3890,44 +3892,84 @@ app.factory('UserFactory', function UserFactory($http, API_URL, AuthTokenFactory
 });
 #+end_src
 
-02:31 We'll need to inject the auth token factory. Now let's go ahead and see
-this in action. If I refresh the page, get that new client code, we'll say
-kentcdodds P login, and let's look at our local storage here, and our
-resources. There we have our auth token. Now we're storing our token in our
-local storage, and we want to us it on request to protected resources, and so
-now we're going to use what in Angular is called an interceptor, and we're
-going to create that as a factory.
+***** Test for a Saved Token in Local Storage
+02:31 We'll need to inject the auth token factory.  Now let's go ahead and see
+this in action.  If I refresh the page, get that new client code, we'll say
+'kentcdodds' 'p' =login=, and let's look at our local storage here, and our
+resources.  There we have our =auth-token=.
 
-**** Interceptors
-03:04 We'll say app.factory, it will be our auth interceptor, and interceptors
-have a couple of cool things on them. You have the request, the request error
-response, and response error. Each one of them is doing different things to the
-HTTP config. The one that we care about is the request, so we'll have request
-and it will be add token, and then here we'll implement that. It'll take the
-config, and it'll return the config.
+Now we're storing our token in our local storage, and we want to us it on
+request to protected resources, and so now we're going to use what in Angular
+is called an =Interceptor=, and we're going to create that as a Factory.
 
-03:35 Here we'll have a token, and let's inject our auth token factory, and
-will get the token. Now if there is a token, so if the user is authenticated,
-then we're going to add this to a header on this config object, so we'll say
-config.headers is equal to config.headers or an empty object, just to kind of
-protect ourselves there. Then we'll say authorization equals bearer plus the
-token, and this is just part of the spec. It's the authorization header, image
-prefixed with bearer space, and then the token.
+**** Add Bearer Token to Each Request with an Angular Interceptor
+03:04 We'll say ~app.factory~, it will be our =AuthInterceptor=, and
+interceptors have a couple of cool things on them.  You have the =request=, the
+=requestError=, =response=, and =responseError=.  Each one of them is doing
+different things to the HTTP config.  The one that we care about is the
+=request=, so we'll have =request= and it will be =addToken=, and then here
+we'll implement that.  It'll take the =config=, and it'll return the =config=.
 
-04:16 Now we're sending the token on every HTTP request, but not quite
-actually. We do need to do one more thing, and that is in our app config, we
-need to inject HTTP provider. On that HTTP provider, it has an array called
-interceptors. We're going to push on that array just a string that is the name
-of our interceptor. Angular will look up this interceptor, and every single
-request that HTTP makes will pass through our function that we defined down
-here, this add token function.
+03:35 Here we'll have a =token=, and let's inject our =AuthTokenFactory=, and
+will get the =token=.  Now if there is a =token=, so if the user is
+authenticated, then we're going to add this to a header on this =config=
+object, so we'll say ~config.headers~ is equal to ~config.headers~ or an empty
+object, just to kind of protect ourselves there.  Then we'll say
+=Authorization= equals 'bearer ' plus the =token=, and this is just part of the
+spec.  It's the =Authorization= header; it's prefixed with =Bearer= space, and
+then the =token=.
 
-04:51 We can see that in action here. Let's refresh our client code, we'll say
-kentcdodds P, and let's go ahead and look at our network tab. We login, and we
-can see the token is given to us. We can see in here in our resources we have
-that token there. Now if we say get user, we'll click here, look at our
-headers, and it's right there, our auth authorization header with the bearer
-and the token.
+#+caption:Adding Bearer Token to Authorization Header
+#+name:angularjs-auth-jwt-app4--AuthInterceptor
+#+begin_src js
+app.factory('AuthInterceptor', function AuthInterceptor(AuthTokenFactory) {
+    'use strict';
+    return ({
+        request: addToken
+    });
+
+    function addToken(config) {
+        var token = AuthTokenFactory.getToken();
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = 'Bearer ' + token;
+        }
+        return config;
+    }
+});
+#+end_src
+
+04:16 Now we're sending the =token= on every HTTP request. But not quite
+actually.  We do need to do one more thing, and that is in our =app= config
+(~angular.module()~), we need to inject =$httpProvider=.  On that
+=$httpProvider=, it has an array called =interceptors=.  We're going to push on
+that array, just a string, that is the name of our =Interceptor=.  Angular will
+look up this =Interceptor=, and every single request that =$http= makes will
+pass through our function that we defined down here, this =addToken= function.
+
+#+caption:Add AuthInterceptor to ~app config~
+#+name:angularjs-auth-jwt-app--var_app4---interceptor
+#+begin_src js
+var app = angular.module('app', [], function config($httpProvider) {
+    $httpProvider.interceptors.push('AuthInterceptor');
+});
+#+end_src
+
+**** Verifying the Authorization Bearer Token on a Request
+04:51 We can see that in action here.  Let's refresh our client code, we'll say
+'kentcdodds' 'p', and let's go ahead and look at our network tab.  We login,
+and we can see the =token= is given to us.
+
+[[file:./resources/angularjs-auth-jwt--token-after-login-40.png]]
+
+We can see in here in our resources we have that =token= there.
+
+[[file: ./resources/angularjs-auth-jwt--token_in_local_storage-40.png]]
+
+Now if we say =Get User=, we'll click here, look at our headers, and it's right
+there, our =auth= =Authorization= header with the =Bearer= and the =token=.
+
+[[file:./resources/angularjs-auth-jwt--authorization_bearer_token-40.png]]
 
 **** Set Up the Logout User Feature
 05:21 Now we need to alter the server to take this token into account when get
@@ -3967,16 +4009,18 @@ next video.
 
 **** Code for app4 and Makefile
 
+#+caption:Code for app4.js with Authorization Bearer Token
 #+name:angularjs-auth-jwt-app4.js
 #+begin_src js :tangle angularjs-auth-jwt/public/app4.js :noweb yes :mkdirp yes
 (function() {
     'use strict';
-    <<angularjs-auth-jwt-app--var_app>>
+    <<angularjs-auth-jwt-app--var_app4---interceptor>>
     <<angularjs-auth-jwt-app--const_API_URL>>
     <<angularjs-auth-jwt-app3--controller.MainCtrl>>
     <<angularjs-auth-jwt-app--RandomUserFactory>>
     <<angularjs-auth-jwt-app4--UserFactory---save-token>>
     <<angularjs-auth-jwt-app4--AuthTokenFactory>>
+    <<angularjs-auth-jwt-app4--AuthInterceptor>>
 })()
 #+end_src
 
