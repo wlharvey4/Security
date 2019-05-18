@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:May 18, 2019
-#+macro:version 0.7.3.<2019-05-18 Sat 07:24>
+#+macro:version 0.7.4.<2019-05-18 Sat 08:18>
 Version {{{version}}} By {{{author}}}
 
 * JSON Web Tokens
@@ -3803,11 +3803,15 @@ protect.  Also, we don't actually know if we're logged in from the UI, so we're
 just going to add this really quickly.  We'll say =<h2>Welcome
 {{vm.user.username}}</h2>=.
 
+See [[*Set Up the Logout User Feature][Set Up the Logout User Feature]] for the =Logout= information.
+
 #+caption:Get User button with Welcome
 #+name:angularjs-auth-jwt-index--body---button.get_random_user----Welcome
 #+begin_src html
 <div>
   <h2>Welcome {{vm.user.username}}</h2>
+  <button ng-click="vm.logout()">Logout</button>
+  <br />
   <button ng-click="vm.getRandomUser()">Get User</button>
   <pre ng-bind="vm.randomUser | json"></pre>
 </div>
@@ -3873,11 +3877,12 @@ we'll take =AuthTokenFactory= and =setToken= to the =response.data.token=, and
 then we'll return the response for future items in the chain.
 
 #+name:angularjs-auth-jwt-app4--UserFactory---save-token
-#+begin_src js
+#+begin_src js :noweb yes
 app.factory('UserFactory', function UserFactory($http, API_URL, AuthTokenFactory) {
     'use strict';
     return ({
-        login: login
+        login: login,
+        logout: logout
     });
 
     function login(username, password) {
@@ -3889,6 +3894,8 @@ app.factory('UserFactory', function UserFactory($http, API_URL, AuthTokenFactory
             return response;
         });;
     }
+
+    <<aaja4-userfactory--logout>>
 });
 #+end_src
 
@@ -3972,40 +3979,88 @@ there, our =auth= =Authorization= header with the =Bearer= and the =token=.
 [[file:./resources/angularjs-auth-jwt--authorization_bearer_token-40.png]]
 
 **** Set Up the Logout User Feature
-05:21 Now we need to alter the server to take this token into account when get
-user is invoked so that that resource can be protected. That's what we'll do in
-the next video. One more thing that we want to do in here that I want to show
-you is how easy it is to logout. We have this auth token in here, we're logged
-in, and it's very simple to add a logout, so we'll just do that now.
+05:21 Now we need to alter the server to take this =token= into account when
+=Get User= is invoked so that that resource can be protected.  That's what
+we'll do in the next video.
 
-05:45 We'll create a button called logout, I'll just add a break here, and
-we'll say ngclick is equal to vm.logout, and then up here we'll say vm.logout
-is equal to logout, and we'll create logout here, and we'll say
-userfactory.logout. Then in our user factory we have it log in, we'll have it
-logout. Then well logout, and we say that auth token factory set token to
-nothing, and that will remove the token from local storage, because that's how
-we implemented it down here.
+One more thing that we want to do in here that I want to show you is how easy
+it is to logout.  We have this =auth-token= in here (local storage), we're
+logged in, and it's very simple to add a =Logout= button (to ~index.html~), so
+we'll just do that now.
 
-06:29 Then for the view side of things, will say vm.user equals null. If we
-refresh the page, you can see the auth token is still there, and we don't have
-any logic to automatically log the user in to the client, and we'll build that
-in the future. But here we have the user logged in, now we have this logout
-button. If we click logout, you can see that the auth token is removed from
-local storage, and no longer is the user name appearing here.
+{{{heading(Add a Logout Button to =index.html=)}}}
 
-06:55 If we refresh, that key is still gone, and then we can login and
-logout. Just in review, we simply added a auth token factory to store the auth
-token in local storage, and then we get that token from local storage on every
-single request using our auth interceptor, and attaching it to the
-authorization header, with bearer and token. Then we take that auth interceptor
-and push it onto the interceptors of the HTTP provider.
+05:45 We'll create a button called =Logout=.  I'll just add a break =<br />=
+here, and we'll say =ngclick= is equal to =vm.logout=.
 
-07:27 We also implemented a logout function that simply set the user to null,
-and removed the token from local storage. In the next video, we'll talk about
-what we need to do to make it so that when a request is made to get a random
-user, the server will take that token into account, and protect that resource
-to only those who have a signed, verified token. That's what we'll see in the
-next video.
+{{{heading(Add a logout function to the app)}}}
+
+And then up here (in in ~app.controller~) we'll say =vm.logout= is equal to
+=logout=, and we'll create =logout= here, and we'll say =UserFactory.logout=
+equals =logout=. <<vm.user-null>>
+
+#+caption:Logout Functionality
+#+name:aaja4-logout
+#+begin_src js
+vm.logout = logout;
+function logout() {
+    UserFactory.logout();
+    vm.user = null;
+}
+#+end_src
+
+#+caption:Login on the App controller with Token
+#+name:angularjs-auth-jwt-app4--controller.MainCtrl
+#+begin_src js :noweb yes
+app.controller('MainCtrl', function MainCtrl(RandomUserFactory, UserFactory) {
+    'use strict';
+    var vm = this;
+
+    <<aaja2-getRandomUser>>
+    <<aaja3-login>>
+    <<aaja4-logout>>
+    <<aaja2-handleError>>
+})
+#+end_src
+
+Then in our =UserFactory= where we have it =login=, we'll have it =logout=.
+Then well logout, and we say that =AuthTokenFactory.setToken()= to nothing, and
+that will remove the =token= from local storage, because that's how we
+implemented it down here.
+
+#+name:aaja4-userfactory--logout
+#+begin_src js
+function logout() {
+    AuthTokenFactory.setToken();
+}
+#+end_src
+
+06:29 Then for the view side of things (back to ~app.controller~, see [[vm.user-null][above]]),
+will say =vm.user= equals =null=.
+
+If we refresh the page, you can see the =auth-token= is still there, and we
+don't have any logic to automatically log the user in to the client, and we'll
+build that in the future.  But here we have the user logged in, now we have
+this =Logout= button.  If we click =Logout=, you can see that the =auth-token=
+is removed from local storage, and no longer is the user name appearing here.
+
+**** Review of Authorization Bear Token Functionality and Logout
+06:55 If we refresh, that key is still gone, and then we can login and logout.
+Just in review, we simply added a =AuthTokenFactory= to store the =auth-token=
+in local storage, and then we get that =token= from local storage on every
+single request using our =AuthInterceptor=, and attaching it to the
+=Authorization= header, with =Bearer = and =token=.  Then we take that
+=AuthInterceptor= and push it onto the =interceptors= of the =$httpProvider=.
+
+{{{heading(Review of Logout)}}}
+
+07:27 We also implemented a =logout= function that simply set the =user= to
+null, and removed the =token= from local storage.
+
+In the next video, we'll talk about what we need to do to make it so that when
+a request is made to get a random user, the server will take that token into
+account, and protect that resource to only those who have a signed, verified
+=token=.  That's what we'll see in the next video.
 
 **** Code for app4 and Makefile
 
@@ -4016,7 +4071,7 @@ next video.
     'use strict';
     <<angularjs-auth-jwt-app--var_app4---interceptor>>
     <<angularjs-auth-jwt-app--const_API_URL>>
-    <<angularjs-auth-jwt-app3--controller.MainCtrl>>
+    <<angularjs-auth-jwt-app4--controller.MainCtrl>>
     <<angularjs-auth-jwt-app--RandomUserFactory>>
     <<angularjs-auth-jwt-app4--UserFactory---save-token>>
     <<angularjs-auth-jwt-app4--AuthTokenFactory>>
