@@ -2,8 +2,19 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 1, 2019
-#+macro:version 0.8.0.<2019-12-01 Sun 20:50>
+#+macro:version 0.8.1.<2019-12-02 Mon 23:59>
 Version {{{version}}} By {{{author}}}
+
+* Overview of OAuth2 and OIDC
+Prior to 2007 there was no way to safey delegate authorization.  Around 2007
+the OAuth discussion group was formed around Twitter.  This group eventually
+released a spec.  Now, when an app wants to access a user's data, the app
+redirects the user to the user's resource owner where the user is presented
+with a consent screen informing the user as to what resources the app wants to
+access if allowed.  If the user authorizes the request, the app is given a
+token which provides access.  The app no longer needs to obtain and store
+sensitive data and the user no longer needs to worry about the app misusing its
+credentials.
 
 * JSON Web Tokens
 ** Article---How JWTs Secure Your API
@@ -4833,7 +4844,7 @@ signature, MAC, and encryption algorithms.
 [[*%5B%5Bhttps://www.jscape.com/blog/what-is-hmac-and-how-does-it-secure-file-transfers%5D%5BWhat Is HMAC And How Does It Secure File Transfers?%5D%5D][What Is HMAC And How Does It Secure File Transfers?]]
 
 * OAuth 2.0
-- [[https://tools.ietf.org/html/rfc6749][RFC 6749]] The OAuth 2.0 Authorization Framework
+- [[https://tools.ietf.org/html/rfc6749][RFC 6749]] The OAuth 2.0 Authorization Framework---October 2012
 
   The OAuth 2.0 authorization framework enables a third-party application to
   obtain limited access to an HTTP service, either on behalf of a resource
