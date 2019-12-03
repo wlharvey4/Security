@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 1, 2019
-#+macro:version 0.8.1.<2019-12-02 Mon 23:59>
+#+macro:version 0.8.2.<2019-12-03 Tue 00:20>
 Version {{{version}}} By {{{author}}}
 
 * Overview of OAuth2 and OIDC
@@ -16,6 +16,63 @@ token which provides access.  The app no longer needs to obtain and store
 sensitive data and the user no longer needs to worry about the app misusing its
 credentials.
 
+
+{{{heading(Authorization vs Authentication)}}}
+
+/Authorization/ is all about finding out who is allowed to access certain data
+and functionality.
+
+/Authentication/ is all about logging in.
+
+While OAuth solved the authorization problems present on the web at the time,
+it didn’t even attempt to tackle authentication issues.  OAuth’s lack of
+authentication guidance led to a number of confusing, complex integration
+scenarios, which is precisely why OpenID Connect (OIDC) was created.
+
+OIDC is a newer standard that extends OAuth, adding support for
+authentication. It doesn’t change any of the OAuth behaviors, all it does is
+add some extra stuff to solve both authentication and authorization challenges
+that most web developers face.
+
+The OIDC specification also clarified a number of ambiguities in the original
+OAuth spec, giving implementors a much clearer understanding of what
+technologies to use under the hood, how to validate requests and a number of
+other things.
+
+{{{heading(Grant Types)}}}
+
+The OAuth and OIDC specs (and extensions) cover authentication and
+authorization for:
+
+- Users logging into a server-side web application
+- Users logging into a client-side web application
+- Users logging into a native mobile application
+- Users logging into a TV/device application
+- Server-to-server API authorization
+- Etc.
+
+
+These use case scenarios are translated into a concept called /grant types/ in
+the OAuth specification, and each one works differently and has different
+security profiles that the implementor needs to be aware of.  In addition to
+grant types, implementors must also understand /tokens/ (specifically, /JSON
+Web Tokens/) (which are a part of the OIDC specification).
+
+In order to successfully implement OAuth/OIDC in your environment, you (as a
+developer) need to fully understand:
+
+- What the different OAuth grant types are
+- Which grant types you should be using in your application in which scenarios
+- What JWTs are
+- How to generate JWTs securely and keep your keys safe
+- How to sign (and optionally encrypt) your JWTs: what options do you use?
+- How to validate JWTs
+- How to assess the security repercussions of using JWTs in different ways
+- And lots more
+
+
+OAuth and OIDC are complicated, and it takes a lot of time and effort to
+understand and use them properly without opening yourself up to exploitation.
 * JSON Web Tokens
 ** Article---How JWTs Secure Your API
 :PROPERTIES:
