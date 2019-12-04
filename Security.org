@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 3, 2019
-#+macro:version 0.8.5.<2019-12-04 Wed 08:32>
+#+date:December 4, 2019
+#+macro:version 0.8.6.<2019-12-04 Wed 13:14>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -9148,16 +9148,66 @@ https://micah.okta.com				# OKTA Tenant
   redirect_uri=https%3A%2F%2Fokta-oidc-fun.herokuapp.com%2Fflow_result
 #+end_example
 
+#+cindex:authorization code
+#+cindex:state string
 After clicking =continue=, the server will redirect you to the =redirect_uri=
-site and will provide you with an authorization code and the =state= string,
+site and will provide you with an /authorization code/ and the =state= string,
 which must be the same one you sent to it.
 
+#+cindex:session
 Behind the scenes, a session is established with a fixed =username= and
 =password=.  If you deploy this app on your own (which you can easily do from
 [[https://github.com/oktadeveloper/okta-oidc-flows-example#okta-openid-connect-fun][here]]), when you click the link you would be redirected to login and then
 redirected back to this same page.
 
+#+cindex:authorization code, exchange
+#+cindex:@code{id_token}
+#+cindex:@code{access_token}
+#+cindex:tokens
+The authorization code received on the redirect can now be exchanged for an
+=id_token= and an =access_token= by the middle tier---a Spring Boot
+application, in this case.  This middle tier will validate the state we sent in
+the authorize request earlier and make a ~/token~ request using the Client
+Secret to mint an =access_token= and =id_token= for the user.
+
 **** Implicit Flow
+The Implicit flow is covered in [[http://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth][Section 3.2 of the OIDC spec]].
+
+Essentially, access and ID tokens are returned directly from the
+~/authorization~ endpoint.  The ~/token~ endpoint is not used.  This is a
+suitable approach when working with a client (such as a Single Page Application
+or mobile application) that you want to interact with the OIDC OP directly.
+
+Here’s an example of how this flow gets started using Okta:
+
+#+begin_example
+  https://micah.okta.com/oauth2/aus2yrcz7aMrmDAKZ1t7/v1/authorize?
+    client_id=0oa2yrbf35Vcbom491t7&
+    response_type=id_token+token&
+    scope=openid&
+    state=shrill-word-accessible-iron&
+    nonce=f8c658f0-1eb9-4f8d-8692-5da4e2f24cf0&
+    redirect_uri=https%3A%2F%2Fokta-oidc-fun.herokuapp.com%2Fflow_result
+#+end_example
+
+#+cindex:@code{id_token}
+#+cindex:@code{token}
+#+cindex:@code{id_token+token}
+#+cindex:response_type, implicit flow
+#+cindex:identity information
+#+cindex:bearer token
+#+cindex:JWT, access token
+It’s almost identical to the authorization code flow, except that the
+=response_type= is either =id_token=, =token= or =id_token+token=.  An
+=id_token= encodes /identity information/ and an =access_token (returned if
+=token= is specified) is a /bearer token/ used to access resources.  Okta also
+uses JWT for an =access_token=, which enables additional information to be
+encoded into it.
+
+Upon redirect to the =redirect_url=, the application can verify the =id_token=
+locally.  Use the ~/introspect~ endpoint to verify the =access_token=.  It can
+also use the =access=_token= as a/ bearer token/ to hit protected resources,
+such as the ~/userinfo~ endpoint.
 
 **** Hybrid Flow
 
