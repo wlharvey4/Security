@@ -2,8 +2,36 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 3, 2019
-#+macro:version 0.8.3.<2019-12-03 Tue 09:27>
+#+macro:version 0.8.3.<2019-12-03 Tue 20:02>
 Version {{{version}}} By {{{author}}}
+
+* Cross Origin Resource Sharing (CORS)
+- https://www.w3.org/TR/access-control/
+
+- [[https://www.w3.org/wiki/CORS][CORS Wiki Page]] The text below was previously part of the CORS
+  specification. It was taken out per a suggestion at the May 2012 F2F so it
+  could be maintained by the wider web community.
+
+- [[https://fetch.spec.whatwg.org/#http-cors-protocol][CORS Protocol]] To allow sharing responses cross-origin and allow for more
+  versatile fetches than possible with HTML’s form element, the CORS protocol
+  exists. It is layered on top of HTTP and allows responses to declare they can
+  be shared with other origins.  This section explains the CORS protocol as it
+  pertains to server developers. Requirements for user agents are part of the
+  fetch algorithm, except for the new HTTP header syntax.  The CORS protocol
+  consists of a set of headers that indicates whether a response can be shared
+  cross-origin.
+
+
+This document defines a mechanism to enable client-side cross-origin requests.
+Specifications that enable an API to make cross-origin requests to resources
+can use the algorithms defined by this specification.
+
+#+cindex:CORS, definition
+-  CORS :: A request for a resource (like an image or a font) outside of the
+           origin is known as a cross-origin request.  CORS (cross-origin
+           resource sharing) manages cross-origin requests.
+
+           file:./resources/same-origin-40.png
 
 * Overview of OAuth2 and OIDC
 Prior to 2007 there was no way to safey delegate authorization.  Around 2007
@@ -8411,10 +8439,36 @@ to start, make sure you don’t miss our upcoming tutorial for setting up a
 Node.js app using Typeform’s PassportJS strategy for authentication (or grab a
 free Node.js Typeform integration boilerplate [[https://github.com/anabellaspinelli/typeform-oauth-boilerplate][here]]!)
 
+* OAuth 2.0 Bearer Token Usage
+- RFC 6750---[[https://tools.ietf.org/html/rfc6750][The OAuth 2.0 Authorization Framework: Bearer Token Usage]]
+
+
+This specification describes how to use bearer tokens in HTTP requests to
+access OAuth 2.0 protected resources.  Any party in possession of a bearer
+token (a "bearer") can use it to get access to the associated resources
+(without demonstrating possession of a cryptographic key).  To prevent misuse,
+bearer tokens need to be protected from disclosure in storage and in transport.
+
 * OpenID Connect
 - https://openid.net/connect/
 - [[http://tools.ietf.org/html/rfc6749][RFC 6749]]
+- [[https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth][OpenID Connect Core 1.0]]
 
+
+{{{heading(From the OIDC 1.0 Core Spec Abstract)}}}
+
+#+cindex:OpenID Connect 1.0
+#+cindex:OIDC spec
+OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 protocol.
+It enables Clients to verify the identity of the End-User based on the
+authentication performed by an Authorization Server, as well as to obtain basic
+profile information about the End-User in an interoperable and REST-like
+manner.
+
+This specification defines the core OpenID Connect functionality:
+authentication built on top of OAuth 2.0 and the use of Claims to communicate
+information about the End-User.  It also describes the security and privacy
+considerations for using OpenID Connect.
 
 {{{heading((Identity, Authentication) + OAuth 2.0 = OpenID Connect)}}}
 
@@ -9048,6 +9102,31 @@ types. Here’s a quick reference:
 
 *** Part 2---OIDC In Action---The Mechanics
 - https://developer.okta.com/blog/2017/07/25/oidc-primer-part-2
+
+- [[https://okta-oidc-fun.herokuapp.com/][OIDC flow test site]]
+
+
+In this post, we’ll dive into the mechanics of OIDC and see the various flows
+in action.  The token(s) you get back from an OIDC flow and the contents of the
+~/userinfo~ endpoint are a function of the flow type and scopes requested.  You
+can see this live on the OIDC flow test site (see link above).  Here, you can
+set different toggles for =scope= and =response_type=, which determines the
+type of flow for your app.
+
+Your use case will determine which flow to use. Are you building a SPA or
+mobile app that needs to interact directly with the OpenID Provider (OP)?  Do
+you have middleware, such as Spring Boot or Node.js Express that will interact
+with the OP?  Below, we dig into some of the available flows and when it’s
+appropriate to use them.
+
+**** Authorization Code Flow
+The Authorization Code flow is covered in [[http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth][Section 3.1 of the OIDC spec]].
+
+**** Implicit Flow
+
+**** Hybrid Flow
+
+**** Other OIDC Flows
 
 *** Part 3---What's In A Token
 - https://developer.okta.com/blog/2017/08/01/oidc-primer-part-3
