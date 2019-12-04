@@ -2,10 +2,10 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 3, 2019
-#+macro:version 0.8.3.<2019-12-03 Tue 20:02>
+#+macro:version 0.8.4.<2019-12-04 Wed 08:16>
 Version {{{version}}} By {{{author}}}
 
-* Cross Origin Resource Sharing (CORS)
+* Cross Origin Resource Sharing---CORS
 - https://www.w3.org/TR/access-control/
 
 - [[https://www.w3.org/wiki/CORS][CORS Wiki Page]] The text below was previously part of the CORS
@@ -9120,7 +9120,42 @@ with the OP?  Below, we dig into some of the available flows and when it’s
 appropriate to use them.
 
 **** Authorization Code Flow
+#+cindex:authorization code flow
+#+cindex:flow, authorization code
 The Authorization Code flow is covered in [[http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth][Section 3.1 of the OIDC spec]].
+
+#+cindex:authorization endpoint
+#+cindex:token endpoint
+In short, a code is returned from the ~/authorization~ endpoint which can be
+exchanged for ID and access tokens using the ~/token~ endpoint.  This is a
+suitable approach when you have a middleware client connected to an OIDC OP and
+don’t (necessarily) want tokens to ever come back to an end-user application,
+such as a browser.  It also means the end-user application never needs to know
+a secret key.
+
+Here’s an example of how this flow gets started using Okta:
+
+: https://okta-oidc-fun.herokuapp.com/continue?code=X7u1GvtPBgZ8ASkMa7zz&state=abrasive-yard-unarmed-fall
+
+#+begin_example
+https://micah.okta.com				# OKTA Tenant
+  /oauth2/aus2yrcz7aMrmDAKZ1t7/v1/authorize?	# Authorization URL
+  client_id=0oa2yrbf35Vcbom491t7&		# Client ID of OIDC application
+  response_type=code&				# Code Flow
+  scope=openid&					# openid scope requested
+  state=little-room-greasy-pie&			# Random value; returned at end of flow
+  nonce=b1e7b75d-6248-4fc7-bad0-ac5ae0f2e581&	# Random value; encoded into id_token
+  redirect_uri=https%3A%2F%2Fokta-oidc-fun.herokuapp.com%2Fflow_result
+#+end_example
+
+After clicking =continue=, the server will redirect you to the =redirect_uri=
+site and will provide you with an authorization code and the =state= string,
+which must be the same one you sent to it.
+
+Behind the scenes, a session is established with a fixed =username= and
+=password=.  If you deploy this app on your own (which you can easily do from
+[[https://github.com/oktadeveloper/okta-oidc-flows-example#okta-openid-connect-fun][here]]), when you click the link you would be redirected to login and then
+redirected back to this same page.
 
 **** Implicit Flow
 
