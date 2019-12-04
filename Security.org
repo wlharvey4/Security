@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 3, 2019
-#+macro:version 0.8.4.<2019-12-04 Wed 08:16>
+#+macro:version 0.8.5.<2019-12-04 Wed 08:32>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11847,6 +11847,41 @@ That's why some organizations have started implementing SSO or Single Sign-On.
 - To facilitate the use of electronic records and signatures in interstate or
   foreign commerce.
 
+* Node Security
+
+** Article---Simple Node Authentication
+:PROPERTIES:
+:author:   Braden Kelley
+:date:     2018-04-24
+:END:
+- https://developer.okta.com/blog/2018/04/24/simple-node-authentication
+
+
+Authenticating users for Node.js/Express.js web apps can be difficult.  You
+have to set up a database, define a user schema (or use something more flexible
+like NoSQL), write code to handle password hashing, etc.  It’s annoying.
+
+#+cindex:OIDC, Node integration
+Using Okta’s API service, however, you can easily register and log in users to
+your Node website using our OpenID Connect integration.
+
+** Node Express Application With Security
+A simple sample application built using Node and Express that contains user
+login, registration, and password reset functionality.
+
+- [[https://github.com/oktadeveloper/okta-node-express-example][okta-node-express-example]]
+
+
+This example shows how to create a website in Node and Express that uses Okta
+for authentication.  The application was bootstrapped with Express Generator.
+You can see it online at:
+
+- https://okta-node-express-example.herokuapp.com.
+
+
+Please read [[https://developer.okta.com/blog/2018/04/24/simple-node-authentication][Simple Node Authentication]] to see how this application was created,
+and [[https://developer.okta.com/blog/2018/06/26/securely-manage-users-node-app][How to Securely Manage Users in Your Node App]] to see how the user profile
+page was created.
 * Listings
 :PROPERTIES:
 :unnumbered: t
