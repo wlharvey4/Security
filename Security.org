@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 4, 2019
-#+macro:version 0.8.9.<2019-12-05 Thu 09:21>
+#+macro:version 0.8.10.<2019-12-05 Thu 09:28>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -8565,6 +8565,22 @@ In subsequent posts, we’ll look at:
 :author:   Micah Silverman
 :date:     2017-07-25
 :END:
+
+All the code used in this series can be found on:
+- [[https://github.com/oktadeveloper/okta-oidc-flows-example][on github here]]
+
+
+You can use the OIDC sample app to exercise the various flows and scopes
+discussed throughout these posts.  It’s at:
+-  https://okta-oidc-fun.herokuapp.com/
+
+
+The entire final OIDC spec can be found:
+- [[http://openid.net/specs/openid-connect-core-1_0.html][OIDC Spec]]
+
+
+And you can learn more about OAuth 2.0 at:
+- [[https://www.oauth.com/][oauth.com]]
 
 *** Part 1---Identity-Claims-Tokens---Basics and History
 - https://developer.okta.com/blog/2017/07/25/oidc-primer-part-1
