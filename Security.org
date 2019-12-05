@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 4, 2019
-#+macro:version 0.8.6.<2019-12-04 Wed 13:14>
+#+macro:version 0.8.7.<2019-12-04 Wed 22:24>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -9210,6 +9210,50 @@ also use the =access=_token= as a/ bearer token/ to hit protected resources,
 such as the ~/userinfo~ endpoint.
 
 **** Hybrid Flow
+#+cindex:hybrid flow
+#+cindex:flow, hybrid
+The Hybrid flow is covered in [[http://openid.net/specs/openid-connect-core-1_0.html#HybridFlowAuth][Section 3.3 of the OIDC spec]].
+
+In this flow, some tokens are returned from the authorization endpoint
+(~/authorize~) and others are returned from the token endpoint (~/token~).
+This is a suitable approach when you want your end-user application to have
+immediate access to short-lived tokens---such as the =id_token= for identity
+information, and also want to use a backend service to exchange the
+authorization code for longer-lived tokens using refresh tokens.  It’s a
+combination of the authorization code and implicit code flows.  You can spot it
+by looking at the =response_type=: it must contain =code= and one or both of
+=id_token= and =token=:
+
+#+begin_example
+  https://micah.okta.com/oauth2/aus2yrcz7aMrmDAKZ1t7/v1/authorize?
+    client_id=0oa2yrbf35Vcbom491t7&
+    response_type=code+id_token+token&
+    scope=openid&
+    state=shrill-word-accessible-iron&
+    nonce=f8c658f0-1eb9-4f8d-8692-5da4e2f24cf0&
+    redirect_uri=https%3A%2F%2Fokta-oidc-fun.herokuapp.com%2Fflow_result
+#+end_example
+
+You are redirected back to the =redirect_uri= originally specified (with the
+returned code, tokens and original state).
+
+Here’s the response from the ~/userinfo~ endpoint using the =access_token= as a
+bearer token:
+
+#+begin_src js
+  {
+          "sub": "00u2yulup4eWbOttd1t7",
+          "name": "Okta OIDC Fun",
+          "locale": "en-US",
+          "email": "okta_oidc_fun@okta.com",
+          "preferred_username": "okta_oidc_fun@okta.com",
+          "given_name": "Okta OIDC",
+          "family_name": "Fun",
+          "zoneinfo": "America/Los_Angeles",
+          "updated_at": 1499922371,
+          "email_verified": true
+  }
+#+end_src
 
 **** Other OIDC Flows
 
