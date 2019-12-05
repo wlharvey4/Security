@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 4, 2019
-#+macro:version 0.8.7.<2019-12-04 Wed 22:24>
+#+macro:version 0.8.8.<2019-12-05 Thu 08:27>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -9256,6 +9256,17 @@ bearer token:
 #+end_src
 
 **** Other OIDC Flows
+
+#+cindex:Client Credentials flow
+#+cindex:Resource Owner Password Credentials flow
+There are two other flows:
+
+- [[https://tools.ietf.org/html/rfc6749#section-4.4][Client Credentials Flow]]
+
+- [[https://tools.ietf.org/html/rfc6749#section-4.3][Resource Owner Password Credentials]]
+
+
+These flows do not require an external authentication provider.
 
 *** Part 3---What's In A Token
 - https://developer.okta.com/blog/2017/08/01/oidc-primer-part-3
