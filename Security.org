@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 4, 2019
-#+macro:version 0.8.13.<2019-12-07 Sat 17:33>
+#+macro:version 0.8.14.<2019-12-07 Sat 17:56>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -13337,6 +13337,57 @@ You can see it online at:
 Please read [[https://developer.okta.com/blog/2018/04/24/simple-node-authentication][Simple Node Authentication]] to see how this application was created,
 and [[https://developer.okta.com/blog/2018/06/26/securely-manage-users-node-app][How to Securely Manage Users in Your Node App]] to see how the user profile
 page was created.
+* Cheat Sheet on Implementing HTML 5 In a Secure Fashion
+- https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html
+
+
+** Introduction to Implementing Secure HTML 5
+The following cheat sheet serves as a guide for implementing HTML 5 in a secure
+fashion.
+
+** Communication APIs
+
+*** Web Messaging
+
+*** Cross Origin Resource Sharing
+
+*** WebSockets
+
+**** WebSocket implementation hints
+
+***** Access filtering
+
+***** Authentication and Input/Output validation
+
+***** Authorization and access token explicit invalidation
+
+***** Confidentiality and Integrity
+
+*** Server-Sent Events
+
+** Storage APIs
+
+*** Local Storage
+
+*** Client-Side Databases
+
+** Geolocation
+
+** Web Workers
+
+** Tabnabbing
+
+** Sandboxed Frames
+
+** Credential and Personally Identifiable Information Input Hints
+
+** Offline Applications
+
+** Progressive Enhancements and Graceful Degradation Risks
+
+** HTTP Headers to enhance security
+
+** 
 * Listings
 :PROPERTIES:
 :unnumbered: t
