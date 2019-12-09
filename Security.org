@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 4, 2019
-#+macro:version 0.9.0.<2019-12-07 Sat 18:55>
+#+macro:version 0.9.1.<2019-12-09 Mon>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -9279,6 +9279,7 @@ AWS now supports OpenID Connect (OIDC)
 [[https://aws.amazon.com/blogs/aws/openid-connect-support/][OpenID Connect Support for Amazon Cognito]] Cognito takes the ID token that you
 obtain from the OIDC identity provider and uses it to manufacture unique
 Cognito IDs for each person who uses your app.
+
 ** Article---OpenID Connect Authorization Code Flow with AWS Cognito
 :PROPERTIES:
 :url:      https://medium.com/@robert.broeckelmann/openid-connect-authorization-code-flow-with-aws-cognito-246997abd11a
@@ -9310,6 +9311,7 @@ In subsequent posts, we’ll look at:
 - Demonstrate federated user registration and login with social login providers
   (Facebook, Google+), SAML2, and OpenID Connect.
 - How to use access tokens issued from AWS Cognito with the AWS API Gateway.
+
 ** Article---An OpenID Connect Primer in Three Parts
 :PROPERTIES:
 :author:   Micah Silverman
@@ -10848,6 +10850,61 @@ free — you only pay for your consumption, not for having an account), then
 can set up the awsmobile CLI to make configuring things easy. I’m going to
 assume you have already set up the [[https://facebook.github.io/react-native/docs/getting-started.html][React Native CLI]] on your system and
 installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
+* Amazon Cognito
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html][AWS Documentation-Amazon Cognito-Developer Guide]]
+
+
+#+cindex:Cognito
+#+cindex:Amazon Cognito
+Amazon Cognito provides:
+
+- authentication
+- authorization
+- user management
+
+
+{{{noindent}}}for your web and mobile apps.  Your users can sign in directly
+with a user name and password, or through a third party such as:
+
+- Facebook
+- Amazon
+- Google
+- Apple
+
+
+{{{heading(Main Components of Cognito)}}}
+
+#+cindex:user pools
+#+cindex:identity pools
+The two main components of Amazon Cognito are:
+
+- user pools :: user directories that provide sign-up and sign-in options for
+                your app users
+
+- identity pools :: enable you to grant your users access to other AWS services
+
+
+{{{noindent}}}You can use identity pools and user pools separately or together.
+
+{{{subheading(An Amazon Cognito user pool and identity pool used together)}}}
+
+See the diagram for a common Amazon Cognito scenario.  Here the goal is to
+authenticate your user, and then grant your user access to another AWS service.
+
+1. In the first step your app user signs in through a user pool and receives
+   user pool tokens after a successful authentication.
+
+2. Next, your app exchanges the user pool tokens for AWS credentials through an
+   identity pool.
+
+3. Finally, your app user can then use those AWS credentials to access other
+   AWS services such as Amazon S3 or DynamoDB.
+
+
+#+caption:User Pools and Identity Pools
+#+name:user-pools-and-identity-pools
+[[file:resources/scenario-cup-cib2.png][file:/usr/local/dev/programming/Security/Security-Info/resources/scenario-cup-cib2.png]]
+
 * Essentials of Cybersecurity
 :PROPERTIES:
 :source:   UWashingtonX
