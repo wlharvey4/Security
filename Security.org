@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 4, 2019
-#+macro:version 0.9.1.<2019-12-09 Mon>
+#+date:December 15, 2019
+#+macro:version 0.9.2.<2019-12-15 Sun 00:21>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11403,21 +11403,280 @@ The two main components of Amazon Cognito are:
 {{{subheading(An Amazon Cognito user pool and identity pool used together)}}}
 
 See the diagram for a common Amazon Cognito scenario.  Here the goal is to
-authenticate your user, and then grant your user access to another AWS service.
 
-1. In the first step your app user signs in through a user pool and receives
-   user pool tokens after a successful authentication.
+- *authenticate* your user, and
 
-2. Next, your app exchanges the user pool tokens for AWS credentials through an
-   identity pool.
+- then *grant* your user access to another AWS service.
 
-3. Finally, your app user can then use those AWS credentials to access other
-   AWS services such as Amazon S3 or DynamoDB.
+
+{{{heading(Steps)}}}
+
+1. In the first step your app user *signs in* through a /user pool/ and receives
+  /user pool tokens/ after a successful authentication.
+
+2. Next, your app *exchanges* the user pool tokens for /AWS credentials/ through
+  an /identity pool/.
+
+3. Finally, your app user can then use those /AWS credentials/ to access other
+  AWS services such as Amazon S3 or DynamoDB.
 
 
 #+caption:User Pools and Identity Pools
 #+name:user-pools-and-identity-pools
 [[file:resources/scenario-cup-cib2.png][file:/usr/local/dev/programming/Security/Security-Info/resources/scenario-cup-cib2.png]]
+
+** Features of Amazon Cognito
+
+*** User Pools
+
+A /user pool/ is a user directory in Amazon Cognito.  With a user pool, your
+users can sign in to your web or mobile app through Amazon Cognito, or federate
+through a third-party identity provider (IdP).  Whether your users sign in
+directly or through a third party, all members of the user pool have a
+directory profile that you can access through an SDK.
+
+User pools provide:
+
+- Sign-up and sign-in services.
+
+- A built-in, customizable web UI to sign in users.
+
+- Social sign-in with Facebook, Google, Login with Amazon, and Sign in with
+  Apple, and through SAML and OIDC identity providers from your user pool.
+
+- User directory management and user profiles.
+
+- Security features such as multi-factor authentication (MFA), checks for
+  compromised credentials, account takeover protection, and phone and email
+  verification.
+
+- Customized workflows and user migration through AWS Lambda triggers.
+
+*** Identify Pools
+
+With an /identity pool/, your users can obtain temporary AWS credentials to
+access AWS services, such as Amazon S3 and DynamoDB.  Identity pools support
+anonymous guest users, as well as the following identity providers that you can
+use to authenticate users for identity pools:
+
+- Amazon Cognito user pools
+
+- Social sign-in with Facebook, Google, Login with Amazon, and Sign in with
+  Apple
+
+- OpenID Connect (OIDC) providers
+
+- SAML identity providers
+
+- Developer authenticated identities
+
+
+To save user profile information, your identity pool needs to be integrated
+with a user pool.
+
+** Getting Started with Amazon Cognito
+
+{{{heading(Top Tasks)}}}
+
+*** Add Sign-up and Sign-in with a User Pool
+
+**** Step 1---Create a User Directory with a User Pool
+  By using an Amazon Cognito user pool, you can create and maintain a user
+  directory, and add sign-up and sign-in to your mobile app or web application.
+
+  {{{heading(To create a user pool:)}}}
+
+  1. Go to the [[https://console.aws.amazon.com/cognito/home][Amazon Cognito console]].
+
+  2. Choose *Manage User Pools*.
+
+  3. In the top-right corner of the page, choose *Create a user pool*
+
+  4. Provide a name for your user pool, and choose *Review defaults* to save
+     the name.
+
+  5. In the top-left corner of the page, choose *Attributes*, choose *Email
+     address or phone number* and *Allow email addresses*, and then choose
+     *Next step* to save.
+
+  6. In the top-left corner of the page, choose *Review*.
+
+  7. Review the user pool information and make any necessary changes. When the
+     information is correct, choose *Create pool*.
+
+**** Step 2---Add an App to Enable the Hosted Web UI
+
+  After you create a user pool, you can create an app to use the built-in
+  webpages for signing up and signing in your users.
+
+  {{{heading(To create an app in your user pool:)}}}
+
+  1. Go to the [[https://console.aws.amazon.com/cognito/home][Amazon Cognito console]].
+
+  2. Choose Manage your User Pools.
+
+  3. Choose an existing user pool from the list, or create a user pool.
+
+  4. On the navigation bar on the left-side of the page, choose *App clients*
+     under *General settings*.
+
+  5. Choose *Add an app client*.
+
+  6. Give your app a name.
+
+  7. Clear the option *Generate client secret* for the purposes of this getting
+     started exercise, as it would not be secure to send it on the URL using
+     client-side JavaScript.  The client secret is used by applications that
+     have a server-side component that can secure the client secret.
+
+  8. Choose *Create app client*.
+
+  9. Note the App client.
+
+     : 1cfa1mhp1prcvent4u1k0h57o1
+
+  10. Choose *Return to pool details*.
+
+  11. Configure the app.
+
+      - Choose *App client settings* from the navigation bar on the left-side
+        of the console page.
+
+      - Select *Cognito User Pool* as one of the Enabled Identity
+        Providers.[fn:4]
+
+      - Type a callback URL for the Amazon Cognito authorization server to call
+        after users are authenticated. For a web app, the URL should start with
+        =https://=, such as =https://www.example.com=.  For an iOS or Android
+        app, you can use a callback URL such as =myapp://=.
+
+      - Select *Authorization code grant* to return an authorization code that
+        is then exchanged for user pool tokens.  Because the tokens are never
+        exposed directly to an end user, they are less likely to become
+        compromised.  However, a custom application is required on the backend
+        to exchange the authorization code for user pool tokens.  For security
+        reasons, we recommend that you use the authorization code grant flow,
+        together with see [[https://tools.ietf.org/html/rfc7636][Proof Key for Code Exchange (PKCE)]], for mobile apps.
+
+        Under *Allowed OAuth Flows*, select *Implicit* grant to have user pool
+        JSON web tokens (JWT) returned to you from Amazon Cognito.  You can use
+        this flow when there's no backend available to exchange an
+        authorization code for tokens.  It's also helpful for debugging tokens.
+
+        You can enable both the *Authorization code grant* and the *Implicit
+        code grant*, and then use each grant as needed.[fn:5]
+
+        Unless you specifically want to exclude one, select the check boxes for
+        all of the *Allowed OAuth scopes*.
+
+  12. Configure a user pool domain.
+
+      - On the *Domain name page*, type a domain prefix that's available.
+
+      - Make a note of the complete domain address.
+
+      - Choose *Save changes*.
+
+
+{{{heading(To view your sign-in page)}}}
+
+You can view the hosted UI sign-in webpage with the following URL.  Note the
+=response_type=.  In this case, =response_type= = =code= for the authentication
+code grant.
+
+: https://<your_domain>/login?response_type=code&client_id=<your_app_client_id>&redirect_uri=<your_callback_url>
+
+You can view the hosted UI sign-in webpage with the following URL for the
+/implicit code grant/ where =response_type= = =token=.  After a successful
+sign-in, Amazon Cognito returns user pool tokens to your web browser's address
+bar.
+
+: https://<your_domain>/login?response_type=token&client_id=<your_app_client_id>&redirect_uri=<your_callback_url>
+
+You can find the JSON web token (JWT) identity token after the =#idtoken= =
+=parameter= in the response.  Here's a sample response from an implicit grant
+request.  Your identity token string will be much longer.
+
+: https://www.example.com/#id_token=123456789tokens123456789&expires_in=3600&token_type=Bearer  
+
+You can decode and verify user pool tokens using AWS Lambda, see [[https://github.com/awslabs/aws-support-tools/tree/master/Cognito/decode-verify-jwt][Decode and
+verify Amazon Cognito JWT tokens]] on the AWS GitHub website.
+
+Amazon Cognito user pools tokens are signed using an *RS256 algorithm*.
+
+Your domain is shown on the *Domain name* page.  Your app client ID and
+callback URL are shown on the *App client settings* page.
+
+**** Step 3---Add Social Sign-in to a User Pool
+  - https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-configuring-federation-with-social-idp.html
+
+
+  You can enable your app users to sign in through a social identity provider
+  (IdP) such as Facebook, Google, Amazon, and Apple.  Whether your users sign
+  in directly or through a third party, all users have a profile in the user
+  pool.  Skip this step if you don't want to add sign in through a social
+  sign-in identity provider.
+
+  1. Register with a Social IdP
+
+  2. Add a Social IdP to Your User Pool
+
+  3. Test Your Social IdP Configuration
+
+**** Adding OIDC Identity Providers to a User Pool
+- https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-oidc-idp.html
+
+
+You can enable your users who already have accounts with OpenID Connect (OIDC)
+identity providers (IdPs) (like Okta, Salesforce or Ping Identity) to skip the
+sign-up step—and sign in to your application using an existing account.  With
+the built-in hosted web UI, Amazon Cognito provides token handling and
+management for all authenticated users, so your backend systems can standardize
+on one set of user pool tokens.
+
+**** Integrating Amazon Cognito With Web and Mobile Apps
+- https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-integrate-apps.html
+
+
+When new users discover your app, or when existing users return to it, their
+first tasks are to sign up or sign in.  By integrating Amazon Cognito with your
+client code, you connect your app to backend AWS functionality that aids
+authentication and authorization workflows.  Your app will use the Amazon
+Cognito API to, for example, create new users in you user pool, retrieve user
+pool tokens, and obtain temporary credentials from your identity pool.  To
+integrate Amazon Cognito with your web or mobile app, use the SDKs and
+libraries that the AWS Amplify framework provides.
+
+***** Amazon Cognito Authentication With the AWS Amplify Framework
+
+AWS Amplify provides services and libraries for web and mobile developers.
+With AWS Amplify, you can build apps that integrate with backend environments
+that are composed of AWS services.  To provision your backend environment, and
+to integrate AWS services with your client code, you use the AWS Amplify
+framework.  The framework provides an interactive command line interface (CLI)
+that helps you configure AWS resources for features that are organized into
+categories, including analytics, storage, and authentication, among many
+others.  The framework also provides high-level SDKs and libraries for web and
+mobile platforms, including iOS, Android, and JavaScript.  Supported JavaScript
+frameworks include React, React Native, Angular, Ionic, and Vue.  Each of the
+SDKs and libraries include authentication operations that you can use to
+implement the authentication workflows that Amazon Cognito drives.
+
+To use the AWS Amplify framework to add authentication to your app, see the AWS
+Amplify documentation for your platform:
+
+- [[https://aws-amplify.github.io/docs/js/authentication][AWS Amplify authentication for JavaScript]]
+
+*** Manage Users in a User Pool
+
+**** TODO Signing Up and Confirming User Accounts
+
+User accounts are added to your user pool in one of the following ways:
+
+- The user signs up in your user pool's client app, which can be a mobile or
+  web app.
+
+*** Access Resources
 
 * Essentials of Cybersecurity
 :PROPERTIES:
@@ -13955,8 +14214,6 @@ fashion.
 ** Progressive Enhancements and Graceful Degradation Risks
 
 ** HTTP Headers to enhance security
-
-** 
 * Listings
 :PROPERTIES:
 :unnumbered: t
@@ -13992,6 +14249,14 @@ fashion.
 ** Local Variable Definitions
 
 * Footnotes
+
+[fn:5] *NOTE*: Select Client credentials only if your app needs to request
+access tokens on its own behalf, not on behalf of a user. 
+
+[fn:4] *NOTE:* To sign in with external identity providers (IdPs) such as
+Facebook, Amazon, Google, and Apple, as well as through OpenID Connect (OIDC)
+or SAML IdPs, first configure them as described next, and then return to the
+App client settings page to enable them. 
 
 [fn:3] Note that this will not work just opening the page from your filesystem
 due to cross-domain restrictions that browser have with =file://= URIs.
