@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 15, 2019
-#+macro:version 0.9.2.<2019-12-15 Sun 00:21>
+#+macro:version 0.9.3.<2019-12-15 Sun>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11678,6 +11678,322 @@ User accounts are added to your user pool in one of the following ways:
 
 *** Access Resources
 
+* Amazon Certificate Manager
+
+You can use ACM to manage SSL/TLS certificates for your AWS-based websites and
+applications.
+
+- [[https://docs.aws.amazon.com/acm/index.html][AWS Certificate Manager Documentation]]
+
+  - [[https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html][AWS Certifcate Manager User Guide]]
+
+  - [[https://docs.aws.amazon.com/acm/latest/APIReference/Welcome.html][AWS Certifcate Manager API Reference]]
+
+  - [[https://docs.aws.amazon.com/cli/latest/reference/acm/index.html][AWS Certifcate Manager API Documentation]]
+
+**  AWS Certificate Manager User Guide
+“Welcome to the AWS Certificate Manager (ACM) service.”
+
+ACM handles the complexity of creating and managing public SSL/TLS certificates
+for your AWS based websites and applications.
+
+- https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html
+
+
+You can use public [[https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html][certificates provided by ACM]] (ACM certificates).
+
+ACM certificates can 
+
+- secure multiple domain names and
+- multiple names within a domain.
+
+
+You can also use ACM to 
+
+- create wildcard SSL certificates that
+- can protect an unlimited number of subdomains.
+
+
+*** Concepts
+
+*** Best Practices
+
+Best practices are recommendations that can help you use AWS Certificate
+Manager (AWS Certificate Manager) more effectively.
+
+- https://docs.aws.amazon.com/acm/latest/userguide/acm-bestpractices.html
+
+
+**** AWS CloudFormation
+
+**** Certificate Pinning
+
+**** Domain Validation
+
+**** Adding or Deleting Domain Names
+
+**** Opting Out of Certificate Transparency Logging
+
+**** Turn on AWS CloudTrail
+Turn on CloudTrail logging before you begin using ACM.
+
+CloudTrail enables you to monitor your AWS deployments by retrieving a history
+of AWS API calls for your account, including API calls made via the AWS
+Management Console, the AWS SDKs, the AWS Command Line Interface, and
+higher-level AWS services.  ou can also identify which users and accounts
+called the ACM APIs, the source IP address the calls were made from, and when
+the calls occurred.  You can integrate CloudTrail into applications using the
+API, automate trail creation for your organization, check the status of your
+trails, and control how administrators turn CloudTrail logging on and off.
+
+- [[https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-create-and-update-a-trail.html][Creating a Trai]]
+
+- [[https://docs.aws.amazon.com/acm/latest/userguide/cloudtrail.html][Using AWS CloudTrail]]
+
+*** Setting Up
+
+The following topics discuss the steps you need to perform before using ACM.
+
+- https://docs.aws.amazon.com/acm/latest/userguide/setup.html
+
+
+**** Register a Domain Name
+
+- Fully Qualified Domain Name (FQDN) ::
+
+     the unique name of an organization or individual on the Internet followed
+     by a top-level domain extension such as ~.com~ or ~.org~.
+
+**** Set Up Your Website or Application
+
+You can install your website on an Amazon EC2 Linux or Windows instance.
+
+- [[https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html][Amazon Elastic Compute Cloud User Guide for Linux]]
+
+
+To get your website up and running quickly on either Windows or Linux, see:
+
+- [[https://docs.aws.amazon.com/acm/latest/userguide/#setup-website-linux][Linux Quickstart]]
+- [[https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-LAMP.html][Tutorial: Installing a LAMP Web Server on Amazon Linux]]
+
+*** Getting Started
+- https://docs.aws.amazon.com/acm/latest/userguide/gs.html
+
+
+{{{heading(Steps)}}}
+
+- [[https://console.aws.amazon.com/acm/home][Sign into the AWS Management Console]]
+
+- open the [[https://console.aws.amazon.com/acm/home][ACM console]]
+
+- choose *Certificate Manager* in the left navigation pane
+
+
+**** Request a Public Certificate
+- https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html
+
+
+The following sections discuss how to use the ACM console or AWS CLI to request
+a public ACM certificate.
+
+***** Requesting a Public Certificate Using the Console
+
+{{{heading(To request an ACM public certificate (console))}}}
+
+1. In the ACM console, choose *Request a certificate*.
+
+2. Choose *Request a public certificate* and *Request a certificate* to
+   continue.
+
+3. On the *Add domain names* page, type your domain name.
+
+   You can use a fully qualified domain name (FQDN), or a bare or apex domain
+   name.  You can also use an asterisk (*) as a wild card in the leftmost
+   position to protect several site names in the same domain.  The wild card
+   name will appear in the Subject field and the Subject Alternative Name
+   extension of the ACM certificate.
+
+4. To add another name, choose *Add another name to this certificate* and type
+   the name in the text box.  This is useful for protecting both a bare or apex
+   domain (such as example.com) and its subdomains such as *.example.com).
+   Choose *Next*.
+
+5. On the *Select validation method* page, choose either *DNS validation* or
+   *Email* validation, depending on your needs.  If you use DNS validation, you
+   simply write a =CNAME= record provided by ACM to your DNS configuration.
+   Choose *Next*.
+
+   - [[https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-validate-dns.html][Use DNS to Validate Domain Ownership]]
+
+6. On the *Add tags* page, you can optionally tag your certificate.  Choose
+   *Review*.
+
+7. If the *Review* page contains correct information about your request, choose
+   *Confirm and request*.  A confirmation page shows that your request is being
+   processed and that certificate domains are being validated.
+
+***** Requesting a Public Certificate Using the CLI
+
+Use the request-certificate command to request a new public ACM certificate on
+the command line.
+
+#+begin_src sh :eval no
+  aws acm request-certificate \
+  --domain-name www.example.com \
+  --validation-method DNS \
+  --idempotency-token 1234 \
+  --options CertificateTransparencyLoggingPreference=DISABLED
+#+end_src
+
+This command outputs the *Amazon Resource Name* (ARN) of your new public
+certificate.
+
+#+begin_src js :eval no
+  {
+      "CertificateArn": "arn:aws:acm:region:account:certificate/12345678-1234-1234-1234-123456789012"
+  }
+#+end_src
+
+**** Use DNS to Validate Domain Ownership
+- https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-validate-dns.html
+
+
+Before the Amazon certificate authority (CA) can issue a certificate for your
+site, AWS Certificate Manager (ACM) must verify that you own or control all of
+the domain names that you specified in your request.
+
+ACM uses =CNAME= (Canonical Name) records to validate that you own or control a
+domain.  When you choose DNS validation, ACM provides you one or more =CNAME=
+records to insert into your DNS database.
+
+For example, if you request a certificate for the ~example.com~ domain with
+~www.example.com~ as an additional name, ACM creates two =CNAME= records for
+you.  Each record, created specifically for your domain and your account,
+contains a name and a value.  The value is an alias that points to a domain
+that ACM owns and which ACM uses to automatically renew your certificate.  You
+add the =CNAME= records to your DNS database only once.  ACM automatically
+renews your certificate as long as the certificate is in use and your =CNAME=
+record remains in place.  In addition, if you use Amazon Route 53 to create
+your domain, ACM can write the =CNAME= records for you.
+
+**** To use DNS validation
+
+1. Sign into the AWS Management Console and open the ACM console at
+   https://console.aws.amazon.com/acm/home
+
+2. On the *Request a certificate* page, type your domain name.
+
+3. To add more domain names to the ACM Certificate, type other names as text
+   boxes open beneath the name you just typed.
+
+4. Choose *Next*.
+
+5. Choose *DNS validation*.
+
+6. Choose *Review and request*.  Verify that the domain name and validation
+   method are correct.
+
+7. Choose *Confirm and request*.
+
+8. On the *Validation page*, retrieve the name of the =CNAME= record that must
+   be added to your DNS database.  You can do this in two ways:
+
+   - In the *Domain* section, expand your domain information and record the
+     Name of the =CNAME= record.
+
+   - Alternatively, choose *Export DNS configuration to a file* at the bottom
+     of the *Validation* page.
+
+9. The *Create record in Route 53* button appears if the following conditions
+   are true:
+
+   - You use Route 53 as your DNS provider.
+
+   - You have permission to write to the zone hosted by Route 53.
+
+   - Your FQDN has not already been validated.
+
+10. Add the record from the console or the exported file to your database.[fn:6]
+    - [[https://docs.aws.amazon.com/acm/latest/userguide/#dns-add-cname][Adding a CNAME to Your Database]].
+
+    - If you want to add the record yourself, see [[https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-editing.html][Editing Resource Record Sets]]
+      in the Route 53 Developer Guide.
+
+11. After updating your DNS configuration, choose *Continue*.
+
+**** Install ACM Certificates
+- https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-install.html
+
+
+You cannot use ACM to directly install your ACM Certificate on your AWS based
+website or application.  You must use one of the services integrated with ACM.
+
+**** Services Integrated with AWS Certificate Manager
+- https://docs.aws.amazon.com/acm/latest/userguide/acm-services.html
+
+
+AWS Certificate Manager supports a growing number of AWS services.  You cannot
+install your ACM certificate or your private ACM PCA certificate directly on
+your AWS based website or application.  You must use one of the following
+services.
+
+***** Elastic Load Balancing
+In general, to serve secure content over SSL/TLS, load balancers require that
+SSL/TLS certificates be installed on either the load balancer or the backend
+Amazon EC2 instance.  ACM is integrated with Elastic Load Balancing to deploy
+ACM certificates on the load balancer.
+- [[https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-application-load-balancer.html][Create an Application Load Balancer]].
+
+***** Amazon CloudFront
+To serve secure content over SSL/TLS, CloudFront requires that SSL/TLS
+certificates be installed on either the CloudFront distribution or on the
+backend content source.  ACM is integrated with CloudFront to deploy ACM
+certificates on the CloudFront distribution.
+- [[https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-procedures.html#cnames-and-https-getting-certificates][Getting an SSL/TLS Certificate.]]
+
+***** AWS Elastic Beanstalk
+To choose a certificate, you must configure the load balancer for your
+application in the Elastic Beanstalk console.
+- [[https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/configuring-https-elb.html][Configuring Your Elastic Beanstalk Environment's Load Balancer to Terminate HTTPS]].
+
+***** Amazon API Gateway
+After you deploy your API to API Gateway, you can set up a custom domain name
+to simplify access to it. To set up a custom domain name, you must provide an
+SSL/TLS certificate.  You can use ACM to generate or import the certificate.
+
+***** AWS CloudFormation
+ACM certificates are included as a template resource, which means that AWS
+CloudFormation can request ACM certificates that you can use with AWS services
+to enable secure connections.
+- [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-certificatemanager-certificate.html][AWS::CertificateManager::Certificate]].
+
+** AWS Certificate Manager API Reference
+“Welcome to the AWS Certificate Manager (ACM) API Reference.”
+
+This guide provides descriptions, syntax, and usage examples for each ACM API
+operation.
+
+- https://docs.aws.amazon.com/acm/latest/APIReference/Welcome.html
+
+
+Instead of using the ACM HTTP API directly, you can use one of the AWS SDKs or
+command line tools to interact with the ACM API.  These tools are available for
+a variety of programming languages and platforms.
+
+- [[https://aws.amazon.com/tools/][Tools for Amazon Web Services]]
+
+
+{{{heading(Signing API Requests)}}}
+
+You must sign your HTTP API requests to ACM.  You must calculate the signature
+yourself.  ACM requires signature version 4.
+
+- [[https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html][Signature Version 4 Signing Process]]
+
+** AWS Certficate Manager CLI Reference
+
+- https://docs.aws.amazon.com/cli/latest/reference/acm/index.html#
+
 * Essentials of Cybersecurity
 :PROPERTIES:
 :source:   UWashingtonX
@@ -14249,6 +14565,10 @@ fashion.
 ** Local Variable Definitions
 
 * Footnotes
+
+[fn:6] *Note*: If your FQDN was validated when you requested a previous
+certificate and you are requesting another certificate for the same FQDN, you
+do not need to add another DNS record. 
 
 [fn:5] *NOTE*: Select Client credentials only if your app needs to request
 access tokens on its own behalf, not on behalf of a user. 
