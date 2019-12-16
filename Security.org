@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 16, 2019
-#+macro:version 0.9.4.<2019-12-16 Mon>
+#+macro:version 0.9.5.<2019-12-16 Mon>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -12239,6 +12239,14 @@ communications with CloudFront depend on how you're using the bucket.
      evaluate them in. For more information, see [[https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesPathPattern][Path Pattern]].
 
    - The cache behaviors are routing requests to the correct origins.
+*** TODO Article---Continually Enhancing Domain Security on Amazon CloudFront
+- https://aws.amazon.com/blogs/networking-and-content-delivery/continually-enhancing-domain-security-on-amazon-cloudfront/
+*** TODO Article---Logging and Monitoring in Amazon S3
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-incident-response.html
+** TODO Amazon S3 Security
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/security.html
+** TODO Redirecting Internet Traffic to Another Domain and Redirecting HTTP Requests to HTTPS
+- https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/tutorial-redirecting-dns-queries.html
 
 * Essentials of Cybersecurity
 :PROPERTIES:
