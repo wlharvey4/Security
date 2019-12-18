@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 16, 2019
-#+macro:version 0.9.6.<2019-12-17 Tue 08:45>
+#+date:December 18, 2019
+#+macro:version 0.9.7.<2019-12-18 Wed>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -12248,8 +12248,626 @@ communications with CloudFront depend on how you're using the bucket.
 ** TODO Redirecting Internet Traffic to Another Domain and Redirecting HTTP Requests to HTTPS
 - https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/tutorial-redirecting-dns-queries.html
 
+* Amazon S3 Security
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/security.html
+
+
+{{{heading(Shared Responsibility Model)}}}
+
+#+cindex:shared responsibility model
+Security is a /shared responsibility/ between AWS and you.  The *shared
+responsibility model* describes this as:
+
+#+cindex:security of the cloud
+#+cindex:security in the cloud
+
+- security /of the cloud/ :: AWS is responsible for protecting the
+     infrastructure that runs AWS services in the AWS Cloud.  AWS also provides
+     you with services that you can use securely.
+
+- security /in the cloud/ :: Your responsibility is determined by the AWS
+     service that you use.  You are also responsible for other factors
+     including the sensitivity of your data, your organization’s requirements,
+     and applicable laws and regulations.
+
+
+This documentation will help you understand how to apply the shared
+responsibility model when using Amazon S3.
+
+** Data Protection in Amazon S3
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/DataDurability.html
+
+
+{{{heading(Durable Storage Infrastructure)}}}
+
+Amazon S3 provides a highly durable storage infrastructure designed for
+mission-critical and primary data storage.
+
+- Objects are /redundantly stored/ on multiple devices across multiple
+  facilities in an Amazon S3 Region.
+
+- Amazon S3 PUT and PUT Object copy operations /synchronously store/ your data
+  across multiple facilities.
+
+- Amazon S3 maintains their durability by quickly /detecting and repairing/ any
+  /lost redundancy/.
+
+- Designed to provide 99.999999999% durability and 99.99% availability of
+  objects
+
+- Designed to sustain the concurrent loss of data in two facilities.
+
+
+{{{heading(Data Versioning)}}}
+
+Amazon S3 further protects your data using /versioning/.  You can use
+versioning to preserve, retrieve, and restore every version of every object
+that is stored in your Amazon S3 bucket.
+
+- With versioning, you can easily recover from both unintended user actions and
+  application failures.
+
+- By default, requests retrieve the most recently written version.
+
+- You can retrieve older versions of an object by specifying a version of the
+  object in a request.
+
+*** Internetwork Traffic Privacy
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/inter-network-traffic-privacy.html
+
+
+This topic describes how Amazon S3 secures connections from the service to
+other locations.
+
+{{{heading(Traffic Between Service and On-Premises Clients and Applications)}}}
+
+You have two connectivity options between your private network and AWS:
+
+- An AWS Site-to-Site VPN connection.
+
+- An AWS Direct Connect connection. 
+
+
+Access to Amazon S3 via the network is through /AWS published APIs/.
+
+Clients must support /Transport Layer Security (TLS)/ 1.0.  We recommend TLS
+1.2 or above.
+
+Clients must also support /cipher suites/ with Perfect Forward Secrecy (PFS),
+such as Ephemeral Diffie-Hellman (DHE) or Elliptic Curve Diffie-Hellman
+Ephemeral (ECDHE).
+
+Additionally, you must /sign requests/ using an *access key ID* and a *secret
+access key* that are associated with an IAM principal;
+
+or you can use the /AWS Security Token Service (STS)/ to generate *temporary
+security credentials* to sign requests.
+
+{{{heading(Traffic Between AWS Resources in the Same Region)}}}
+
+{{{subheading(Virtual Private Cloud Endpoint for S3)}}}
+
+An /Amazon Virtual Private Cloud (Amazon VPC) endpoint for Amazon S3/ is a
+logical entity within a VPC that allows connectivity only to Amazon S3.
+
+- The Amazon VPC routes requests to Amazon S3 and routes responses back to the
+  VPC.
+
+- see [[https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html][VPC Endpoints]]
+
+- see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies-vpc-endpoint.html][Example Bucket Policies for VPC Endpoints for Amazon S3]]
+
+*** Protecting Data Using Encryption
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingEncryption.html
+
+
+/Data protection/ refers to:
+
+- protecting data while in-transit (as it travels to and from Amazon S3); and
+
+- at rest (while it is stored on disks in Amazon S3 data centers).
+
+
+You can protect data in transit using
+
+- /Secure Sockets Layer (SSL)/ or
+
+- /client-side encryption/.
+
+
+You have the following options for protecting data at rest in Amazon S3:
+
+- Server-Side Encryption :: Request Amazon S3 to encrypt your object before
+     saving it on disks in its data centers and then decrypt it when you
+     download the objects.
+
+- Client-Side Encryption :: Encrypt data client-side and upload the encrypted
+     data to Amazon S3.  In this case, you manage the encryption process, the
+     encryption keys, and related tools.
+
+**** TODO Protecting Data Using Server-Side Encryption
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html
+
+**** TODO Protecting Data Using Client-Side Encryption
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingClientSideEncryption.html
+
+*** Identity and Access Management in Amazon S3
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html
+
+
+{{{heading(Grant Permissions to Others by Writing an Access Policy)}}}
+
+#+cindex:access policy
+By default, all Amazon S3 resources—buckets, objects, and related subresources
+(for example, lifecycle configuration and website configuration) are private:
+only the resource owner, an AWS account that created it, can access the
+resource.  The resource owner can optionally grant /access permissions/ to
+others by writing an /access policy/.
+
+Amazon S3 offers access policy options broadly categorized as:
+
+- resource-based policies :: Access policies you attach to your resources
+     (buckets and objects) are referred to as resource-based policies.  For
+     example, bucket policies and access control lists (ACLs) are
+     resource-based policies.
+
+- user policies :: You can also attach access policies to users in your
+                   account.
+
+
+You may choose to use resource-based policies, user policies, or some
+combination of these to manage permissions to your Amazon S3 resources. 
+
+**** Introduction to Managing Access to Amazon S3 Resources
+
+{{{heading(Overview of Managing Access)}}}
+
+#+cindex:access
+#+cindex:permissions
+When granting permissions, you decide 
+
+- who is getting permissions;
+- which Amazon S3 resources they are getting permissions for; and
+- specific actions you want to allow on those resources.
+
+
+{{{subheading(Amazon S3 Resources: Buckets and Objects)}}}
+
+#+cindex:resources
+In Amazon Web Services (AWS), a /resource/ is an entity that you can work with.
+In Amazon S3, *buckets* and *objects* are the resources, and both have
+associated subresources.
+
+{{{subheading(Subresources)}}}
+
+#+cindex:subresources
+Bucket /subresources/ include the following:
+
+- lifecycle :: Stores lifecycle configuration information
+
+- website :: Stores website configuration information if you configure your
+             bucket for website hosting;
+
+             see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html][Hosting a Static Website on Amazon S3]]
+
+- versioning :: Stores versioning configuration
+
+- policy and acl :: Store access permission information for the bucket.
+
+- cors :: Supports configuring your bucket to allow cross-origin requests
+
+- logging :: Enables you to request Amazon S3 to save bucket access logs.
+
+
+Object /subresources/ include the following:
+
+- acl :: Stores a list of access permissions on the object
+
+- restore :: Supports temporarily restoring an archived object
+
+
+{{{subheading(Amazon S3 Bucket and Object Ownership)}}}
+
+Buckets and objects are Amazon S3 resources.  By default, only the resource
+owner can access these resources.  The resource owner refers to the AWS account
+that creates the resource.
+
+{{{subheading(Ownership and Request Authentication)}}}
+
+All requests to a bucket are either:
+
+#+cindex:authenticated requests
+- authenticated :: Authenticated requests must include a signature value that
+                   authenticates the request sender.  AWS recommends that you
+                   don't use the AWS account root user credentials to make
+                   authenticated requests.  Instead, create an IAM user and
+                   grant that user full access.  We refer to these users as
+                   administrator users.
+
+#+cindex:unauthenticated requests
+- unauthenticated :: unauthenticated requests do not include a signature value
+     authenticating the request sender; a bucket owner can allow
+     unauthenticated requests.  All unauthenticated requests are made by the
+     anonymous user.  This user is represented in access control lists (ACLs)
+     by the specific canonical user:
+     : 65a011a29cdf8ec533ec3d1ccaae921c
+
+     If an object is uploaded to a bucket through an unauthenticated request,
+     the anonymous user owns the object.  The default object ACL grants
+     FULL_CONTROL to the anonymous user as the object's owner.  Therefore,
+     Amazon S3 allows unauthenticated requests to retrieve the object or modify
+     its ACL.
+
+     #+cindex:Block Public Access
+     To prevent objects from being modified by the anonymous user, we recommend
+     that you do not implement bucket policies that allow anonymous public
+     writes to your bucket or use ACLs that allow the anonymous user write
+     access to your bucket.  You can enforce this recommended behavior by using
+     Amazon S3 Block Public Access.
+
+     - see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html][Using Amazon S3 Block Public Access]]
+
+     - see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html][Access Control List (ACL) Overview]].
+
+
+{{{subheading(Resource Operations)}}}
+
+#+cindex:resource operations
+Amazon S3 provides a set of operations to work with the Amazon S3 resources.
+
+For a list of available operations, go to:
+- [[https://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketOps.html][Operations on Buckets]]
+
+  *Amazon S3 REST API Introduction*
+
+  It describes various API operations, related request and response structures,
+  and error codes.
+
+  Requests to Amazon S3 can be authenticated or anonymous.
+
+  - Authenticated access :: requires credentials that AWS can use to
+       authenticate your requests.  When making REST API calls directly from
+       your code, you create a signature using valid credentials and include
+       the signature in your request.
+
+       - see [[https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html][Authenticating Requests]]
+
+  - Use SDK's instead :: 
+
+       Making REST API calls directly from your code can be cumbersome.  It
+       requires you to write the necessary code to calculate a valid signature
+       to authenticate your requests.  We recommend the following alternatives
+       instead:
+
+       - Use the AWS SDKs to send your requests.  With this option, you don't
+         need to write code to calculate a signature for request authentication
+         because the SDK clients authenticate your requests by using access
+         keys that you provide.  Unless you have a good reason not to, you
+         should always use the AWS SDKs.
+
+         - see [[https://aws.amazon.com/code][Sample Code and Libraries]]
+
+  - Use the CLI instead ::
+
+       For information about setting up the AWS CLI and example Amazon S3
+       commands see the following topics:
+
+       - [[https://docs.aws.amazon.com/AmazonS3/latest/dev/setup-aws-cli.html][Set Up the AWS CLI]]
+
+       - Using Amazon S3 with the AWS Command Line Interface
+
+  - Use Proper Permisions ::
+
+       You can have valid credentials to authenticate your requests, but unless
+       you have /permissions/ you cannot create or access Amazon S3 resources.
+       For example, you must have permissions to create an S3 bucket or get an
+       object from your bucket.  If you use root credentials of your AWS
+       account, you have all the permissions.  However, using root credentials
+       is not recommended.  Instead, we recommend that you create IAM users in
+       your account and manage user permissions.
+
+       - see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html][Managing Access Permissions to Your Amazon S3 Resources]]
+
+- [[https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectOps.html][Operations on Objects]]
+
+
+{{{subheading(Managing Access to Resources)}}}
+
+#+cindex:manage access
+#+cindex:access policy
+#+cindex:permission, grant
+/Managing access/ refers to granting others (AWS accounts and users) permission
+to perform the resource operations by writing an *access policy*.
+
+#+cindex:PUT object
+- For example, you can grant =PUT Object= permission to a user in an AWS
+  account so the user can upload objects to your bucket.
+
+
+ In addition to granting permissions to individual users and accounts, you can
+ grant permissions to everyone (also referred as anonymous access) or to all
+ authenticated users (users with AWS credentials).
+
+ #+cindex:GET object
+- For example, if you configure your bucket as a website, you may want to make
+  objects public by granting the =GET Object= permission to everyone.
+
+
+{{{subheading(Access Policy Options)}}}
+
+#+cindex:access policy
+/Access policy/ describes who has access to what.  You can associate an access
+policy with a *resource* (bucket and object) or a *user*.  Accordingly, you can
+categorize the available Amazon S3 access policies as follows:
+
+#+cindex:resource policies
+#+cindex:access control lists (ACLs)
+#+cindex:ACL's, access control lists
+- Resource-based policies :: Bucket policies and access control lists (ACLs)
+     are resource-based because you attach them to your Amazon S3 resources.
+
+     - ACL :: Each bucket and object has an ACL associated with it.
+
+              An /ACL/ is a list of grants identifying grantee and permission
+              granted.  You use ACLs to grant basic read/write permissions to
+              other AWS accounts.  ACLs use an Amazon S3–specific XML schema.
+
+     - Bucket policy :: For your bucket, you can add a bucket policy to grant
+                        other AWS accounts or IAM users permissions for the
+                        bucket and the objects in it.
+
+#+cindex:user policies
+- User policies :: You can use IAM to manage access to your Amazon S3
+                   resources.  You can create IAM /users/, /groups/, and
+                   /roles/ in your account and attach /access policies/ to them
+                   granting them access to AWS resources, including Amazon S3.
+
+                   The following is an example of a user policy.  The example
+                   policy allows the associated user that it's attached to
+                   perform six different Amazon S3 actions on a bucket and the
+                   objects in it. You can attach this policy to a specific IAM
+                   user, group, or role.
+
+  #+begin_src js :eval never
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "ExampleStatement1",
+                "Effect": "Allow",
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:ListBucket",
+                    "s3:DeleteObject",
+                    "s3:GetBucketLocation"
+                ],
+                "Resource": [
+                     "arn:aws:s3:::examplebucket/*",
+                     "arn:aws:s3:::examplebucket"
+                ]
+            },
+            {
+                "Sid": "ExampleStatement2",
+                "Effect": "Allow",
+                "Action": "s3:ListAllMyBuckets",
+                "Resource": "*"
+            }
+        ]
+    }
+  #+end_src
+
+  When Amazon S3 receives a request, it must evaluate all the access policies
+                   to determine whether to authorize or deny the request.
+
+  - see [[https://docs.aws.amazon.com/AmazonS3/latest/dev/how-s3-evaluates-access-control.html][How Amazon S3 Authorizes a Request]].
+
+{{{heading(Access Analyzer for S3)}}}
+
+#+cindex:Access Analyzer for S3
+On the Amazon S3 console, you can use *Access Analyzer for S3* to review all
+buckets that have bucket access control lists (ACLs) or bucket policies that
+grant public or shared access.  Access Analyzer for S3 alerts you to buckets
+that are configured to allow access to anyone on the internet or other AWS
+accounts, including AWS accounts outside of your organization.  For each public
+or shared bucket, you receive findings that report the source and level of
+public or shared access.
+
+Access Analyzer for S3 is available at no extra cost on the Amazon S3
+console. Access Analyzer for S3 is powered by AWS Identity and Access
+Management (IAM) Access Analyzer.  To use Access Analyzer for S3 on the Amazon
+S3 console, you must visit the IAM console and enable IAM Access Analyzer on a
+per-Region basis.
+
+- see [[https://docs.aws.amazon.com/AmazonS3/latest/user-guide/access-analyzer.html][Using Access Analyzer for S3]]
+
+
+{{{heading(Which Access Control Method Should I Use?)}}}
+
+With the options available to write an access policy, the following questions
+arise:
+
+- When should I use which access control method?  For example, to grant bucket
+  permissions, should I use a bucket policy or bucket ACL?  I own a bucket and
+  the objects in the bucket.  Should I use a resource-based access policy or an
+  IAM user policy?  If I use a resource-based access policy, should I use a
+  bucket policy or an object ACL to manage object permissions?
+
+- If I grant access by using a combination of these access policy options, how
+  does Amazon S3 determine if a user has permission to perform a requested
+  operation?
+
+{{{heading(How Amazon S3 Authorizes a Request)}}}
+
+When Amazon S3 receives a request---for example, a bucket or an object
+operation:
+
+*NOTE:* To perform a specific operation on a resource, an IAM principal needs
+permission from /both/ the *parent AWS account* to which it belongs and the
+*AWS account that owns* the resource.  In addition, a bucket owner (who pays
+the bill) can /explicitly deny access/ to objects in the bucket regardless of
+who owns it.  The bucket owner can also delete any object in the bucket.
+
+- Permissions :: it first verifies that the requester has the necessary
+                 permissions.  Amazon S3 evaluates all the relevant access
+                 policies, user policies, and resource-based policies (bucket
+                 policy, bucket ACL, object ACL) in deciding whether to
+                 authorize the request.
+
+  - IAM principal and Parent Permissions :: If the requester is an IAM
+       principal, Amazon S3 must determine if the *parent AWS account* to which
+       the principal belongs has granted the principal necessary permission to
+       perform the operation.
+
+  - Bucket operation and Resource Owner permissions :: if the request is for a
+       bucket operation, such as a request to list the bucket content, Amazon
+       S3 must verify that the *bucket owner* has granted permission for the
+       requester to perform the operation.
+
+  - Non-owner permissions :: If the request is for an operation on an object
+       that the bucket owner does not own, in addition to making sure the
+       requester has permissions from the object owner, Amazon S3 must also
+       check the bucket policy to ensure the bucket owner has not set explicit
+       deny on the object.
+
+
+{{{subheading(Specific Steps to Determine Permissions)}}}
+
+In order to determine whether the requester has permission to perform the
+specific operation, Amazon S3 does the following, in order, when it receives a
+request:
+
+1. Converts all the /relevant access policies/ (*user policy*, *bucket policy*,
+   *ACLs*) at run time into a set of policies for evaluation.
+
+2. Evaluates the resulting set of policies in the following steps.  In each
+   step, Amazon S3 evaluates a subset of policies in a /specific context/,
+   based on the /context authority/.
+
+   - User context ::
+
+                     In the /user context/, the parent account to which the
+                     user belongs is the *context authority*.  Amazon S3
+                     evaluates a subset of policies owned by the parent
+                     account.  This subset includes the *user policy* that the
+                     parent attaches to the user.
+
+                     If the parent also owns the resource in the request
+                     (bucket, object), Amazon S3 also evaluates the
+                     corresponding *resource policies* (bucket policy, bucket
+                     ACL, and object ACL) at the same time.
+
+                     A user must have permission from the parent account to
+                     perform the operation.
+
+                     This step applies only if the request is made by a user in
+                     an AWS account.  If the request is made using root
+                     credentials of an AWS account, Amazon S3 skips this step.
+
+   - Bucket context ::
+
+                       In the /bucket context/, Amazon S3 evaluates policies
+                       owned by the AWS account that owns the bucket.
+
+                       If the request is for a bucket operation, the requester
+                       must have permission from the bucket owner.
+
+                       If the request is for an object, Amazon S3 evaluates all
+                       the policies owned by the bucket owner to check if the
+                       bucket owner has not explicitly denied access to the
+                       object.  If there is an explicit deny set, Amazon S3
+                       does not authorize the request.
+
+   - Object context ::
+
+                       If the request is for an object, Amazon S3 evaluates the
+                       subset of policies owned by the object owner.
+
+{{{heading(How Amazon S3 Authorizes a Request for a Bucket Operation)}}}
+
+- https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-auth-workflow-bucket-operation.html
+
+[[file:resources/AccessControlAuthorizationFlowBucketResource.png]]
+
+{{{heading(Guidelines for Using the Available Access Policy Options)}}}
+
+{{{heading(Example Walkthroughs: Managing Access to Your Amazon S3
+Resources)}}}
+
+{{{heading(Security Best Practices)}}}
+
+{{{subheading(Ensure Amazon S3 buckets are not publicly accessible)}}}
+
+{{{subheading(Implement least privilege access)}}}
+
+{{{subheading(Use IAM roles)}}}
+
+{{{subheading(Enable MFA (Multi-Factor Authentication) Delete)}}}
+
+{{{subheading(Identify and audit all your Amazon S3 buckets)}}}
+
+{{{subheading(Monitor AWS security advisories)}}}
+
+**** Amazon S3 Resource Access Options
+You can use the following topics to get more information about specific access
+policy options:
+
+{{{heading(Using Bucket Policies and User Policies)}}}
+
+{{{heading(Managing Access with ACLs)}}}
+
+{{{heading(Using Amazon S3 Block Public Access)}}}
+
+** Identity and Access Management in Amazon S3
+
+** Logging and Monitoring in Amazon S3
+
+** Compliance and Validation for Amazon S3
+
+** Resilience in Amazon S3
+
+** Infrastructure Security in Amazon S3
+
+** Configuration and Vulnerability Analysis in Amazon S3
+
+** Security Best Practices for Amazon S3
+
+The following security best practices also address data protection in Amazon
+S3:
+
+*** Implement server-side encryption
+
+*** Enforce encryption of data in transit
+
+*** Consider using Amazon Macie with Amazon S3
+
+*** Identify and audit all your Amazon S3 buckets
+
+* Security in Amazon Virtual Private Cloud
+- https://docs.aws.amazon.com/vpc/latest/userguide/security.html
+
+
+This documentation helps you understand how to apply the shared responsibility
+model when using Amazon VPC.
+
+- The following topics show you how to configure Amazon VPC to meet your
+  security and compliance objectives.
+
+- You also learn how to use other AWS services that help you to monitor and
+  secure your Amazon VPC resources.
+
+** Data Protection in Amazon Virtual Private Cloud
+
+** Identity and Access Management for Amazon VPC
+
+** Logging and Monitoring for Amazon VPC
+
+** Resilience in Amazon Virtual Private Cloud
+
+** Compliance Validation for Amazon Virtual Private Cloud
+
 * Amazon S3 Server Access Logging
-- https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html
+- [[https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html]]
 
 
 Server access logging provides detailed records for the requests that are made
