@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 19, 2019
-#+macro:version 0.9.9.<2019-12-19 Thu 11:20>
+#+macro:version 0.9.10.<2019-12-19 Thu 13:32>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -5239,7 +5239,7 @@ include a secret in the source code, anyone using the app could just “view
 source” in their browser and see it.  So we need a solution.
 
 Thankfully, this problem has already been solved, since the same issue applies
-to mobile apps as well. As we’ve [[https://developer.okta.com/blog/2019/05/01/is-the-oauth-implicit-flow-dead][seen in the past]] [fn:2], native apps also can’t
+to mobile apps as well. As we’ve [[https://developer.okta.com/blog/2019/05/01/is-the-oauth-implicit-flow-dead][seen in the past]] [fn:1], native apps also can’t
 safely use a client secret. The OAuth working group solved this problem several
 years ago with the PKCE extension to the Authorization Code flow.
 
@@ -5693,7 +5693,7 @@ functions.
 At this point, you’re ready to try out the application!  You’ll need to either
 run a local web server, or host it on a test domain.  In any case, just make
 sure that the Base URI and Redirect URI in your application settings are set to
-the URL that you’ll be visiting this application.[fn:3]
+the URL that you’ll be visiting this application.[fn:2]
 
 1. You can use any web server to serve the file, but I find that an easy way to
    launch this app is to use PHP’s built-in web server.  You can run the
@@ -11659,7 +11659,7 @@ with a user pool.
         of the console page.
 
       - Select *Cognito User Pool* as one of the Enabled Identity
-        Providers.[fn:4]
+        Providers.[fn:3]
 
       - Type a callback URL for the Amazon Cognito authorization server to call
         after users are authenticated. For a web app, the URL should start with
@@ -11680,7 +11680,7 @@ with a user pool.
         authorization code for tokens.  It's also helpful for debugging tokens.
 
         You can enable both the *Authorization code grant* and the *Implicit
-        code grant*, and then use each grant as needed.[fn:5]
+        code grant*, and then use each grant as needed.[fn:4]
 
         Unless you specifically want to exclude one, select the check boxes for
         all of the *Allowed OAuth scopes*.
@@ -11794,6 +11794,345 @@ User accounts are added to your user pool in one of the following ways:
 
 *** Access Resources
 
+** Amazon Cognito Auth SDK for JavaScript
+- [[https://github.com/aws/amazon-cognito-auth-js][amazon-cognito-auth-js]]
+
+- [[https://www.npmjs.com/package/amazon-cognito-identity-js][amazon-cognito-identity-js]]
+
+
+#+cindex:Amazon Cognito Auth SDK JavaScript
+#+cindex:Cognito Auth SDK JavaScript
+#+cindex:Cognito Auth JavaScript
+#+cindex:JavaScript Cognito Auth SDK
+#+cindex:SDK JavaScript Cognito Auto
+The Amazon Cognito Auth SDK for JavaScript simplifies adding sign-up, sign-in
+with user profile functionality to web apps.
+
+#+cindex:sign-in
+#+cindex:sign-out
+You can now use Amazon Cognito Auth to easily add sign-up, sign-in and sign-out
+to your mobile and web apps.  Your user pool in Amazon Cognito is a fully
+managed user directory that can scale to hundreds of millions of users, so you
+don't have to worry about building, securing, and scaling a solution to handle
+user management and authentication.  Instead of implementing a UI for sign-up
+and sign-in, this SDK provides the UI via a hosted page.  It supports sign-up,
+sign-in, confirmation, multifactor authentication, and sign-out.
+
+*** Setup---Cognito Auth SDK for JavaScript
+- https://github.com/aws/amazon-cognito-auth-js#setup
+
+
+- Download the JavaScript libraries and include them in your HTML, or
+
+  #+cindex:webpack
+  #+cindex:npm
+- Install the dependencies with npm and use a bundler like webpack.
+
+**** Install Using Separate Javascript Files
+- https://github.com/aws/amazon-cognito-auth-js#install-using-separate-javascript-files
+
+
+This method is simpler and does not require additional tools, but may have
+worse performance due to the browser having to download multiple files.
+
+- Download the following JavaScript file for the required library and place it
+  in your project:[fn:5]
+
+  - The [[https://github.com/aws/amazon-cognito-auth-js/blob/master/dist/amazon-cognito-auth.min.js][Amazon Cognito Auth SDK for JavaScript at /dist/amazon-cognito-auth.min.js]]
+
+  Include all of the files in your HTML page before calling any Amazon Cognito
+  Auth SDK APIs:
+
+  #+begin_src html
+    <script src="/path/to/amazon-cognito-auth.min.js"></script>
+    <!-- optional: only if you use other AWS services -->
+    <script src="/path/to/aws-sdk-2.6.10.js"></script>
+  #+end_src
+
+**** Using NPM and Webpack
+- https://github.com/aws/amazon-cognito-auth-js#using-npm-and-webpack
+
+
+#+cindex:webpack
+The following is a quick setup guide with specific notes for using the Amazon
+Cognito Auth SDK for JavaScript with Webpack, but there are many more ways it
+can be used.
+
+#+cindex:CommonJS modules
+#+cindex:ECMAScript 2015 modules
+#+cindex:Babel
+Note that webpack expects your source files to be structured as [[https://webpack.github.io/docs/commonjs.html][CommonJS
+(Node.js-style) modules]] (or [[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import][ECMAScript 2015 modules]] if you are using a
+transpiler such as [[https://babeljs.io/][Babel]].)
+
+#+cindex:@code{package.json}
+- In your project add a ~package.json~, either use ~npm init~ or the minimal,
+  which means your repository is private:
+
+  #+cindex:npm install
+- Install the Amazon Cognito Auth SDK for JavaScript and the Webpack tool into
+  your project with ~npm~ (the Node Package Manager, which is installed with
+  Node.js):
+
+  : ? npm install --save-dev webpack json-loader
+  : ? npm install --save amazon-cognito-auth-js
+
+  #+cindex:webpack.config.js
+- Create the configuration file for webpack, named ~webpack.config.js~:
+
+  #+begin_src js :eval no
+    module.exports = {
+      // Example setup for your project:
+      // The entry module that requires or imports the rest of your project.
+      // Must start with `./`!
+      entry: './src/entry',
+      // Place output files in `./dist/my-app.js`
+      output: {
+        path: 'dist',
+        filename: 'my-app.js'
+      },
+      module: {
+        loaders: [
+          {
+            test: /\.json$/,
+            loader: 'json'
+          }
+        ]
+      }
+    };
+  #+end_src
+
+- Add a =scripts= property into your ~package.json~
+
+  #+begin_src js :eval no
+    {
+      "scripts": {
+        "build": "webpack"
+      }
+    }
+  #+end_src
+
+- Build your application bundle with
+  : npm run build
+
+**** Configuration
+- https://github.com/aws/amazon-cognito-auth-js#configuration
+
+
+#+cindex:configuration values
+#+cindex:Cognito User Pool
+The Amazon Cognito Auth SDK for JavaScript requires three configuration values
+from your AWS Account in order to access your Cognito User Pool, plus allows
+additional optional values:
+
+1. A =User Pool App Client Id=
+
+   When creating the App, if the =generate client secret= box was checked, for
+   ~/oauth2/token~ endpoint which gets the user's tokens, the client must pass
+   its =client_id= and =client_secret= in the =authorization= header.
+
+   See [[http://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html][Token Endpoint]]
+
+2. An =App Web Domain=
+
+   When you click the =Domain name= tab, you can create a domain name there and
+   save it for record.
+
+3. =Scope Array=
+
+   e.g.~['phone', 'email', 'profile','openid',
+   'aws.cognito.signin.user.admin']~
+
+  See [[http://docs.aws.amazon.com/cognito/latest/developerguide/authorization-endpoint.html][Scopes]]
+
+  #+cindex:identity provider
+   - When you click the =App settings= tab, you can select the identity provider
+     which you want to use on your App.
+
+     #+cindex:callback url
+     #+cindex:signout url
+   - In the =sign in= and =sign out= URLs tab, you can set the =Callback URLs=
+     and =Sign out= URLs.  (both are required)
+
+     #+cindex:OAuth2.0
+     #+cindex:OAuth flows
+     #+cindex:flows, OAuth
+   - Under the =OAuth2.0= tab, you can select the =OAuth= flows and scopes
+     enabled for this app. (both are required)
+
+4. IdentityProvider (optional)
+
+   Pre-selected identity provider (this allows to automatically trigger social
+   provider authentication flow).e.g. Facebook
+
+5. UserPoolId (optional)
+
+6. AdvancedSecurityDataCollectionFlag (optional)
+
+   =boolean= flag indicating if the data collection is enabled to support
+   cognito advanced security features.  By default, this flag is set to =true=.
+
+7. Storage (optional)
+
+   Storage provider used to store session data.  By default, it uses
+   =localStorage= if available or an in-memory structure.
+
+8. LaunchUri (optional)
+
+   A function called to launch an =Uri=.  By default it uses ~window.location~ in
+   browsers, and the Linking class in react native.
+
+
+The [[https://console.aws.amazon.com/cognito/users/][AWS Console for Cognito User Pools]] can be used to get or create these
+values.
+
+#+cindex:errors
+Note that the various errors returned by the service are valid JSON so one can
+access the different exception types (~err.code~) and status codes
+(~err.statusCode~).
+
+**** Usage
+- https://github.com/aws/amazon-cognito-auth-js#usage
+
+
+The usage examples below use the unqualified names for types in the Amazon
+Cognito Auth SDK for JavaScript. Remember to import or qualify access to any of
+these types:
+
+#+begin_src js :eval no
+// When using loose Javascript files:
+var CognitoAuth = AmazonCognitoIdentity.CognitoAuth;
+
+// Modules, e.g. Webpack:
+var AmazonCognitoIdentity = require('amazon-cognito-auth-js');
+var CognitoAuth = AmazonCognitoIdentity.CognitoAuth;
+
+// ES Modules, e.g. transpiling with Babel
+import {CognitoAuth} from 'amazon-cognito-auth-js';
+#+end_src
+
+***** Use Case 1---Registering an auth with the application
+
+You need to create a =CognitoAuth= object by providing
+
+- a App client ID,
+- a App web domain,
+- a scope array,
+- a sign-in redirect URL, and
+- a sign-out redirect URL:
+- Identity Provider, UserPoolId and AdvancedSecurityDataCollectionFlag are
+  optional values
+
+
+#+begin_src js :eval no
+  /*
+    TokenScopesArray
+    Valid values are found under:
+    AWS Console -> User Pools -> <Your user pool> -> App Integration -> App client settings
+    Example values: ['profile', 'email', 'openid', 'aws.cognito.signin.user.admin', 'phone']
+
+    RedirectUriSignOut 
+    This value must match the value specified under:
+    AWS Console -> User Pools -> <Your user pool> -> App Integration -> App client settings -> Sign out URL(s)
+  ,*/
+  var authData = {
+          ClientId : '<TODO: add ClientId>', // Your client id here
+          AppWebDomain : '<TODO: add App Web Domain>',
+          TokenScopesArray : ['<TODO: add scope array>'], // e.g.['phone', 'email', 'profile','openid', 'aws.cognito.signin.user.admin'],
+          RedirectUriSignIn : '<TODO: add redirect url when signed in>',
+          RedirectUriSignOut : '<TODO: add redirect url when signed out>',
+          IdentityProvider : '<TODO: add identity provider you want to specify>', // e.g. 'Facebook',
+          UserPoolId : '<TODO: add UserPoolId>', // Your user pool id here
+          AdvancedSecurityDataCollectionFlag : '<TODO: boolean value indicating whether you want to enable advanced security data collection>', // e.g. true
+          Storage: '<TODO the storage object>' // OPTIONAL e.g. new CookieStorage(), to use the specified storage provided
+  };
+  var auth = new AmazonCognitoIdentity.CognitoAuth(authData);
+#+end_src
+
+Also you can provide onSuccess callback and onFailure callback:
+
+#+begin_src js :eval no
+  auth.userhandler = {
+          onSuccess: function(result) {
+                  alert("Sign in success");
+                  showSignedIn(result);
+          },
+          onFailure: function(err) {
+                  alert("Error!");
+          }
+  };
+#+end_src
+
+You can also set state parameter:
+
+#+begin_src js :eval no
+auth.setState(<state parameter>);
+#+end_src
+
+***** Use Case 2---Sign-in using getSession API:
+
+: auth.getSession();
+
+For the cache tokens and scopes, use the ~parseCognitoWebResponse(Response)~
+API, e.g. the response is the current window url:
+
+#+begin_src js :eval no
+var curUrl = window.location.href;
+auth.parseCognitoWebResponse(curUrl);
+#+end_src
+
+Typically, you can put this part of logic in the ~onLoad()~, e.g.:
+
+#+begin_src js :eval no
+  function onLoad() {
+          var auth = initCognitoSDK();
+          var curUrl = window.location.href;
+          auth.parseCognitoWebResponse(curUrl);
+  }
+#+end_src
+
+***** Use Case 3---Sign-out using signOut
+
+: auth.signOut();
+
+***** Important to know
+
+#+cindex:implicit flow
+#+cindex:authorization code flow
+#+cindex:@code{useCodeGrantFlow()}
+By default, the SDK uses /implicit flow/ (/token flow/), so if you want to
+enable /authorization code grant flow/, you need to call ~useCodeGrantFlow()~.
+For example, please check our sample ~index.html~; in that file, you need to
+uncomment ~auth.useCodeGrantFlow()~.
+
+
+** Article---Amazon Cognito Credentials Provider
+:PROPERTIES:
+:author:   Norm Johanson
+:date:     October 2, 2014
+:source:   AWS Developer Blog
+:END:
+- https://aws.amazon.com/blogs/developer/amazon-cognito-credentials-provider/
+
+
+#+cindex:credentials
+#+cindex:identifiers
+Amazon Cognito helps you create unique identifiers for your end users that are
+kept consistent across devices and platforms.
+
+#+cindex:temporary credentials
+Cognito also delivers temporary, limited-privilege credentials to your app to
+access AWS resources.
+
+#+cindex:unauthenticated users
+#+cindex:authenticated users
+#+cindex:identify providers
+#+cindex:Facebook
+#+cindex:Google
+#+cindex:Login with Amazon
+With Amazon Cognito, your app can support unauthenticated guest users as well
+as users authenticated through a identity provider, such as Facebook, Google,
+Login with Amazon or with developer authenticated identity providers.
 * Amazon Certificate Manager and HTTPS
 
 You can use ACM to manage SSL/TLS certificates for your AWS-based websites and
@@ -12120,6 +12459,7 @@ yourself.  ACM requires signature version 4.
 ** AWS Certficate Manager CLI Reference
 
 - https://docs.aws.amazon.com/cli/latest/reference/acm/index.html#
+
 ** Using HTTPS with CloudFront
 - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html
 
@@ -15873,25 +16213,27 @@ fashion.
 
 * Footnotes
 
-[fn:6] *Note*: If your FQDN was validated when you requested a previous
-certificate and you are requesting another certificate for the same FQDN, you
-do not need to add another DNS record. 
+[fn:1] Aaron Parecki discusses common security threats when building
+microservices using OAuth and how to protect yourself.
 
-[fn:5] *NOTE*: Select Client credentials only if your app needs to request
-access tokens on its own behalf, not on behalf of a user. 
-
-[fn:4] *NOTE:* To sign in with external identity providers (IdPs) such as
-Facebook, Amazon, Google, and Apple, as well as through OpenID Connect (OIDC)
-or SAML IdPs, first configure them as described next, and then return to the
-App client settings page to enable them. 
-
-[fn:3] Note that this will not work just opening the page from your filesystem
+[fn:2] Note that this will not work just opening the page from your filesystem
 due to cross-domain restrictions that browser have with =file://= URIs.
 
-[fn:2] Aaron Parecki discusses common security threats when building
-microservices using OAuth and how to protect yourself. 
+[fn:3] *NOTE:* To sign in with external identity providers (IdPs) such as
+Facebook, Amazon, Google, and Apple, as well as through OpenID Connect (OIDC)
+or SAML IdPs, first configure them as described next, and then return to the
+App client settings page to enable them.
 
-[fn:1] 
+[fn:4] *NOTE*: Select Client credentials only if your app needs to request
+access tokens on its own behalf, not on behalf of a user.
+
+[fn:5] Optionally, to use other AWS services, include a build of the AWS SDK
+for JavaScript.
+
+[fn:6] *Note*: If your FQDN was validated when you requested a previous
+certificate and you are requesting another certificate for the same FQDN, you
+do not need to add another DNS record.
+
 # Local Variables:
 # fill-column: 79
 # End:
