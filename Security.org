@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 18, 2019
-#+macro:version 0.9.8.<2019-12-18 Wed>
+#+date:December 19, 2019
+#+macro:version 0.9.9.<2019-12-19 Thu 11:20>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11365,12 +11365,23 @@ can set up the awsmobile CLI to make configuring things easy. I’m going to
 assume you have already set up the [[https://facebook.github.io/react-native/docs/getting-started.html][React Native CLI]] on your system and
 installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
 * Amazon Cognito
+“Simple and Secure User Sign-Up, Sign-In, and Access Control”
+
+- [[https://aws.amazon.com/cognito/][Amazon Cognito]]
 - [[https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html][AWS Documentation-Amazon Cognito-Developer Guide]]
 
 
+“Spend your time creating great apps.  Let Amazon Cognito handle
+authentication.”
+
 #+cindex:Cognito
 #+cindex:Amazon Cognito
-Amazon Cognito provides:
+Amazon Cognito lets you add user sign-up, sign-in, and access control to your
+web and mobile apps quickly and easily.  Amazon Cognito scales to millions of
+users and supports sign-in with social identity providers, such as Facebook,
+Google, and Amazon, and enterprise identity providers via SAML 2.0.
+
+{{{heading(Amazon Cognito provides:)}}}
 
 - authentication
 - authorization
@@ -11386,7 +11397,88 @@ with a user name and password, or through a third party such as:
 - Apple
 
 
-{{{heading(Main Components of Cognito)}}}
+** About Cognito
+
+{{{heading(Secure and scalable user directory)}}}
+
+#+cindex:user pools
+Amazon Cognito User Pools provide a secure user directory that scales to
+hundreds of millions of users.  As a fully managed service, User Pools are easy
+to set up without any worries about standing up server infrastructure.
+
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started-with-cognito-user-pools.html][Cognito User Pools]]
+
+
+{{{heading(Social and enterprise identity federation)}}}
+
+#+cindex:social identity providers
+#+cindex:Google
+#+cindex:Facebook
+#+cindex:Amazon
+#+cindex:Active Directory
+#+cindex:SAML
+#+cindex:federation
+With Amazon Cognito, your users can sign in through social identity providers
+such as Google, Facebook, and Amazon, and through enterprise identity providers
+such as Microsoft Active Directory via SAML.
+
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-identity-federation.html][Federation]]
+
+
+{{{heading(Standards-based authentication)}}}
+
+#+cindex:OAuth
+#+cindex:SAML
+#+cindex:OpenID Connect
+#+cindex:standards based authentication
+#+cindex:authentication
+Amazon Cognito User Pools is a standards-based Identity Provider and supports
+identity and access management standards, such as Oauth 2.0, SAML 2.0, and
+OpenID Connect.
+
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html][standards-based authentication]]
+
+
+{{{heading(Security for your apps and users)}}}
+
+#+cindex:multi-factor authentication
+#+cindex:encryption
+#+cindex:HIPAA
+#+cindex:compliance, security
+#+cindex:security
+Amazon Cognito supports multi-factor authentication and encryption of
+data-at-rest and in-transit.  Amazon Cognito is HIPAA eligible and PCI DSS,
+SOC, ISO/IEC 27001, ISO/IEC 27017, ISO/IEC 27018, and ISO 9001 compliant.
+
+- [[https://aws.amazon.com/compliance/][security and compliance]]
+
+
+{{{heading(Access control for AWS resources)}}}
+
+#+cindex:access control
+#+cindex:backend resources
+#+cindex:users
+#+cindex:roles
+Amazon Cognito provides solutions to control access to backend resources from
+your app.  You can define roles and map users to different roles so your app
+can access only the resources that are authorized for each user.
+
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html][controlling access to AWS resources]]
+
+
+{{{heading(Easy integration with your app)}}}
+
+#+cindex:sign-in
+#+cindex:sign-up
+#+cindex:access control
+With a built-in UI and easy configuration for federating identity providers,
+you can integrate Amazon Cognito to add user sign-in, sign-up, and access
+control to your app in minutes.  You can customize the UI to put your company
+branding front and center for all user interactions.
+
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started.html][integrate Amazon Cognito with your app]]
+
+** Main Components of Cognito
 
 #+cindex:user pools
 #+cindex:identity pools
@@ -11475,6 +11567,30 @@ To save user profile information, your identity pool needs to be integrated
 with a user pool.
 
 ** Getting Started with Amazon Cognito
+
+{{{heading(It Really Is This Easy)}}}
+
+#+caption:Sign in users and get back tokens using the SDKs and a few lines of code.
+#+name:cognito-example
+#+begin_src js -n :eval no
+  // Add 'aws-amplify' library into your application
+
+  // Configure Auth category with your Amazon Cognito credentials
+  Amplify.configure({
+      Auth: {
+          identityPoolId: 'XX-XXXX-X:XXXXXXXX-XXXX', // Amazon Cognito Identity Pool ID
+          region: 'XX-XXXX-X', // Amazon Cognito Region
+      }
+  });
+
+  // Call Auth.signIn with user credentials
+  Auth.signIn(username, password)
+      .then(user => console.log(user))
+      .catch(err => console.log(err));
+#+end_src
+
+#+name:cognito-landing-iphone
+[[file:resources/Cognito_SI_IMG_landing_iphone.23469830ae7726f1f17678973733595223709d9a.png]]
 
 {{{heading(Top Tasks)}}}
 
