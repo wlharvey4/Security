@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 19, 2019
-#+macro:version 0.9.10.<2019-12-19 Thu 13:32>
+#+macro:version 0.9.11.<2019-12-19 Thu 14:34>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11396,7 +11396,6 @@ with a user name and password, or through a third party such as:
 - Google
 - Apple
 
-
 ** About Cognito
 
 {{{heading(Secure and scalable user directory)}}}
@@ -11794,10 +11793,23 @@ User accounts are added to your user pool in one of the following ways:
 
 *** Access Resources
 
-** Amazon Cognito Auth SDK for JavaScript
-- [[https://github.com/aws/amazon-cognito-auth-js][amazon-cognito-auth-js]]
+** Amazon Cognito Auth and Identity SDK for JavaScript
 
-- [[https://www.npmjs.com/package/amazon-cognito-identity-js][amazon-cognito-identity-js]]
+*NOTE:* The following are similar but from different sources.  See also
+- [[https://aws-amplify.github.io/docs/js/authentication][Amplify JavaScript Authentication]]
+
+
+{{{heading(Auth from AWS)}}}
+
+- On GitHub [[https://github.com/aws/amazon-cognito-auth-js][amazon-cognito-auth-js]]
+
+- On NPM [[https://www.npmjs.com/package/amazon-cognito-auth-js][amazon-cognito-auth-js]]
+
+{{{heading(Identity from AWS-Amplify)}}}
+
+- On GitHub [[https://github.com/aws-amplify/amplify-js/tree/master/packages/amazon-cognito-identity-js][amazon-cognito-identity-js]]
+
+- On NPM [[https://www.npmjs.com/package/amazon-cognito-identity-js][amazon-cognito-identity-js]]
 
 
 #+cindex:Amazon Cognito Auth SDK JavaScript
@@ -11818,15 +11830,85 @@ user management and authentication.  Instead of implementing a UI for sign-up
 and sign-in, this SDK provides the UI via a hosted page.  It supports sign-up,
 sign-in, confirmation, multifactor authentication, and sign-out.
 
+For an overview of the Cognito authentication flow, refer to the following blog
+post:
+
+- [[https://aws.amazon.com/blogs/mobile/customizing-your-user-pool-authentication-flow/][Customizing Amazon Cognito User Pool Authentication Flow]]
+
+  - Ionut Trestian
+  - October 24, 2016
+  - AWS Mobile Blog
+
+
+   #+cindex:authentication flow
+   #+cindex:dynamic authentication flow
+   With Amazon Cognito Your User Pools, we now have a flexible authentication flow
+   that you can customize to incorporate additional authentication methods and
+   support dynamic authentication flows that are server driven.
+
+   First, we generalize authentication into two common steps, which are
+   implemented through two APIs
+
+   - ~InitiateAuth~
+   - ~RespondToAuthChallenge~
+
+
+   In this flow, a user authenticates by answering successive challenges until
+   authentication either fails or the user is issued tokens.  With these two
+   steps, which can be repeated to include different challenges, we support any
+   custom authentication flow.
+
+   #+cindex:Lambda triggers
+   Second, we provide the ability to customize your authentication flow with AWS
+   Lambda triggers.  These triggers issue and verify their own challenges as part
+   of the authentication flow.
+
+   In this post, we provide detail on the two APIs and their inputs and outputs as
+   we demonstrate how you can customize Your User Pools authentication flow to
+   contain additional challenges such as CAPTCHAs.
+
+*** Introduction
+The Amazon Cognito Identity SDK for JavaScript allows JavaScript enabled
+applications to:
+
+- sign-up users;
+- authenticate users;
+- view,
+- delete, and
+- update user attributes
+- password changes
+- forgot password flows
+
+
+Your users will benefit from a number of security features including:
+
+#+cindex:multi-factor authentication
+#+cindex:MFA
+#+cindex:verification, account
+#+cindex:password features
+#+cindex:Secure Remote Password protocol (SRP)
+#+cindex:SRP, Secure Remote Password protocol
+- SMS-based Multi-Factor Authentication (MFA)
+- account verification via phone or email
+- The password features use the Secure Remote Password (SRP) protocol to avoid
+  sending cleartext passwords over the wire.
+
 *** Setup---Cognito Auth SDK for JavaScript
 - https://github.com/aws/amazon-cognito-auth-js#setup
 
+
+There are two ways to install the Amazon Cognito Identity SDK for JavaScript
+and its dependencies, depending on your project setup and experience with
+modern JavaScript build tools:
 
 - Download the JavaScript libraries and include them in your HTML, or
 
   #+cindex:webpack
   #+cindex:npm
-- Install the dependencies with npm and use a bundler like webpack.
+- Install the dependencies with ~npm~ and use a bundler like ~webpack~.
+
+
+Note that this library uses the [[https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API][Fetch API]].
 
 **** Install Using Separate Javascript Files
 - https://github.com/aws/amazon-cognito-auth-js#install-using-separate-javascript-files
@@ -11843,8 +11925,14 @@ worse performance due to the browser having to download multiple files.
   Include all of the files in your HTML page before calling any Amazon Cognito
   Auth SDK APIs:
 
-  #+begin_src html
+  #+begin_src html :eval no
     <script src="/path/to/amazon-cognito-auth.min.js"></script>
+    <!-- optional: only if you use other AWS services -->
+    <script src="/path/to/aws-sdk-2.6.10.js"></script>
+  #+end_src
+
+  #+begin_src html :eval no
+    <script src="/path/to/amazon-cognito-identity.min.js"></script>
     <!-- optional: only if you use other AWS services -->
     <script src="/path/to/aws-sdk-2.6.10.js"></script>
   #+end_src
@@ -11870,15 +11958,22 @@ transpiler such as [[https://babeljs.io/][Babel]].)
   which means your repository is private:
 
   #+cindex:npm install
-- Install the Amazon Cognito Auth SDK for JavaScript and the Webpack tool into
-  your project with ~npm~ (the Node Package Manager, which is installed with
-  Node.js):
+- Install the Amazon Cognito Auth (Identity ?) SDK for JavaScript and the
+  Webpack tool into your project with ~npm~ (the Node Package Manager, which is
+  installed with Node.js):
 
   : ? npm install --save-dev webpack json-loader
   : ? npm install --save amazon-cognito-auth-js
+  or
+  : ? npm install --save amazon-cognito-identity-js
+
+
+  These will add a ~node_modules~ directory containing these tools and
+  dependencies into your project; you will probably want to exclude this
+  directory from source control.
 
   #+cindex:webpack.config.js
-- Create the configuration file for webpack, named ~webpack.config.js~:
+- Create the configuration file for ~webpack~, named ~webpack.config.js~:
 
   #+begin_src js :eval no
     module.exports = {
@@ -11888,7 +11983,7 @@ transpiler such as [[https://babeljs.io/][Babel]].)
       entry: './src/entry',
       // Place output files in `./dist/my-app.js`
       output: {
-        path: 'dist',
+        path: __dirname + 'dist',
         filename: 'my-app.js'
       },
       module: {
@@ -11902,6 +11997,14 @@ transpiler such as [[https://babeljs.io/][Babel]].)
     };
   #+end_src
 
+- Create the following directory where ~webpack.config.js~ resides, and create
+  the entry file:
+
+  #+begin_src sh :eval no
+    mkdir -p src
+    touch src/entry.js
+  #+end_src
+
 - Add a =scripts= property into your ~package.json~
 
   #+begin_src js :eval no
@@ -11912,10 +12015,10 @@ transpiler such as [[https://babeljs.io/][Babel]].)
     }
   #+end_src
 
-- Build your application bundle with
+- Build your application bundle with:
   : npm run build
 
-**** Configuration
+*** Configuration---Cognito Auth SDK for JavaScript
 - https://github.com/aws/amazon-cognito-auth-js#configuration
 
 
@@ -11991,7 +12094,27 @@ Note that the various errors returned by the service are valid JSON so one can
 access the different exception types (~err.code~) and status codes
 (~err.statusCode~).
 
-**** Usage
+*** Configuration---Cognito Identity SDK for JavaScript
+- https://www.npmjs.com/package/amazon-cognito-identity-js#configuration
+
+
+#+cindex:Cognito User Pool
+The Amazon Cognito Identity SDK for JavaScript requires two configuration
+values from your AWS Account in order to access your /Cognito User Pool/:
+
+- The User Pool Id (e.g. us-east-1_aB12cDe34)
+
+- A User Pool App Client Id (e.g. 7ghr5379orhbo88d52vphda6s9)
+
+  *Note*: When creating the App, the =generate client secret= box must be
+  =unchecked= because the JavaScript SDK doesn't support apps that have a
+  client secret.
+
+
+The [[https://console.aws.amazon.com/cognito/users/][AWS Console for Cognito User Pools]] can be used to get or create these
+values.
+
+*** Usage---Cognito Auth SDK for JavaScript
 - https://github.com/aws/amazon-cognito-auth-js#usage
 
 
@@ -12011,7 +12134,7 @@ var CognitoAuth = AmazonCognitoIdentity.CognitoAuth;
 import {CognitoAuth} from 'amazon-cognito-auth-js';
 #+end_src
 
-***** Use Case 1---Registering an auth with the application
+**** Use Case 1---Registering an auth with the application
 
 You need to create a =CognitoAuth= object by providing
 
@@ -12069,7 +12192,7 @@ You can also set state parameter:
 auth.setState(<state parameter>);
 #+end_src
 
-***** Use Case 2---Sign-in using getSession API:
+**** Use Case 2---Sign-in using getSession API:
 
 : auth.getSession();
 
@@ -12091,11 +12214,11 @@ Typically, you can put this part of logic in the ~onLoad()~, e.g.:
   }
 #+end_src
 
-***** Use Case 3---Sign-out using signOut
+**** Use Case 3---Sign-out using signOut
 
 : auth.signOut();
 
-***** Important to know
+**** Important to know
 
 #+cindex:implicit flow
 #+cindex:authorization code flow
@@ -12104,6 +12227,270 @@ By default, the SDK uses /implicit flow/ (/token flow/), so if you want to
 enable /authorization code grant flow/, you need to call ~useCodeGrantFlow()~.
 For example, please check our sample ~index.html~; in that file, you need to
 uncomment ~auth.useCodeGrantFlow()~.
+
+*** Relevant Examples---Cognito Identity for SDK for JavaScript
+
+For an example using babel-webpack of a React setup, see
+- [[file:resources/Cognito_SI_IMG_landing_iphone.23469830ae7726f1f17678973733595223709d9a.png][babel-webpack example]].
+
+
+For a working example using angular, see
+- [[https://github.com/awslabs/aws-cognito-angular2-quickstart][cognito-angular2-quickstart]]
+
+
+For a working example using ~ember.js~, see:
+
+- [[https://github.com/awslabs/aws-serverless-ember][aws-serverless-ember]]
+
+- [[https://github.com/awslabs/aws-mobilehub-ember][aws-mobilehub-ember]]
+
+*** Usage---Cognito Identity for SDK for JavaScript
+- https://www.npmjs.com/package/amazon-cognito-identity-js#usage
+
+
+The usage examples below use the unqualified names for types in the Amazon
+Cognito Identity SDK for JavaScript. Remember to import or qualify access to
+any of these types:
+
+#+begin_src js :eval no
+  // When using loose Javascript files:
+  var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
+ 
+  // Modules, e.g. Webpack:
+  var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+  var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
+ 
+  // ES Modules, e.g. transpiling with Babel
+  import {
+      CognitoUserPool,
+      CognitoUserAttribute,
+      CognitoUser,
+  } from 'amazon-cognito-identity-js';
+#+end_src
+
+**** Use Case 1---Registering a user with the application
+
+One needs to create a =CognitoUserPool= object by providing a =UserPoolId= and
+a =ClientId= and signing up by using a username, password, attribute list, and
+validation data.
+
+#+begin_src js :eval no
+  var poolData = {
+      UserPoolId: '...', // Your user pool id here
+      ClientId: '...', // Your client id here
+  };
+  var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+ 
+  var attributeList = [];
+ 
+  var dataEmail = {
+      Name: 'email',
+      Value: 'email@mydomain.com',
+  };
+ 
+  var dataPhoneNumber = {
+      Name: 'phone_number',
+      Value: '+15555555555',
+  };
+  var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+  var attributePhoneNumber = new AmazonCognitoIdentity.CognitoUserAttribute(
+      dataPhoneNumber
+  );
+ 
+  attributeList.push(attributeEmail);
+  attributeList.push(attributePhoneNumber);
+ 
+  userPool.signUp('username', 'password', attributeList, null, function(
+      err,
+      result
+  ) {
+      if (err) {
+          alert(err.message || JSON.stringify(err));
+          return;
+      }
+      var cognitoUser = result.user;
+      console.log('user name is ' + cognitoUser.getUsername());
+  });
+#+end_src
+
+**** Use Case 2---Confirming a Registered, Unauthenticated User
+
+Confirming a registered, unauthenticated user using a confirmation code
+received via SMS.
+
+#+begin_src js :eval no
+  var poolData = {
+      UserPoolId: '...', // Your user pool id here
+      ClientId: '...', // Your client id here
+  };
+ 
+  var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+  var userData = {
+      Username: 'username',
+      Pool: userPool,
+  };
+ 
+  var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+  cognitoUser.confirmRegistration('123456', true, function(err, result) {
+      if (err) {
+          alert(err.message || JSON.stringify(err));
+          return;
+      }
+      console.log('call result: ' + result);
+  });
+#+end_src
+
+**** Use Case 3---Confirming Registration For a Unauthenticated User
+
+Resending a confirmation code via SMS for confirming registration for a
+unauthenticated user.
+
+#+begin_src js :eval no
+  cognitoUser.resendConfirmationCode(function(err, result) {
+      if (err) {
+          alert(err.message || JSON.stringify(err));
+          return;
+      }
+      console.log('call result: ' + result);
+  });
+#+end_src
+
+**** Use Case 4---Authenticating a User and Establishing a User Session
+
+Authenticating a user and establishing a user session with the Amazon Cognito
+Identity service.
+
+#+begin_src js :eval no
+  import * as AWS from 'aws-sdk/global';
+ 
+  var authenticationData = {
+      Username: 'username',
+      Password: 'password',
+  };
+  var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(
+      authenticationData
+  );
+  var poolData = {
+      UserPoolId: '...', // Your user pool id here
+      ClientId: '...', // Your client id here
+  };
+  var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+  var userData = {
+      Username: 'username',
+      Pool: userPool,
+  };
+  var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+  cognitoUser.authenticateUser(authenticationDetails, {
+      onSuccess: function(result) {
+          var accessToken = result.getAccessToken().getJwtToken();
+ 
+          //POTENTIAL: Region needs to be set if not already set previously elsewhere.
+          AWS.config.region = '<region>';
+ 
+          AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+              IdentityPoolId: '...', // your identity pool id here
+              Logins: {
+                  // Change the key below according to the specific region your user pool is in.
+                  'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>': result
+                      .getIdToken()
+                      .getJwtToken(),
+              },
+          });
+ 
+          //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
+          AWS.config.credentials.refresh(error => {
+              if (error) {
+                  console.error(error);
+              } else {
+                  // Instantiate aws sdk service objects now that the credentials have been updated.
+                  // example: var s3 = new AWS.S3();
+                  console.log('Successfully logged!');
+              }
+          });
+      },
+ 
+      onFailure: function(err) {
+          alert(err.message || JSON.stringify(err));
+      },
+  });
+#+end_src
+
+Note that if device tracking is enabled for the user pool with a setting that
+user opt-in is required, you need to implement an ~onSuccess(result,
+userConfirmationNecessary)~ callback, collect user input and call either
+~setDeviceStatusRemembered~ to remember the device or
+~setDeviceStatusNotRemembered~ to not remember the device.
+
+Note also that if ~CognitoUser.authenticateUser~ throws =ReferenceError:
+navigator is not defined when running on Node.js=, follow the instructions on
+the following [[http://stackoverflow.com/questions/40219518/aws-cognito-unauthenticated-login-error-window-is-not-defined-js][Stack Overflow post]].
+
+**** Use Case 5---Retrieve User Attributes For an Authenticated User
+
+#+begin_src js :eval no
+  cognitoUser.getUserAttributes(function(err, result) {
+      if (err) {
+          alert(err.message || JSON.stringify(err));
+          return;
+      }
+      for (i = 0; i < result.length; i++) {
+          console.log(
+              'attribute ' + result[i].getName() + ' has value ' + result[i].getValue()
+          );
+      }
+  });
+#+end_src
+
+**** Use Case 6---Verify User Attribute For an Authenticated User
+
+Note that the ~inputVerificationCode~ method needs to be defined but does not
+need to actually do anything.  If you would like the user to input the
+verification code on another page, you can set ~inputVerificationCode~ to
+=null=.  If ~inputVerificationCode~ is null, =onSuccess= will be called
+immediately (assuming there is no error).
+
+#+begin_src js :eval no
+  cognitoUser.getAttributeVerificationCode('email', {
+      onSuccess: function(result) {
+          console.log('call result: ' + result);
+      },
+      onFailure: function(err) {
+          alert(err.message || JSON.stringify(err));
+      },
+      inputVerificationCode: function() {
+          var verificationCode = prompt('Please input verification code: ', '');
+          cognitoUser.verifyAttribute('email', verificationCode, this);
+      },
+  });
+#+end_src
+
+**** TODO Use Cases 7...32
+
+*** Network Configuration
+
+The Amazon Cognito Identity JavaScript SDK will make requests to the following
+endpoints:
+
+- For Amazon Cognito User Pool service request handling:
+
+  : https://cognito-idp.us-east-1.amazonaws.com
+
+  This endpoint may change based on which region your Cognito User Pool was
+  created in.
+
+- For most frameworks you can whitelist the domain by whitelisting all AWS
+  endpoints with:
+
+  : *.amazonaws.com
+
+*** Random Numbers
+
+In order to authenticate with the Amazon Cognito User Pool Service, the client
+needs to generate a random number as part of the SRP protocol.  The AWS SDK is
+only compatible with modern browsers, and these include support for
+cryptographically strong random values.  If you do need to support older
+browsers then you should include a strong polyfill for
+~window.crypto.getRandomValues()~ before including this library.
 
 
 ** Article---Amazon Cognito Credentials Provider
