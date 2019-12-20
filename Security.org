@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 19, 2019
-#+macro:version 0.9.12.<2019-12-19 Thu 16:06>
+#+macro:version 0.9.13.<2019-12-19 Thu 17:43>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11971,7 +11971,7 @@ privileges that can be requested for access tokens.
              client.
 
 
-{{{heading(Allowed Custom Scopes}}}
+{{{heading(Allowed Custom Scopes)}}}
 
 A custom scope is one that you define for your own resource server in the
 Resource Servers.  The format is =resource-server-identifier/scope=.
@@ -11982,6 +11982,10 @@ Resource Servers.  The format is =resource-server-identifier/scope=.
 
 #+cindex:hosted domain
 #+cindex:custom domain
+#+cindex:sign-in
+#+cindex:sign-up
+#+cindex:app webpages
+#+cindex:webpages, app
 After setting up an app client, you can configure the address of your sign-up
 and sign-in webpages.  You can use an Amazon Cognito hosted domain and choose
 an available domain prefix, or you can use your own web address as a custom
@@ -12000,6 +12004,303 @@ Management Console, see:
 After setting up an app client, you can configure your user pool with a custom
 domain for the Amazon Cognito hosted UI.  With a custom domain, you enable your
 users to sign in to your application by using your own web address.
+
+***** Adding a Custom Domain to a User Pool
+
+To add a custom domain to your user pool, you:
+
+#+cindex:domain name
+- specify the /domain name/ in the Amazon Cognito console, and
+
+  #+cindex:certificate
+  #+cindex:Certificate Manager
+- provide a /certificate/ you manage with AWS Certificate Manager (ACM).
+
+  #+cindex:alias target
+- After you add your domain, Amazon Cognito provides an /alias target/, which
+  you add to your DNS configuration.
+
+***** Prerequisites
+
+You need:
+
+- A user pool with an app client.
+
+- A web domain that you own.  Its root must have a valid A record in DNS.
+
+  #+cindex:subdomain
+  #+cindex:@code{auth} subdomain
+- The ability to create a /subdomain/ for your custom domain.  We recommend
+  using ~auth~ as the subdomain.
+  : auth.example.com.
+
+  #+cindex:wildcard certificate
+  You might need to obtain a new certificate for your custom domain's subdomain
+  if you don't have a wildcard certificate.
+
+  #+cindex:SSL certificate
+- A Secure Sockets Layer (SSL) certificate managed by ACM.  You must change the
+  AWS region to US East (N. Virginia) in the ACM console before you request or
+  import a certificate.
+
+- To set up a custom domain name or to update its certificate, you must have
+  permission to update Amazon CloudFront distributions.  You can do so by
+  attaching the following IAM policy statement to an IAM user, group, or role
+  in your AWS account:
+
+  #+BEGIN_SRC js :eval no
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+             {
+                "Sid": "AllowCloudFrontUpdateDistribution",
+                "Effect": "Allow",
+                "Action": [
+                    "cloudfront:updateDistribution"
+                ],
+                "Resource": [
+                    "*"
+                ]
+            }
+        ]
+    }
+  #+END_SRC
+
+
+
+
+***** Step 1---Enter Your Custom Domain Name
+
+You can add your domain to your user pool by using the Amazon Cognito console
+or API.
+
+{{{heading(To add your domain to your user pool (Amazon Cognito console))}}}
+
+1. Sign in to the Amazon Cognito console
+
+2. Sign in to the AWS Management Console and open the Amazon Cognito console
+
+3. Choose Manage User Pools.
+
+4. On the Your User Pools page, choose the user pool that you want to add your
+   domain to.
+
+5. On the navigation menu on the left, choose Domain name.
+
+6. Under Your own domain, choose Use your domain.
+
+   #+cindex:custom domain name
+7. For Domain name, enter your custom domain name.  Your domain name can
+   include only lowercase letters, numbers, and hyphens.  Do not use a hyphen
+   for the first or last character.  Use periods to separate subdomain names.
+
+   #+cindex:SSL certificate
+8. For AWS managed certificate, choose the SSL certificate that you want to use
+   for your domain.  You can choose one of the certificates that you manage
+   with ACM.  If you don't have a certificate that is available to choose, you
+   can use ACM to provision one.
+
+9. Choose Save changes.
+
+   #+cindex:Alias target
+10. Note the *Alias target*.  Instead of an IP address or a domain name, the
+    Alias target is an alias resource record set that points to an Amazon
+    CloudFront distribution.
+
+***** Step 2---Add an Alias Target and Subdomain
+
+#+cindex:DNS
+#+cindex:alias target
+In this step, you set up an alias through your Domain Name Server (DNS) service
+provider that points back to the alias target from the previous step.  If you
+are using Amazon Route 53 for DNS address resolution, choose the section *To
+add an alias target and subdomain using Route 53*.
+
+***** Step 3---Verify Your Sign-in Page
+
+Verify that the sign-in page is available from your custom domain.  Sign in
+with your custom domain and subdomain by entering this address into your
+browser. This is an example URL of a custom domain:
+
+: https://auth.example.com/login?response_type=code&client_id=<your_app_client_id>&redirect_uri=<your_callback_url>
+
+**** Defining Resource Servers for Your User Pool
+- https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-define-resource-servers.html
+
+
+Once you configure a domain for your user pool, the Amazon Cognito service
+automatically provisions a hosted web UI that allows you to add sign-up and
+sign-in pages to your app.
+
+{{{heading(Resource Server)}}}
+
+#+cindex:resoure server
+A /resource server/ is a server for access-protected resources.  It handles
+authenticated requests from an app that has an access token.  Typically the
+resource server provides a CRUD API for making these access requests.  This API
+can be hosted in Amazon API Gateway or outside of AWS.  The app passes the
+access token in the API call to the resource server.  The app should treat the
+access token as opaque when it passes the token in the access request.  The
+resource server inspects the access token to determine if access should be
+granted.
+
+{{{subheading(Verification of Access Token)}}}
+
+Your resource server must /verify/ the access token signature and expiration
+date before processing any claims inside the token.
+- see [[https://aws.amazon.com/blogs/mobile/integrating-amazon-cognito-user-pools-with-api-gateway/][this blog post]]
+
+
+Amazon API Gateway is a good option for inspecting access tokens and protecting
+your resources.
+- see [[https://docs.aws.amazon.com/apigateway/latest/developerguide/use-custom-authorizer.html][Use API Gateway Custom Authorizers]]
+
+
+{{{subheading(Scopes)}}}
+
+#+cindex:scope
+A /scope/ is a level of access that an app can request to a resource.  For
+example, if you have a resource server for photos, it might define two scopes:
+one for read access to the photos and one for write/delete access.  When the
+app makes an API call to request access and passes an access token, the token
+will have one or more scopes embedded in inside it.
+
+{{{heading(Custom OAuth2 Resource Servers)}}}
+
+Amazon Cognito allows app developers to create their own OAuth2.0 resource
+servers and define custom scopes in them.  Custom scopes can then be associated
+with a client, and the client can request them in OAuth2.0 authorization code
+grant flow, implicit flow, and client credentials flow.  Custom scopes are
+added in the scope claim in the access token.  A client can use the access
+token against its resource server, which makes the authorization decision based
+on scopes present in the token.
+
+{{{subheading(Managing the Resource Server and Custom Scopes)}}}
+
+When creating a resource server, you must provide a /resource server name/ and
+a /resource server identifier/.  For each scope you create in the resource
+server, you must provide the scope name and description.
+
+- =Name= :: a friendly name for the resource server, such as Weather API or Photo API.
+
+- =Identifier= :: Unique identifier for the resource server.  This could be an
+                  HTTPS endpoint where your resource server is located.  For
+                  example, =https://my-weather-api.example.com=
+
+- =Scope Name= :: he scope name.  For example, =weather.read=
+
+- =Scope Description= :: A brief description the scope.  For example, =Retrieve
+     weather information=.
+
+
+When a client app requests a custom scope in any of the OAuth2.0 flows, it must
+request the full identifier for the scope, which is
+~resourceServerIdentifier/scopeName~.  For example, if the resource server
+identifier is =https://myphotosapi.example.com= and the scope name is
+=photos.read=, the client app must request
+~https://myphotosapi.example.com/photos.read~ at runtime.
+
+Deleting a scope from a resource server does not delete its association with
+all clients; deleting the scope makes it inactive.  So if a client app requests
+the deleted scope at runtime, the scope is ignored and is not included in the
+access token.  If the scope is re-added later, then it is again included in the
+access token.
+
+If a scope is removed from a client, the association between client and scope
+is deleted.  If a client requests a disallowed scope at runtime, this results
+in an error, and an access token is not issued.
+
+You can use the AWS Management Console, API, and CLI to define resource servers
+and scopes for your user pool.
+
+**** Defining a Resource Server for Your User Pool
+
+You can use the AWS Management Console to define a resource server for your
+user pool.
+
+{{{heading(To define a resource server)}}}
+
+1. Sign in to the Amazon Cognito console
+
+2. In the navigation pane, choose Manage your User Pools, and choose the user
+   pool you want to edit.
+
+3. Choose the Resource servers tab.
+
+4. Choose Add a resource server.
+
+5. Enter the name of your resource server, for example, Photo Server.
+
+6. Enter the identifier of your resource server, for example,
+   com.example.photos.
+
+7. Enter the names of the custom scopes for your resources, such as read and
+   write.
+
+8. For each of the scope names, enter a description, such as view your photos
+   and update your photos.
+
+9. Choose Save changes.
+
+
+Each of the custom scopes that you define appears on the App client settings
+tab, under OAuth2.0 Allowed Custom Scopes; for example com.example.photos/read.
+
+**** Managing Security for Amazon Cognito User Pools
+- https://docs.aws.amazon.com/cognito/latest/developerguide/managing-security.html
+
+  #+cindex:multi-factor authentication (MFA)
+  #+cindex:MFA
+You can add multi-factor authentication (MFA) to a user pool to protect the
+identity of your users.  MFA adds a second authentication method that doesn't
+rely solely on user name and password.  You can choose to use SMS text
+messages, or time-based one-time (TOTP) passwords as second factors in signing
+in your users.
+
+#+cindex:advancd security features
+You can also use adaptive authentication with its risk-based model to predict
+when you might need another authentication factor.  It's part of the user pool
+advanced security features, which also include protections against compromised
+credentials.
+
+***** Adding Multi-Factor Authentication
+- https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-mfa.html
+
+
+{{{heading(Prequisites)}}}
+
+- You can only choose MFA as Required when you initially create a user pool.
+
+- Phone numbers must be verified if MFA is enabled and SMS text message is
+  chosen as a second factor.
+
+- Advanced security features require that MFA is enabled, and set as optional
+  in the Amazon Cognito user pool console.
+
+
+{{{heading(Configuring Multi-Factor Authentication)}}}
+
+To configure MFA in the Amazon Cognito console:
+
+1. From the left navigation bar, choose MFA and verifications.
+
+2. Choose whether MFA is Off, Optional, or Required.
+
+3. Choose Optional to enable MFA on a per-user basis, or if you are using the
+   risk-based adaptive authentication. For more information on adaptive
+   authentication, see Adding Advanced Security to a User Pool.
+
+4. Your users can use SMS text message or Time-based One-time Password as a
+   second factor.  Choose which second factors to support in your app.  We
+   recommend using TOTP for second factor.  This allows SMS to be used as a
+   password recovery mechanism which is disjoint from an authentication factor.
+
+5. If you're using SMS text messages as a second factor and you don't have an
+   IAM role defined with this permission, then you can create one in the
+   console. Choose Create role to create an IAM role to allow Amazon Cognito to
+   send SMS messages to your users on your behalf.
+
+6. Choose Save changes.
 
 *** Identity Pools
 
