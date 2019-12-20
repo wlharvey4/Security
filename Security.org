@@ -2,7 +2,7 @@
 #+title:Security Information
 #+author:Pinecone062
 #+date:December 19, 2019
-#+macro:version 0.9.13.<2019-12-19 Thu 17:43>
+#+macro:version 0.9.14.<2019-12-19 Thu 18:12>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -12301,6 +12301,89 @@ To configure MFA in the Amazon Cognito console:
    send SMS messages to your users on your behalf.
 
 6. Choose Save changes.
+*** Managing Users in a User Pool
+- https://docs.aws.amazon.com/cognito/latest/developerguide/managing-users.html
+
+
+After you create a user pool, you can
+- create,
+- confirm, and
+- manage
+
+
+{{{noindent}}}users accounts.
+
+With Amazon Cognito User Pools groups you can manage your users and their
+access to resources by mapping IAM roles to groups.
+
+**** TODO Signing Up and Confirming User Accounts
+- https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html
+
+
+User accounts are added to your user pool in one of the following ways:
+
+- The user signs up in your user pool's client app, which can be a mobile or web app.
+
+- You can import the user's account into your user pool.  See [[https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-using-import-tool.html][Importing Users
+  into User Pools From a CSV File]].
+
+- You can create the user's account in your user pool and invite the user to
+  sign in.  See [[https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-create-user-accounts.html][Creating User Accounts as Administrator]].
+
+
+Users who sign themselves up need to be confirmed before they can sign in.
+Imported and created users are already confirmed, but they need to create their
+password the first time they sign in.  The following sections explain the
+confirmation process and email and phone verification.
+
+**** TODO Creating User Accounts as Administrator
+- https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-create-user-accounts.html
+
+
+After you create your user pool, you can create users using the AWS Management
+Console, as well as the AWS Command Line Interface or the Amazon Cognito API.
+You can create a profile for a new user in a user pool and send a welcome
+message with sign-up instructions to the user via SMS or email.
+*** Authentication with a User Pool
+- https://docs.aws.amazon.com/cognito/latest/developerguide/authentication.html
+
+
+#+cindex:authentication
+Your app users can sign in either directly through a user pool, or federate
+through a third-party identity provider (IdP).  The user pool manages the
+overhead of handling the tokens that are returned from social sign-in through
+Facebook, Google, Amazon, and Apple, and from OpenID Connect (OIDC) and SAML
+IdPs.
+
+#+cindex:user pool tokens
+After successful authentication, Amazon Cognito returns user pool tokens to
+your app.  You can use the tokens to grant your users access to your own
+server-side resources, or to the Amazon API Gateway.  Or, you can exchange them
+for AWS credentials to access other AWS services.
+
+User pool token handling and management for your web or mobile app is provided
+on the client side through Amazon Cognito SDKs.  Likewise, the Mobile SDK for
+iOS and the Mobile SDK for Android automatically refresh your ID and access
+tokens if there is a valid (non-expired) refresh token present, and the ID and
+access tokens have a minimum remaining validity of 5 minutes.
+
+For information on the SDKs, and sample code for JavaScript, Android, and iOS
+see:
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-sdk-links.html][Amazon Cognito User Pool SDKs]]
+
+
+#+cindex:session
+After your app user successfully signs in, Amazon Cognito creates a session and
+returns an ID, access, and refresh token for the authenticated user.
+**** Using Tokens with User Pools
+- https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html
+
+
+#+cindex:user pool tokens
+After a successful authentication, Amazon Cognito returns user pool tokens to
+your app. You can use the tokens to grant your users access to your own
+server-side resources, or to the Amazon API Gateway. Or, you can exchange them
+for temporary AWS credentials to access other AWS services.
 
 *** Identity Pools
 
