@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 19, 2019
-#+macro:version 0.9.14.<2019-12-19 Thu 18:12>
+#+date:December 22, 2019
+#+macro:version 0.9.15.<2019-12-22 Sun 23:13>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11368,7 +11368,7 @@ installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
 “Simple and Secure User Sign-Up, Sign-In, and Access Control”
 
 - [[https://aws.amazon.com/cognito/][Amazon Cognito]]
-- [[https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html][AWS Documentation-Amazon Cognito-Developer Guide]]
+- [[https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html][AWS Documentation----Amazon Cognito-Developer Guide]]
 
 
 “Spend your time creating great apps.  Let Amazon Cognito handle
@@ -13361,6 +13361,257 @@ access AWS resources.
 With Amazon Cognito, your app can support unauthenticated guest users as well
 as users authenticated through a identity provider, such as Facebook, Google,
 Login with Amazon or with developer authenticated identity providers.
+** Article---Understanding Amazon Cognito User Pool OAuth 2.0 Grants
+:PROPERTIES:
+:uri:      https://aws.amazon.com/blogs/mobile/understanding-amazon-cognito-user-pool-oauth-2-0-grants/
+:author:   Kevin Yarosh
+:date:     November 12, 2018
+:END:
+
+#+cindex:OAuth 2.0
+In addition to using the Amazon Cognito-specific user APIs to authenticate
+users, Amazon Cognito user pools also support the OAuth 2.0 authorization
+framework for authenticating users.
+
+After you configure a domain for the user pool, Amazon Cognito automatically
+provisions a hosted UI that enables you to easily add a federated, single
+sign-on experience to your website.  Behind the scenes, the hosted UI accesses
+HTTPS endpoints (also provisioned by Amazon Cognito) that implement parts of
+the OAuth 2.0 framework.
+
+The flow for obtaining user pool tokens varies slightly based on which grant
+type you use. While each of these grant types is defined by the OAuth 2.0 RFC
+document, certain details about the endpoints are open ended.
+
+The following sections describe the flows as specific to the Amazon Cognito
+user pools implementation.  These details can help you to customize and debug
+implementations that use third-party identity providers to federate into Amazon
+Cognito.  They may also provide insight into which grant flow suits your
+application best.
+
+*** Authorization Code Grant
+
+#+cindex:authorization code grant
+The /authorization code grant/ is the preferred method for authorizing end
+users.  Instead of directly providing user pool tokens to an end user upon
+authentication, an authorization code is provided.  This code is then sent to a
+custom application that can exchange it for the desired tokens.  Because the
+tokens are never exposed directly to an end user, they are less likely to
+become compromised.
+
+{{{heading(Authorization Code Grant Steps)}}}
+
+1. An application makes an HTTP GET request to
+   ~https://AUTH_DOMAIN/oauth2/authorize~, where =AUTH_DOMAIN= represents the
+   user pool’s configured domain.  This request includes the following query
+   parameters:
+
+   - =response_type= :: Set to “code” for this grant type.
+
+   - =client_id= :: The ID for the desired user pool app client.
+
+   - =redirect_uri= :: The URL that a user is directed to after successful
+                       authentication.
+
+   - =state= :: optional but recommended.  A random value that’s used to
+                prevent cross-site request forgery (CSRF) attacks.
+
+   - =scope= :: optional.  A space-separated list of scopes to request for the
+                generated tokens.
+
+     - An ID token is only generated if the openid scope is
+       requested.
+
+     - The =phone=, =email=, and =profile= scopes can only be
+       requested if =openid= is also requested.
+
+     - A vended access token can only be used to make user pool API calls if
+       =aws.cognito.signin.user.admin= is requested.
+
+   - =identity_provider= :: optional.  Indicates the provider that the end user
+        should authenticate with.
+
+   - =idp_provider= :: optional.  Same as =identity_provider=, but doesn’t
+                       expose the provider’s real name.
+
+   #+cindex:Proof Key for Code Exchange (PKCE)
+   #+cindex:PKCE
+   - =code_challenge= :: optional.  The hashed, base64 URL-encoded
+        representation of a random code that’s generated client side.  It
+        serves as a /Proof Key for Code Exchange (PKCE)/, which prevents
+        attackers from being able to use intercepted authorization codes.
+
+   - =code_challenge_method= :: optional.  The hash algorithm that’s used to
+        generate the code_challenge.  Amazon Cognito currently only supports
+        setting this parameter to “256”.  This indicates that the
+        code_challenge parameter was generated using SHA-256.
+
+2. A =CSRF= token is returned in a cookie.  If an identity provider was
+   specified in the request from step 1, the rest of this step is skipped.  The
+   user is automatically redirected to the appropriate identity provider’s
+   authentication page.  Otherwise, the end user is redirected to
+   ~https://AUTH_DOMAIN/login~ (which hosts the auto-generated UI) with the
+   same query parameters set from step 1.  Here they can either authenticate
+   with the user pool or select one of the third-party providers that’s
+   configured for the designated app client.
+
+3. The user authenticates with their identity provider through one of the
+   following means:
+
+   - If the user uses the native user pool to authenticate, the hosted UI
+     submits the user’s credentials through a =POST= request to
+     ~https://AUTH_DOMAIN/login~ (including the original query parameters),
+     along with some additional metadata.
+
+   - If the user selects a different identity provider to authenticate with,
+     the user is redirected to that identity provider’s authentication page.
+     After successful authentication the provider redirects the user to
+     ~https://AUTH_DOMAIN/oauth2/idpresponse~ with either an authorization
+     token in the “code” query parameter or a SAML assertion in a =POST=
+     request.
+
+4. After Amazon Cognito verifies the user pool credentials or provider
+   tokens/assertion it receives, the user is redirected to the URL that was
+   specified in the original =redirect_uri= query parameter.  The redirect also
+   sets a code query parameter that specifies the authorization code that was
+   vended to the user by Amazon Cognito.
+
+5. The custom application that’s hosted at the redirect URL can then extract
+   the authorization code from the query parameters and exchange it for user
+   pool tokens.
+
+   The exchange occurs by submitting a =POST= request to
+   ~https://AUTH_DOMAIN/oauth2/token~ with the following
+   =application/x-www-form-urlencoded= parameters:
+
+   - =grant_type= :: Set to “authorization_code” for this grant.
+
+   - =code= :: The authorization code that’s vended to the user.
+
+   - =client_id= :: Same as from the request in step 1.
+
+   - =redirect_uri= :: Same as from the request in step 1.
+
+   - =code_verifier= :: optional.  The base64 URL-encoded representation of the
+        unhashed, random string that was used to generate the PKCE
+        =code_challenge= in the original request.
+
+        If the client app that was used requires a secret, the =Authorization=
+        header for this request is set as “Basic
+        BASE64(CLIENT_ID:CLIENT_SECRET)”, where
+        =BASE64(CLIENT_ID:CLIENT_SECRET)= is the base64 representation of the
+        app client ID and app client secret, concatenated with a colon.
+
+   The JSON returned in the resulting response has the following keys:
+
+   - =id_token= :: A valid user pool [[https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html#amazon-cognito-user-pools-using-the-id-token][ID token]].  Note that an ID token is only
+                   provided if the =openid= scope was requested.
+
+   - =access_token= :: A valid user pool access token.
+
+   - =refresh_token= :: A valid user pool refresh token.  This can be used to
+        retrieve new tokens by sending it through a =POST= request to
+        ~https://AUTH_DOMAIN/oauth2/token~, specifying the =refresh_token= and
+        =client_id= parameters, and setting the =grant_type= parameter to
+        “refresh_token“.
+
+   - =expires_in= :: The length of time (in seconds) that the provided ID
+                     and/or access token(s) are valid for.
+
+   - =token_type= :: Set to “Bearer”.
+
+
+#+caption:Authorization Code Grant flow
+#+name:authorization-code-grant-flow
+[[file:resources/auth_code_grant.jpg]]
+
+*** Implicit Grant
+
+#+cindex:implicit grant
+Only use the implicit grant when there’s a specific reason that the
+authorization code grant can’t be used.  In an implicit grant, user pool tokens
+are exposed directly to the end user.  As a result, the ID and access tokens
+have more potential to become compromised before they expire.  On the other
+hand, if your setup doesn’t contain any server-side logic, you may want to use
+the implicit grant to prevent refresh tokens from being exposed to the client,
+as the implicit grant does not generate refresh tokens.
+
+Steps 1, 2, and 3 of the implicit grant are identical to the authorization code
+grant steps, except that the =response_type= query parameter is set to “token”.
+Additionally, while a =PKCE= challenge can technically be passed, it isn’t used
+because the ~/oauth2/token~ endpoint is never accessed.  The subsequent steps
+are as follows:
+
+4. [@4]After Amazon Cognito verifies the user pool credentials or provider
+   tokens/assertion it receives, the user is redirected to the URL that was
+   specified in the original =redirect_uri= query parameter.  The redirect also
+   sets the following query parameters:
+
+   - =id_token= :: A valid user pool ID token.  Note that an ID token is only
+                   provided if the =openid= scope was requested.
+
+   - =access_token= :: A valid user pool access token.
+
+   - =expires_in= :: The length of time (in seconds) that the provided ID
+                     and/or access token(s) are valid for.
+
+   - =token_type= :: Set to “Bearer”.
+
+5. The custom application that’s hosted at the redirect URL can then extract
+   the access token and ID token (if they’re present) from the query
+   parameters.  Before trusting any claims in these tokens, however, it’s
+   crucial that the application first validate the tokens to ensure that no
+   spoofing or tampering has occurred.
+
+
+[[file:resources/implicit_grant.jpg]]
+
+*** Client Credentials Grant
+
+The client credentials grant is much more straightforward than the previous two
+grant types.  While the previous grants are intended to obtain tokens for end
+users, the client credentials grant is typically intended to provide
+credentials to an application in order to authorize machine-to-machine
+requests.  Note that, to use the client credentials grant, the corresponding
+user pool app client must have an associated app client secret.
+
+The steps for the process are as follows:
+
+1. An app makes a POST request to ~https://AUTH_DOMAIN/oauth2/token~, and
+   specifies the following parameters:
+
+   - =grant_type= :: Set to “client_credentials” for this grant type.
+
+   - =client_id= :: The ID for the desired user pool app client.
+
+   - =scope= :: A space-separated list of scopes to request for the generated
+                access token.
+
+                In order to indicate that the app is authorized to make the
+                request, the =Authorization= header for this request is set as
+                “Basic BASE64(CLIENT_ID:CLIENT_SECRET)”, where
+                =BASE64(CLIENT_ID:CLIENT_SECRET)= is the base64 representation
+                of the app client ID and app client secret, concatenated with a
+                colon.
+
+2. The Amazon Cognito authorization server returns a JSON object with the
+   following keys:
+
+   - =access_token= :: A valid user pool access token.
+
+   - =expires_in= :: The length of time (in seconds) that the provided access
+                     token is valid for.
+
+   - =token_type= :: Set to “Bearer”.
+
+3. The app uses the access token to make requests to an associated resource
+   server.
+
+4. The resource server [[https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html][validates the received token]] and, if everything checks
+   out, executes the request from the app.
+
+
+[[file:resources/client_creds_grant.jpg]]
 * Amazon Certificate Manager and HTTPS
 
 You can use ACM to manage SSL/TLS certificates for your AWS-based websites and
