@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 22, 2019
-#+macro:version 0.9.15.<2019-12-22 Sun 23:13>
+#+date:December 24, 2019
+#+macro:version 0.9.16.<2019-12-24 Tue 04:43>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -13943,6 +13943,9 @@ yourself.  ACM requires signature version 4.
 - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html
 
 
+#+cindex:CloudFront
+#+cindex:web distributions
+#+cindex:HTTPS
 For web distributions, you can configure CloudFront to require that viewers use
 HTTPS to request your objects, so that connections are encrypted when
 CloudFront communicates with viewers.  You also can configure CloudFront to use
@@ -13982,6 +13985,12 @@ bucket, MediaStore, or a custom origin such as an HTTP/S server.
 https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-https-requests-s3/
 
 
+#+cindex:CloudFront
+#+cindex:HTTPS requests
+#+cindex:S3
+#+cindex:distribution
+#+cindex:REST API endpoint, S3 buckets
+#+cindex:website endpoint
 This article describes how to configure an Amazon CloudFront distribution to
 serve HTTPS requests for my Amazon Simple Storage Service (Amazon S3).
 
@@ -14001,6 +14010,10 @@ serve HTTPS requests for my Amazon Simple Storage Service (Amazon S3).
 
 {{{heading(Using a Custom Domain)}}}
 
+#+cindex:custom domain
+#+cindex:alternate domain name
+#+cindex:CNAME
+#+cindex:SSL Certificate
 If you're not using a custom domain with CloudFront, choose *Create
 Distribution* to complete the process.  If you are using a custom domain,
 follow these additional steps before you create the distribution:
@@ -14014,16 +14027,23 @@ follow these additional steps before you create the distribution:
 3. Choose *Create Distribution*
 
 
+#+cindex:DNS
 Be sure to update the DNS for your domain to a CNAME record that points to the
 CloudFront distribution's provided domain.  You can find your distribution's
 domain name in the CloudFront console.
 
+#+cindex:Route 53
+#+cindex:alias record
+#+cindex:CNAME record
 If you're using Amazon Route 53 as your DNS provider, you can create an alias
 record (example.com Alias d111111abcdef8.cloudfront.net) to point the record to
-your CloudFront distribution. If you're using another DNS provider, you can
+your CloudFront distribution.  If you're using another DNS provider, you can
 create only a CNAME record (www.example.com CNAME
 d111111abcdef8.cloudfront.net) to point to the distribution's domain.
 
+#+cindex:apex domain
+#+cindex:authoritative A record
+#+cindex:subdomain
 Important: DNS standards require that an apex domain (example.com) use an
 authoritative (A) record that maps to an IP address.  You can point your apex
 domain to your CloudFront distribution only if you're using Route 53.  If
@@ -14033,6 +14053,11 @@ you're using another DNS provider, you must use a subdomain (www.example.com).
 - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https-viewers-to-cloudfront.html
 
 
+#+cindex:cache behaviors
+#+cindex:CloudFront distribution
+#+cindex:SSL/TLS certificate
+#+cindex:certificate, SSL/TLS
+#+cindex:Certificate Manager
 You can configure one or more cache behaviors in your CloudFront distribution
 to require HTTPS for communication between viewers and CloudFront.  You also
 can configure one or more cache behaviors to allow both HTTP and HTTPS, so that
@@ -14040,19 +14065,74 @@ CloudFront requires HTTPS for some objects but not for others.  The
 configuration steps depend on which domain name you're using in object URLs:
 
 - If you're using the domain name that CloudFront assigned to your
-  distribution, such as d111111abcdef8.cloudfront.net
+  distribution, such as ~d111111abcdef8.cloudfront.net~
 
   - you change the Viewer Protocol Policy setting for one or more cache
     behaviors to require HTTPS communication.
 
   - In that configuration, CloudFront provides the SSL/TLS certificate.
 
-- If you're using your own domain name, such as example.com
+- If you're using your own domain name, such as ~example.com~
 
   - you need to change several CloudFront settings.
 
   - You also need to use an SSL/TLS certificate provided by AWS Certificate
     Manager (ACM)
+
+
+**** To configure CloudFront to require HTTPS between viewers and CloudFront
+
+1. Open the [[https://console.aws.amazon.com/cloudfront/][CloudFront console]]
+
+2. In the top pane of the CloudFront console, choose the ID for the
+   distribution that you want to update.
+
+3. On the *Behaviors* tab, choose the /cache behavior/ that you want to update,
+   and then choose *Edit*.
+
+4. Specify one of the following values for *Viewer Protocol Policy*:
+
+   - *Redirect HTTP to HTTPS*
+     #+cindex:status code 301 Moved Permanently
+     Viewers can use both protocols.  HTTP =GET= and =HEAD= requests are
+     automatically redirected to HTTPS requests.  CloudFront returns HTTP
+     status code 301 (Moved Permanently) along with the new HTTPS URL.  The
+     viewer then resubmits the request to CloudFront using the HTTPS URL.
+     #+cindex:status code 307 Temporary Redirect
+     If you send =POST=, =PUT=, =DELETE=, =OPTIONS=, or =PATCH= over HTTP with
+     an *HTTP to HTTPS* cache behavior and a request protocol version of HTTP
+     1.1 or above, CloudFront redirects the request to a HTTPS location with a
+     HTTP status code 307 (Temporary Redirect).  This guarantees that the
+     request is sent again to the new location using the same method and body
+     payload.
+
+     When a viewer makes an HTTP request that is redirected to an HTTPS
+     request, CloudFront charges for both requests.  For the HTTP request, the
+     charge is only for the request and for the headers that CloudFront returns
+     to the viewer.  For the HTTPS request, the charge is for the request, and
+     for the headers and the object that are returned by your origin.
+
+   - *HTTPS Only*
+     #+cindex:status code 403 Forbidden
+     Viewers can access your content only if they're using HTTPS.  If a viewer
+     sends an HTTP request instead of an HTTPS request, CloudFront returns HTTP
+     status code 403 (Forbidden) and does not return the object.
+
+5. Choose Yes, Edit.
+
+6. Repeat steps 3 through 5 for each additional cache behavior that you want to
+   require HTTPS for between viewers and CloudFront.
+
+7. Confirm the following before you use the updated configuration in a
+   production environment:
+
+   - The path pattern in each cache behavior applies only to the requests that
+     you want viewers to use HTTPS for.
+
+   - The cache behaviors are listed in the order that you want CloudFront to
+     evaluate them in. For more information, see [[https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesPathPattern][Path Pattern]].
+
+   - The cache behaviors are routing requests to the correct origins.
 
 *** Requiring HTTPS for Communication Between CloudFront and Your Custom Origin
 <<requiring-https-custom-origin>>
