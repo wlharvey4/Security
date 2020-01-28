@@ -1,8 +1,8 @@
 # -*- mode: org; -*-
 #+title:Security Information
 #+author:Pinecone062
-#+date:December 24, 2019
-#+macro:version 0.9.16.<2019-12-24 Tue 04:43>
+#+date:January 28, 2020
+#+macro:version 0.9.17.<2020-01-28 Tue>
 Version {{{version}}} By {{{author}}}
 
 * Cross Origin Resource Sharing---CORS
@@ -11364,6 +11364,68 @@ free — you only pay for your consumption, not for having an account), then
 can set up the awsmobile CLI to make configuring things easy. I’m going to
 assume you have already set up the [[https://facebook.github.io/react-native/docs/getting-started.html][React Native CLI]] on your system and
 installed the AWS CLI as well. Installing the awsmobile CLI is a snap:
+* Friend
+
+“An extensible authentication and authorization library for Clojure Ring web
+applications and services.”
+
+- https://github.com/cemerick/friend
+
+** Overview of Friend
+
+Friend is intended to provide a foundation for addressing all of the
+authentication and authorization concerns associated with web apps:
+
+- user agent authentication ::
+
+- role-based authorization ::
+
+- su capabilities (a.k.a. "log in as") ::
+
+- Ring middlewares ::
+
+- Macros ::
+
+- A reasonable Clojure AP ::
+
+- Enables DRY routes and configuration ::
+
+- Purely functional in nature :: 
+
+** Rationale
+
+Nothing like Friend exists, and it needs to.  Securing Ring applications and
+services is (charitably speaking) a PITA right now, with everyone rolling their
+own, or starting with relatively low-level middlewares and frameworks.  This
+will never do.  Serious web applications need to take security seriously, and
+need to readily interoperate with all sorts of authentication mechanisms that
+have come to litter the web as well as internal networks.
+
+Friend has been built with one eye on a number of frameworks.
+
+- [[https://github.com/hassox/warden/wiki][warden]]
+
+- [[https://spring.io/projects/spring-security][spring-security]]
+
+- [[https://github.com/bnoguchi/everyauth][everyauth]]
+
+- [[https://github.com/bnoguchi/everyauth][omniauth]]
+
+- sandbar (defunct)
+
+** Installatin of Friend
+
+Friend is available in Clojars. Add this :dependency to your Leiningen
+~project.clj~:
+
+: [com.cemerick/friend "0.2.3"]
+
+Friend is compatible with Clojure 1.2.0 - 1.5.0+.
+
+** Usage of Friend
+
+- https://github.com/cemerick/friend#usage
+
 * Amazon Cognito
 “Simple and Secure User Sign-Up, Sign-In, and Access Control”
 
